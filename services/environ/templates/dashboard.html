@@ -1,0 +1,31 @@
+{% block content %}
+Temperature = {{ sensors.temperature | default('NO_DATA', true) }}
+Pressure = {{ sensors.pressure | default('NO_DATA', true) }}
+Humidity = {{ sensors.humidity | default('NO_DATA', true) }}
+CPU = {{ sensors.system_cpu | default('NO_DATA', true) }}
+Memory = {{ sensors.system_mem | default('NO_DATA', true) }}
+
+{% if auth %}
+Windows:
+{% for sensor, data in sensors.items() if "window" in sensor %}
+{{ sensor | replace("window_", "") | capitalize }} = {{ data | default('NO_DATA', true) }}
+{% endfor%}
+
+Doors:
+{% for sensor, data in sensors.items() if "door" in sensor %}
+{{ sensor | replace("door_", "") | capitalize }} = {{ data | default('NO_DATA', true) }}
+{% endfor%}
+
+Lights:
+{% for sensor, data in sensors.items() if "light" in sensor %}
+{{ sensor | replace("light_", "") | capitalize }} = {{ data | default('NO_DATA', true) }}
+{% endfor%}
+
+Radiators:
+{% for sensor, data in sensors.items() if "radiator" in sensor %}
+{{ sensor | replace("radiator_", "") | capitalize }} = {{ data | default('NO_DATA', true) }}
+{% endfor%}
+
+
+{% endif %}
+{% endblock %}
