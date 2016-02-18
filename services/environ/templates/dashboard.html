@@ -1,11 +1,12 @@
+{% extends "base.html" %}
 {% block content %}
-Temperature = {{ sensors.temperature | default('NO_DATA', true) }}
+Temperature = {% if session %}<a href="/log/temperature" >{% endif %}{{ sensors.temperature | default('NO_DATA', true) }}{% if session %}</a>{% endif %}
 Pressure = {{ sensors.pressure | default('NO_DATA', true) }}
 Humidity = {{ sensors.humidity | default('NO_DATA', true) }}
 CPU = {{ sensors.system_cpu | default('NO_DATA', true) }}
 Memory = {{ sensors.system_mem | default('NO_DATA', true) }}
 
-{% if auth %}
+{% if session %}
 Windows:
 {% for sensor, data in sensors.items() if "window" in sensor %}
 {{ sensor | replace("window_", "") | capitalize }} = {{ data | default('NO_DATA', true) }}
@@ -25,7 +26,6 @@ Radiators:
 {% for sensor, data in sensors.items() if "radiator" in sensor %}
 {{ sensor | replace("radiator_", "") | capitalize }} = {{ data | default('NO_DATA', true) }}
 {% endfor%}
-
 
 {% endif %}
 {% endblock %}

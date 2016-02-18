@@ -1,7 +1,9 @@
-from flask import Flask, request, render_template
-import logging
+from datetime import datetime
+
+from flask import Flask, request, render_template, session, url_for, redirect, flash
 import os
 app = Flask("environ")
+app.secret_key = os.urandom(32)
 app.logs = os.path.dirname(os.path.realpath(__file__)) + "/logs/"
 
 
@@ -12,10 +14,8 @@ def tail(filename, n=1):
             f.seek(-(256 * n), 2)
         except OSError:
             pass
-        if n < 2:
-            return f.readlines()[-1].decode("utf8")
-        return list(map(lambda l: l.decode("utf8").rstrip(),
-                        f.readlines()[-n:]))[::-1]
+        return "\n".join(list(map(lambda l: l.decode("utf8").rstrip(),
+                                  f.readlines()[-n:]))[::-1])
     except:
         return b""
 
@@ -35,8 +35,6 @@ def decode(raw, s_type):
 
 @app.route("/")
 def dashboard():
-    # TODO: auth check
-    auth = True
     sensors = ["temperature", "pressure", "humidity",
                "system_cpu", "system_mem"]
     private_sensors = [
@@ -50,13 +48,11 @@ def dashboard():
         "radiator_garage", "radiator_kitchen", "radiator_livingroom",
         "radiator_bedroom"
     ]
-    if auth:
+    if 'username' in session:
         sensors.extend(private_sensors)
 
     return render_template("dashboard.html",
-                           sensors={k: decode(tail(k), k) for k in sensors},
-                           # TODO: pass user
-                           auth=auth)
+                           sensors={k: decode(tail(k), k) for k in sensors})
 
 
 @app.route("/register")
@@ -66,16 +62,36 @@ def register():
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
+    errors = {}
     if request.method == 'POST':
-        return "Successful login"
+        if request.form.get('username') == 'admin':
+            if request.form.get('password') == 'qwerty':
+                session['uid'] = 1
+                session['username'] = request.form.get('username')
+                session['logged_in'] = datetime.now().isoformat(sep=' ')
+                flash('Welcome home, sweet!')
+                return redirect(url_for('dashboard'))
+            else:
+                errors['password'] = True
+        else:
+            errors['username'] = True
+    return render_template("login.html", errors=errors)
 
-    return "Login form here"
+
+@app.route("/logout")
+def logout():
+    if 'username' in session:
+        session.clear()
+        flash('Bye-bye!')
+
+    return redirect(url_for('dashboard'))
 
 
-# TODO: auth only
 @app.route("/log/<sensor>")
 def log(sensor):
-    return str({"log": tail(sensor, 50)})
+    if 'username' in session:
+        return render_template("log.html", log=tail(sensor, 50), sensor=sensor)
+    return redirect(url_for('dashboard'))
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)

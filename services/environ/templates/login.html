@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+
+<form method="POST">
+    {% if errors %}{% if errors.username %}<p>Wrong username</p>{% endif %}{% endif %}
+    <input name="username" type="text" />
+    {% if errors %}{% if errors.password %}<p>Wrong password</p>{% endif %}{% endif %}
+    <input name="password" type="password" />
+    <button type="submit">Sign in</button>
+</form>
+
+{% endblock %}

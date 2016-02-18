@@ -11,7 +11,6 @@ class TestController(TestCase):
 
     def test_dashboard(self):
         resp = self.app.get("/")
-        print(resp.data)
         self.assertIn(b"36.6", resp.data)
 
     def test_register(self):
@@ -19,10 +18,17 @@ class TestController(TestCase):
 
     def test_login(self):
         self.assertIn(b"Login", self.app.get("/login").data)
+        post = self.app.post("/login", data={'username': "admin",
+                                             'password': "qwerty"},
+                             follow_redirects=True).data
+        self.assertIn(b"admin", post)
+        self.assertIn(b"Since", post)
 
     def test_log(self):
-        print(self.app.get("/log/temperature").data)
-        self.assertIn(b"log", self.app.get("/log/temperature").data)
+        self.app.post("/login", data={'username': "admin",
+                                      'password': "qwerty"})
+        self.assertIn(b"Log for temperature",
+                      self.app.get("/log/temperature").data)
 
     def test_tail(self):
-        self.assertIn("app.run()", controller.tail("../controller.py"))
+        self.assertIn("app.run", controller.tail("../controller.py"))
