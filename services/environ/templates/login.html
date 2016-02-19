@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 
+Login form
 <form method="POST">
     {% if errors %}{% if errors.username %}<p>Wrong username</p>{% endif %}{% endif %}
     <input name="username" type="text" />

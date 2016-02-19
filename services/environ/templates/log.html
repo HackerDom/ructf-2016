@@ -2,6 +2,10 @@
 {% block content %}
 
 <h3>Log for {{ sensor }}</h3>
+{% if log %}
 <textarea>{{ log }}</textarea>
+{% else %}
+<p>No data</p>
+{% endif %}
 
 {% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+Registration form
+<form method="POST">
+    {% if errors %}{% if errors.username %}<p>Wrong username or user already exists</p>{% endif %}{% endif %}
+    <input name="username" type="text" />
+    <input name="password" type="password" />
+    <button type="submit">Sign up</button>
+</form>
+
+{% endblock %}
