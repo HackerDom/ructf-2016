@@ -16,7 +16,7 @@
     <div class="col-sm-4 col-xs-6 text-xs-center">
         <h5>Pressure</h5>
         <div class="center-block c100 p{{ sensors.pressure | int(50) - 50 }} orange">
-            <a {% if session.username %}href="/log/pressure"{% endif %}><small>{{ sensors.pressure | int }}kPa</small></a>
+            <a {% if session.username %}href="/log/pressure"{% endif %}>{{ sensors.pressure | int }}kPa</a>
             <div class="slice">
                 <div class="bar"></div>
                 <div class="fill"></div>
