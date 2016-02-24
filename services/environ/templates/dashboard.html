@@ -1,30 +1,84 @@
 {% extends "base.html" %}
-{% block content %}
-Temperature = {% if session %}<a href="/log/temperature" >{% endif %}{{ sensors.temperature | default('NO_DATA', true) }}{% if session %}</a>{% endif %}
-Pressure = {{ sensors.pressure | default('NO_DATA', true) }}
-Humidity = {{ sensors.humidity | default('NO_DATA', true) }}
-CPU = {{ sensors.system_cpu | default('NO_DATA', true) }}
-Memory = {{ sensors.system_mem | default('NO_DATA', true) }}
+{% block title %}Dashboard{% endblock %}
 
-{% if session %}
+{% block content %}
+<div class="row">
+    <div class="col-sm-4 col-xs-6 text-xs-center">
+        <h5>Temperature</h5>
+        <div class="center-block c100 p{{ (sensors.temperature / 40 * 100) | int }} green">
+            <a {% if session.username %}href="/log/temperature"{% endif %}>{{ sensors.temperature }}℃</a>
+            <div class="slice">
+                <div class="bar"></div>
+                <div class="fill"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4 col-xs-6 text-xs-center">
+        <h5>Pressure</h5>
+        <div class="center-block c100 p{{ sensors.pressure | int(50) - 50 }} orange">
+            <a {% if session.username %}href="/log/pressure"{% endif %}><small>{{ sensors.pressure | int }}kPa</small></a>
+            <div class="slice">
+                <div class="bar"></div>
+                <div class="fill"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4 col-xs-6 text-xs-center">
+        <h5>Humidity</h5>
+        <div class="center-block c100 p{{ sensors.humidity | int }} blue">
+            <a {% if session.username %}href="/log/humidity"{% endif %}>{{ sensors.humidity | float }}%</a>
+            <div class="slice">
+                <div class="bar"></div>
+                <div class="fill"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-offset-2  col-sm-4 col-xs-6 text-xs-center">
+        <h5>CPU</h5>
+        <div class="center-block c100 p{{ sensors.system_cpu  | int }} violet">
+            <a {% if session.username %}href="/log/system_cpu"{% endif %}>{{ sensors.system_cpu | int }}%</a>
+            <div class="slice">
+                <div class="bar"></div>
+                <div class="fill"></div>
+            </div>
+        </div>
+    </div>
+    <div class=" col-sm-4 col-xs-6 text-xs-center">
+        <h5>Memory</h5>
+        <div class="center-block c100 p{{ sensors.system_mem | int // 10 }}">
+            <a {% if session.username %}href="/log/system_mem"{% endif %}>{{ sensors.system_mem | int }}MB</a>
+            <div class="slice">
+                <div class="bar"></div>
+                <div class="fill"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if session.username %}
 Windows:
 {% for sensor, data in sensors.items() if "window" in sensor %}
-{{ sensor | replace("window_", "") | capitalize }} = {{ data | default('NO_DATA', true) }}
+{% if data != None %}
+    {{ sensor | replace("window_", "") | capitalize }} = <a href="/log/{{ sensor }}">{{ data }}</a>
+{% endif %}
 {% endfor%}
 
 Doors:
 {% for sensor, data in sensors.items() if "door" in sensor %}
-{{ sensor | replace("door_", "") | capitalize }} = {{ data | default('NO_DATA', true) }}
+{{ sensor | replace("door_", "") | capitalize }} = <a href="/log/{{ sensor }}">{{ data | default('NO_DATA', true) }}</a>
 {% endfor%}
 
 Lights:
 {% for sensor, data in sensors.items() if "light" in sensor %}
-{{ sensor | replace("light_", "") | capitalize }} = {{ data | default('NO_DATA', true) }}
+{{ sensor | replace("light_", "") | capitalize }} = <a href="/log/{{ sensor }}">{{ data | default('NO_DATA', true) }}</a>
 {% endfor%}
 
 Radiators:
 {% for sensor, data in sensors.items() if "radiator" in sensor %}
-{{ sensor | replace("radiator_", "") | capitalize }} = {{ data | default('NO_DATA', true) }}
+{{ sensor | replace("radiator_", "") | capitalize }} = <a href="/log/{{ sensor }}">{{ data | default('NO_DATA', true) }}</a>
 {% endfor%}
 
 {% endif %}

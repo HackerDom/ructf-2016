@@ -1,29 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{% block title %}{% endblock %}</title>
-</head>
-<body>
-<header>
-    <h1>Environ</h1>
-    {% if session and session.username %}
-        <h2>{{ session.username }} / Since: {{ session.logged_in }}</h2>
-        <a href="/logout">Logout</a>
-    {% else %}
-        <a href="/register">Register</a>
-        <a href="/login">Login</a>
-    {% endif %}
-</header>
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <ul class=flashes>
-    {% for message in messages %}
-      <li>{{ message }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
-{% block content %} {% endblock %}
-</body>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>🏡 {% block title %}{% endblock %}</title>
+        <link rel="stylesheet" href="/static/bootstrap.min.css">
+        <link rel="stylesheet" href="/static/circle.min.css">
+        <link rel="stylesheet" href="/static/style.css">
+    </head>
+    <body>
+        <nav class="navbar navbar-light ">
+            <a class="navbar-brand" href="/">🏡 Environ</a>
+            <div class="nav navbar-nav pull-xs-right">
+                {% if session and session.username %}
+                    <a class="nav-item nav-link" title="Since: {{ session.logged_in }}">{{ session.username }}</a>
+                    <a class="nav-item nav-link text-danger" href="/logout">Logout</a>
+                {% else %}
+                    <a class="nav-item nav-link text-info" href="/register">Register</a>
+                    <a class="nav-item nav-link text-success" href="/login">Login</a>
+                {% endif %}
+            </div>
+        </nav>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="container">
+            {% for message in messages %}
+                <div class="alert alert-success alert-dismissible fade in" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    {{ message }}
+                </div>
+            {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+        <div class="container">
+            {% block content %} {% endblock %}
+        </div>
+
+        <script src="/static/jquery.min.js"></script>
+        <script src="/static/tether.min.js"></script>
+        <script src="/static/bootstrap.min.js"></script>
+        <script>
+            $( document ).ready(function() {
+                {% block script %}{% endblock %}
+            });
+        </script>
+    </body>
 </html>

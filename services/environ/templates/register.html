@@ -1,11 +1,84 @@
 {% extends "base.html" %}
+{% block title %}Registration{% endblock %}
 {% block content %}
-Registration form
-<form method="POST">
-    {% if errors %}{% if errors.username %}<p>Wrong username or user already exists</p>{% endif %}{% endif %}
-    <input name="username" type="text" />
-    <input name="password" type="password" />
-    <button type="submit">Sign up</button>
-</form>
 
+<h2>Registration form</h2>
+<form method="POST">
+    <div class="form-group row {% if error_username %}has-danger{% endif%}">
+        <label for="username" class="col-sm-2 form-control-label">Username</label>
+        <div class="col-sm-5">
+            <input type="text" class="form-control {% if error_username %}form-control-danger{% endif%}" name="username" id="username" placeholder="username">
+        </div>
+    </div>
+    <div class="form-group row {% if error_password %}has-danger{% endif%}">
+        <label for="password" class="col-sm-2 form-control-label">Password</label>
+        <div class="col-sm-5">
+          <input type="password" class="form-control {% if error_password %}form-control-danger{% endif%}" name="password" id="password" placeholder="********">
+        </div>
+    </div>
+    <div class="form-group row {% if error_belong %}has-danger{% endif %}">
+        <div class="col-sm-12">
+            <p class="text-help">You need to prove you are belong to the house</p>
+        </div>
+        <div class="col-lg-2 col-xs-12">
+            <div class="c100 p100" id="countdown">
+                <a>100s</a>
+                <div class="slice">
+                    <div class="bar"></div>
+                    <div class="fill"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5 col-xs-8">
+            <blockquote class="blockquote">
+                Please, do all of these things in 100 seconds:
+                <ul>
+                    {% for task in tasks %}
+                    <li>{{ task }}</li>
+                    {% endfor %}
+                </ul>
+                <footer class="blockquote-footer pull-xs-right">Environ assistant</footer>
+            </blockquote>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-offset-2 col-sm-5">
+            <button type="submit" class="btn btn-secondary">Sign in</button>
+        </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block script %}
+    var i = 100;
+    var intervalId = setInterval(function () {
+        if (i > 0) {
+            $('#countdown').removeClass("p" + i--);
+            $('#countdown').addClass("p" + i);
+            $('#countdown').find("span").text(i + "s");
+        } else {
+            $('#countdown').find("span").text("STOP");
+            $('#countdown').find("span").addClass("text-danger");
+            $('#countdown').css('background-color', '#d9534f');
+            clearInterval(intervalId);
+        }
+    }, 1000);
+    $('input').focus(function() {
+        $(this).removeClass("form-control-danger");
+        $(this).parent().parent().removeClass("has-danger");
+    });
+    $('#username').change(function() {
+        if ($(this).val().indexOf(':') > -1) {
+            $(this).addClass('form-control-warning');
+            $(this).parent().parent().addClass('has-warning');
+            if (document.getElementById('colon-warn')) {}
+            else {
+                $(this).parent().parent().append('<div class="col-sm-offset-2 col-sm-6 text-warning" id="colon-warn">Colon symbol is not allowed here</div>');
+            };
+        } else {
+            $('#colon-warn').remove();
+            $(this).removeClass('form-control-warning');
+            $(this).parent().parent().removeClass('has-warning');
+        }
+    });
 {% endblock %}

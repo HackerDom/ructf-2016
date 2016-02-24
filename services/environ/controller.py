@@ -1,7 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from hashlib import sha256
 from flask import (Flask, request, render_template,
                    session, url_for, redirect, flash)
+from random import sample, randint
 import os
 
 
@@ -50,62 +51,125 @@ def tail(filename, n=1):
 
 
 def decode(raw, s_type):
+    if not raw:
+        return None
+    try:
+        timestamp, data = raw.split("\t")
+    except ValueError:
+        data = raw.strip()
     if s_type == "temperature":
-        return raw
+        return float(data)
     elif s_type == "pressure":
-        return raw
+        return float(data)
     elif s_type == "humidity":
-        return raw
+        return float(data)
     elif "system_" in s_type:
-        return raw
+        return float(data)
     else:
-        return hash(raw) % 2 if raw else raw
+        return False if hash(data) % 2 else True
 
 app = Flask("environ")
 app.secret_key = os.urandom(32)
 app.logs = os.path.dirname(os.path.realpath(__file__)) + "/logs/"
 app.users = Users(os.path.dirname(os.path.realpath(__file__)) + "/users.db")
+app.private_sensors = [
+    "window_kitchen", "window_livingroom", "window_bedroom",
+
+    "door_main", "door_gate", "door_garage", "door_balcony",
+
+    "light_kitchen", "light_livingroom", "light_bedroom", "light_bathroom",
+    "light_toilet", "light_hall", "light_garden", "light_garage",
+
+    "radiator_garage", "radiator_kitchen", "radiator_livingroom",
+    "radiator_bedroom"
+]
 
 
 @app.route("/")
 def dashboard():
     sensors = ["temperature", "pressure", "humidity",
                "system_cpu", "system_mem"]
-    private_sensors = [
-        "window_kitchen", "window_livingroom", "window_bedroom",
 
-        "door_main", "door_gate", "door_garage", "door_balcony",
-
-        "light_kitchen", "light_livingroom", "light_bedroom", "light_bathroom",
-        "light_toilet", "light_hall", "light_garden", "light_garage",
-
-        "radiator_garage", "radiator_kitchen", "radiator_livingroom",
-        "radiator_bedroom"
-    ]
     if 'username' in session:
-        sensors.extend(private_sensors)
+        sensors.extend(app.private_sensors)
 
     return render_template("dashboard.html",
                            sensors={k: decode(tail(k), k) for k in sensors})
 
 
+def generate_task():
+    #sensors = {s: randint(1, 3)
+    #           for s in sample(app.private_sensors, randint(2, 5))}
+    sensors = {'window_kitchen': 2}
+
+    def humanise_task(task, times):
+        phrase = ""
+        if "light" in task or "radiator" in task:
+            phrase += "Switch on and off "
+        elif "window" in task or "door" in task:
+            phrase += "Open and close "
+        phrase += " ".join(task.split("_")[::-1])
+        phrase += " %s times" % times
+        return phrase
+
+    text = [humanise_task(t, i) for t, i in sensors.items()]
+    return sensors, text
+
+
+def accept_task(tasks):
+    current = datetime.now()
+    iso = '%Y-%m-%d %H:%M:%S.%f'
+    for sensor, times in tasks.items():
+        last_log = tail(sensor, n=20)
+        if not last_log:
+            return False
+        last_values = []
+        for l in last_log.split('\n'):
+            time, value = l.split('\t')
+            if current - datetime.strptime(time, iso) > timedelta(minutes=1):
+                break
+            last_values.append(decode(value, sensor))
+
+        counter = 0
+        last = last_values[0]
+        for i in last_values[1:]:
+            if i != last:
+                counter += 1
+                last = i
+        if counter < times:
+            return False
+    return True
+
+
 @app.route("/register", methods=['GET', 'POST'])
 def register():
-    errors = {}
+    error_username, error_belong = None, None
     if request.method == 'POST':
         try:
             data = request.form
+            if 'task' not in session:
+                raise ValueError
+            if not accept_task(session['task']):
+                raise ValueError
             app.users[data.get('username', "")] = data.get('password', "")
             flash('Registration successful! Please log in.')
             return redirect(url_for('login'))
         except (KeyError, AttributeError):
-            errors['username'] = True
-    return render_template("register.html", errors=errors)
+            error_username = True
+        except ValueError:
+            error_belong = True
+
+    task, task_text = generate_task()
+    session['task'] = task
+    return render_template("register.html",
+                           error_username=error_username,
+                           error_belong=error_belong,
+                           tasks=task_text)
 
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
-    errors = {}
+    error_username, error_password = None, None
     if request.method == 'POST':
         try:
             session['uid'], session['username'] = app.users.auth(
@@ -116,10 +180,12 @@ def login():
             flash('Welcome home, sweet!')
             return redirect(url_for('dashboard'))
         except KeyError:
-            errors['password'] = True
+            error_password = True
         except LookupError:
-            errors['username'] = True
-    return render_template("login.html", errors=errors)
+            error_username = True
+    return render_template("login.html",
+                           error_username=error_username,
+                           error_password=error_password)
 
 
 @app.route("/logout")

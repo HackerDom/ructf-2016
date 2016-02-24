@@ -25,7 +25,7 @@ class TestController(TestCase):
         post = self.app.post("/register", data={'username': "admin1",
                                                 'password': "qwerty1"},
                              follow_redirects=True).data
-        self.assertIn(b"Registration successful! Please log in.", post)
+        self.assertIn(b"has-danger", post)
 
     def test_login(self):
         self.assertIn(b"Login", self.app.get("/login").data)
