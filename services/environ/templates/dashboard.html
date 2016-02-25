@@ -46,7 +46,7 @@
             </div>
         </div>
     </div>
-    <div class=" col-sm-4 col-xs-6 text-xs-center">
+    <div class="col-sm-4 col-xs-6 text-xs-center">
         <h5>Memory</h5>
         <div class="center-block c100 p{{ sensors.system_mem | int // 10 }}">
             <a {% if session.username %}href="/log/system_mem"{% endif %}>{{ sensors.system_mem | int }}MB</a>
@@ -59,27 +59,121 @@
 </div>
 
 {% if session.username %}
-Windows:
-{% for sensor, data in sensors.items() if "window" in sensor %}
-{% if data != None %}
-    {{ sensor | replace("window_", "") | capitalize }} = <a href="/log/{{ sensor }}">{{ data }}</a>
-{% endif %}
-{% endfor%}
+<div class="row panel">
+    <h5>Doors</h5>
+    <div class="card-deck-wrapper container-fluid">
+        <div class="card-deck">
+        {% for sensor, data in sensors | dictsort if "door" in sensor %}
+        <div class="card card-inverse {% if data != None %}text-white {% if data %}card-danger{% else %}card-success{% endif %}{% endif %}">
+            <a href="/log/{{sensor}}">
+                <div class="card-block">
+                    <div class="media">
+                        <span class="media-left">
+                            {% if "main" in sensor %}
+                            <span class="media-object fa-stack fa-2x">
+                                <i class="fa fa-home fa-stack-1x"></i>
+                            </span>
+                            {% else %}{% if "gate" in sensor %}
+                            <span class="media-object fa-stack fa-2x">
+                                <i class="fa fa-terminal fa-stack-1x"></i>
+                                <i class="fa fa-barcode fa-stack-1x"></i>
+                            </span>
+                            {% else %}{% if "garage" in sensor %}
+                            <span class="media-object fa-stack fa-2x">
+                                <i class="fa fa-square-o fa-stack-2x"></i>
+                                <i class="fa fa-car fa-stack-1x"></i>
+                            </span>
+                            {% else %}{% if "balcony" in sensor %}
+                            <span class="media-object fa-stack fa-2x">
+                                <i class="fa fa-building fa-stack-1x"></i>
+                                <i class="fa fa-terminal fa-stack-1x"></i>
+                            </span>
+                            {% endif %}{% endif %}{% endif %}{% endif %}
+                        </span>
+                        <div class="media-body">
+                            <h5>{% if data != None %}{% if data %}Open{% else %}Closed{% endif %}{% endif %}</h5>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+        </div>
+    </div>
+</div>
 
-Doors:
-{% for sensor, data in sensors.items() if "door" in sensor %}
-{{ sensor | replace("door_", "") | capitalize }} = <a href="/log/{{ sensor }}">{{ data | default('NO_DATA', true) }}</a>
-{% endfor%}
+<div class="row panel">
+    <h5>Windows</h5>
+    <div class="card-deck-wrapper container-fluid">
+        <div class="card-deck">
+        {% for sensor, data in sensors | dictsort if "window" in sensor %}
+        <div class="card card-inverse {% if data != None %}text-white {% if data %}card-info{% else %}card-success{% endif %}{% endif %}">
+            <a href="/log/{{sensor}}">
+                <div class="card-block">
+                    <div class="media">
+                        <span class="media-left">
+                            {% if "kitchen" in sensor %}
+                            <span class="media-object fa-stack fa-2x">
+                                <i class="fa fa-coffee fa-stack-1x"></i>
+                            </span>
+                            {% else %}{% if "livingroom" in sensor %}
+                            <span class="media-object fa-stack fa-2x">
+                                <i class="fa fa-tv fa-stack-1x"></i>
+                            </span>
+                            {% else %}{% if "bedroom" in sensor %}
+                            <span class="media-object fa-stack fa-2x">
+                                <i class="fa fa-bed fa-stack-1x"></i>
+                            </span>
+                            {% else %}{% if "balcony" in sensor %}
+                            <span class="media-object fa-stack fa-2x">
+                                <i class="fa fa-building fa-stack-1x"></i>
+                                <i class="fa fa-terminal fa-stack-1x"></i>
+                            </span>
+                            {% endif %}{% endif %}{% endif %}{% endif %}
+                        </span>
+                        <div class="media-body">
+                            <h5>{% if data != None %}{% if data %}Open{% else %}Closed{% endif %}{% endif %}</h5>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+        </div>
+    </div>
+</div>
 
-Lights:
-{% for sensor, data in sensors.items() if "light" in sensor %}
-{{ sensor | replace("light_", "") | capitalize }} = <a href="/log/{{ sensor }}">{{ data | default('NO_DATA', true) }}</a>
-{% endfor%}
+<div class="row panel">
+    <h5>Lights</h5>
+    {% for sensor, data in sensors | dictsort if "light" in sensor %}
+    <div class="col-xs-4 col-sm-3 col-lg-2">
+        <div class="card text-xs-center {% if data != None %}{% if data %}card-yellow{% else %}card-gray text-white{% endif %}{% endif %}">
+            <a href="/log/{{sensor}}">
+                <div class="card-block">
+                    <h5 class="card-title"><i class="fa fa-lightbulb-o fa-2x"></i></h5>
+                    <h6 class="card-status">{{ sensor | replace("light_", "") | capitalize }}</h6>
+                </div>
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
 
-Radiators:
-{% for sensor, data in sensors.items() if "radiator" in sensor %}
-{{ sensor | replace("radiator_", "") | capitalize }} = <a href="/log/{{ sensor }}">{{ data | default('NO_DATA', true) }}</a>
-{% endfor%}
+<div class="row panel">
+    <h5>Radiators</h5>
+    {% for sensor, data in sensors | dictsort if "radiator" in sensor %}
+    <div class="col-sm-4 col-xs-6 text-xs-center">
+        <h5>{{ sensor | replace("radiator_", "") | capitalize }}</h5>
+        <div class="center-block c100 p{{ data | int }} {% if data | int > 10 %}{% if data | int < 20 %}blue{% else %}{% if data | int < 30 %}green{% else %}{% if data | int < 70 %}orange{% else %}red{% endif %}{% endif %}{% endif %}{% endif %}">
+            <a href="/log/{{sensor}}">{{ data }}℃</a>
+            <div class="slice">
+                <div class="bar"></div>
+                <div class="fill"></div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
 
 {% endif %}
 {% endblock %}

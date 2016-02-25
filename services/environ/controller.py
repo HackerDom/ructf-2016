@@ -51,6 +51,22 @@ def tail(filename, n=1):
 
 
 def decode(raw, s_type):
+    if "radiator_" in s_type:
+        return randint(1,100)
+    if "light_" in s_type or "window" in s_type or "door" in s_type:
+        return randint(0,1) == 0
+    if s_type == "temperature":
+        return randint(0, 400) / 10.0
+    if s_type == "pressure":
+        return randint(500, 1500) / 10.0
+    if s_type == "humidity":
+        return randint(0, 100)
+    if s_type == "system_cpu":
+        return randint(0, 1000) / 10.0
+    if s_type == "system_mem":
+        return randint(0, 1000)
+
+
     if not raw:
         return None
     try:
@@ -65,6 +81,8 @@ def decode(raw, s_type):
         return float(data)
     elif "system_" in s_type:
         return float(data)
+    elif "radiator_" in s_type:
+        return int(data)
     else:
         return False if hash(data) % 2 else True
 
@@ -73,7 +91,7 @@ app.secret_key = os.urandom(32)
 app.logs = os.path.dirname(os.path.realpath(__file__)) + "/logs/"
 app.users = Users(os.path.dirname(os.path.realpath(__file__)) + "/users.db")
 app.private_sensors = [
-    "window_kitchen", "window_livingroom", "window_bedroom",
+    "window_kitchen", "window_livingroom", "window_bedroom", "window_balcony",
 
     "door_main", "door_gate", "door_garage", "door_balcony",
 
@@ -89,7 +107,7 @@ app.private_sensors = [
 def dashboard():
     sensors = ["temperature", "pressure", "humidity",
                "system_cpu", "system_mem"]
-
+    session['username'] = 'admin'
     if 'username' in session:
         sensors.extend(app.private_sensors)
 

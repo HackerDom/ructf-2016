@@ -3,10 +3,12 @@
 {% block content %}
 
 <h3>Log for {{ sensor }}</h3>
+<div class="form-group">
 {% if log %}
-<textarea>{{ log }}</textarea>
+<textarea class="form-control" rows="{{ log.split('\n') | length + 1 }}" readonly>{{ log }}</textarea>
 {% else %}
 <p>No data</p>
 {% endif %}
+</div>
 
 {% endblock %}
