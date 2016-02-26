@@ -1,1 +1,1 @@
-# ructf-2016
+# ructf-2016 is awesome!
