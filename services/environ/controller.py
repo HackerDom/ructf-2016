@@ -51,6 +51,7 @@ def tail(filename, n=1):
 
 
 def decode(raw, s_type):
+    # DEV: TEST VALUES
     if "radiator_" in s_type:
         return randint(1,100)
     if "light_" in s_type or "window" in s_type or "door" in s_type:
@@ -65,7 +66,7 @@ def decode(raw, s_type):
         return randint(0, 1000) / 10.0
     if s_type == "system_mem":
         return randint(0, 1000)
-
+    # END DEV
 
     if not raw:
         return None
@@ -91,9 +92,9 @@ app.secret_key = os.urandom(32)
 app.logs = os.path.dirname(os.path.realpath(__file__)) + "/logs/"
 app.users = Users(os.path.dirname(os.path.realpath(__file__)) + "/users.db")
 app.private_sensors = [
-    "window_kitchen", "window_livingroom", "window_bedroom", "window_balcony",
+    "window_kitchen", "window_livingroom", "window_bedroom", "window_playroom",
 
-    "door_main", "door_gate", "door_garage", "door_balcony",
+    "door_main", "door_gate", "door_garage", "door_garden",
 
     "light_kitchen", "light_livingroom", "light_bedroom", "light_bathroom",
     "light_toilet", "light_hall", "light_garden", "light_garage",
@@ -116,8 +117,10 @@ def dashboard():
 
 
 def generate_task():
-    #sensors = {s: randint(1, 3)
-    #           for s in sample(app.private_sensors, randint(2, 5))}
+    # DEV: simple registration
+    # sensors = {s: randint(1, 3)
+    #            for s in sample(app.private_sensors, randint(2, 5))}
+    # END DEV
     sensors = {'window_kitchen': 2}
 
     def humanise_task(task, times):
