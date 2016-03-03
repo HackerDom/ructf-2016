@@ -5,7 +5,7 @@
 <div class="row">
     <div class="col-sm-4 col-xs-6 text-xs-center">
         <h5>Temperature</h5>
-        <div class="center-block c100 p{{ (sensors.temperature / 40 * 100) | int }} green">
+        <div class="center-block c100 p{{ (sensors.temperature| int / 40 * 100) | int }} green">
             <a {% if session.username %}href="/log/temperature"{% endif %}>{{ sensors.temperature }}℃</a>
             <div class="slice">
                 <div class="bar"></div>

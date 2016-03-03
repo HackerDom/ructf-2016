@@ -18,7 +18,7 @@ class TestController(TestCase):
 
     def test_dashboard(self):
         resp = self.app.get("/")
-        self.assertIn(b"36.6", resp.data)
+        self.assertIn(b"center-block c100", resp.data)
 
     def test_register(self):
         self.assertIn(b"Registration", self.app.get("/register").data)
@@ -41,6 +41,3 @@ class TestController(TestCase):
                       follow_redirects=True)
         self.assertIn(b"Log for temperature",
                       self.app.get("/log/temperature").data)
-
-    def test_tail(self):
-        self.assertIn("app.run", controller.tail("../controller.py"))
