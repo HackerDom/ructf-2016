@@ -24,3 +24,4 @@ while True:
                 status.write(str(pressure))
         except IndexError:
             pass
+    sleep(1)
