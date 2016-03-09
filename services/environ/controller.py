@@ -2,7 +2,6 @@ from datetime import datetime
 
 from flask import (Flask, request, render_template,
                    session, url_for, redirect, flash)
-from random import sample, randint
 import os
 
 from utils import tail, generate_task, accept_task, cat
@@ -103,4 +102,4 @@ def log(sensor):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(port=27000, debug=True)
