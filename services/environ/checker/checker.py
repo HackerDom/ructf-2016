@@ -1,4 +1,6 @@
 from base64 import b64encode
+from os import urandom
+from random import choice, randint
 from sys import argv, stderr
 from socket import error as net_error, socket
 
@@ -6,7 +8,29 @@ __author__ = 'm_messiah'
 
 OK, GET_ERROR, CORRUPT, FAIL, INTERNAL_ERROR = 101, 102, 103, 104, 110
 PORT = 27000
-SENSORS = (None, "door_main", "window_kitchen")
+SENSORS = ("main", "door_main", "window_kitchen")
+
+
+def gen_dh():
+    n = 5
+
+    # Remove this rule?
+    while (n - 2) % 3 == 0:
+        n = randint(100, 200)
+
+    p = pow(pow(2, n) - 1, 2) - 2
+    g = choice([2, 3, 5, 7, 11, 13, 17, 23])
+    a = int.from_bytes(urandom(40), byteorder='big')
+    A = pow(g, a, p)
+    if A < 2 or A > p - 1 or pow(A, (p - 1) // 2, p) != 1:
+        return gen_dh()
+    return p, g, A, a
+
+
+def shared_secret(p, a, B):
+    if B < 2 or B > p - 1 or pow(B, (p - 1) // 2, p) != 1:
+        return None
+    return pow(B, a, p)
 
 
 def xor(s1, s2):
@@ -48,31 +72,45 @@ def put(*args):
     addr = args[0]
     flag_id = args[1]
     flag = args[2]
-    vuln = int(args[3]) if len(args) > 3 else 1
     answer = ""
-
-    salt = b"RuCTF_"  # get or set from/to wifi
 
     if not addr or not flag_id or not flag:
         close(INTERNAL_ERROR, None, "Incorrect parameters")
     try:
-        if vuln == 1:
-            sensor = SENSORS[vuln]
-            data = xor(flag, salt + sensor.upper().encode("utf8"))
-            sock = socket()
-            sock.connect((addr, PORT + vuln))
-            sock.send(data + b"\n")
-            recv = sock.recv(3).strip()
-            try:
-                recv = int(recv)
-                if recv > 0:
-                    close(OK, sensor, None)
-                else:
-                    close(CORRUPT, "can't put in %s sensor" % sensor,
-                          "%s sensor put answer: %s" % (sensor, recv))
-            except ValueError:
-                close(CORRUPT, "can't put in %s sensor" % sensor,
-                      "%s sensor put answer: %s" % (sensor, recv))
+
+        p, g, A, a = gen_dh()
+        data = int.from_bytes("start:%s:%s:%s" % (p, g, A), byteorder='big')
+        client_id = addr
+        # TODO: sign data
+        # TODO: get pub_key for client
+        # TODO: send wi-fi signed_data to client
+        # TODO: listen wi-fi to answer and check client_sign
+        # TODO: if packet.captured: B = packet.data
+        B = int()
+        secret = shared_secret(p, a, B)
+        data = int.from_bytes("put:%s" % flag, byteorder='big') * secret
+
+        # 36 bytes
+
+        # TODO: sign data
+        # TODO: send wi-fi signed_data to client
+        # TODO: listen wi-fi to answer and check client_sign
+        # TODO: if packet.captured:
+        # packed.data = int(packed.data).to_bytes(50, byteorder='big').lstrip(b'\0')
+        packet_data = b""
+        if b"ACCEPT:" in packet_data:
+            flag_id = packet_data.split(b"ACCEPT:")[1]
+            if flag_id:
+                close(OK, flag_id, None)
+            else:
+                close(CORRUPT, "ID not found",
+                      "ID not found in %s" % packet_data)
+        else:
+            close(CORRUPT, "Data not accepted by environ",
+                  "Not accepted: %s" % packet_data)
+        # TODO: else (packet not captured or timeout)
+        # close(CORRUPT, "No answer",
+        #       "Service did not respond to put")
 
     except net_error:
         close(FAIL, "No connection to %s" % addr)

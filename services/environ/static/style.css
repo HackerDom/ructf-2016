@@ -1,12 +1,15 @@
 .text-white {color: #fff}
 .card-status {padding-top:0.4rem;}
 .card-status-stack {padding-top:1.4rem;}
-.text-white>a {color: #fff}
-a {color: #777}
-a, a .text-warning {-webkit-transition-property:all;-moz-transition-property:all;-o-transition-property:all;transition-property:all;-webkit-transition-duration:.5s;-moz-transition-duration:.5s;-o-transition-duration:.5s;transition-duration:.5s;-webkit-transition-timing-function:ease-out;-moz-transition-timing-function:ease-out;-o-transition-timing-function:ease-out;transition-timing-function:ease-out}
-a:hover {color: #000; text-decoration: none;}
-a:hover path {fill: #000;}
-a:hover .text-warning {color: #d9534f!important;}
+.text-white>.my-card {color: #fff}
+
+.my-card {color: #777}
+.my-card, .my-card .text-warning {-webkit-transition-property:all;-moz-transition-property:all;-o-transition-property:all;transition-property:all;-webkit-transition-duration:.5s;-moz-transition-duration:.5s;-o-transition-duration:.5s;transition-duration:.5s;-webkit-transition-timing-function:ease-out;-moz-transition-timing-function:ease-out;-o-transition-timing-function:ease-out;transition-timing-function:ease-out}
+.my-card:hover {color: #000; text-decoration: none;}
+.my-card:hover path {fill: #000;}
+.my-card:hover .text-warning {color: #d9534f!important;}
+
+
 .text-gray{color: #ccc;}
 .panel {margin-top: 1.5rem;}
 .media-body h5 {padding-top: 20%;}

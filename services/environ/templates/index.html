@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>🏡 Environ</title>
+        <link rel="stylesheet" href="/static/bootstrap.min.css">
+        <link rel="stylesheet" href="/static/circle.min.css">
+        <link rel="stylesheet" href="/static/mdi/css/materialdesignicons.min.css">
+        <link rel="stylesheet" href="/static/style.css">
+    </head>
+    <body>
+        <nav class="navbar navbar-light ">
+            <a class="navbar-brand" href="/">🏡 Environ</a>
+            <div class="form-inline pull-xs-right">
+                <div class="input-group">
+                    <input class="form-control" type="text" id="sensorID" placeholder="sensor ID">
+                    <span class="input-group-btn">
+                        <button id="rawSensor" class="btn btn-info-outline" type="submit">Raw</button>
+                    </span>
+                </div>
+            </div>
+        </nav>
+        <div class="container" id="alerts"></div>
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-4 col-xs-6 text-xs-center">
+                    <h5>Temperature</h5>
+                    <div class="center-block c100 p{{ (sensors.temperature| int / 40 * 100) | int }} green">
+                        <a>{{ sensors.temperature | float | round(1) }}℃</a>
+                        <div class="slice">
+                            <div class="bar"></div>
+                            <div class="fill"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4 col-xs-6 text-xs-center">
+                    <h5>Pressure</h5>
+                    <div class="center-block c100 p{{ sensors.pressure | int(50) - 50 }} orange">
+                        <a>{{ sensors.pressure | int }}kPa</a>
+                        <div class="slice">
+                            <div class="bar"></div>
+                            <div class="fill"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4 col-xs-6 text-xs-center">
+                    <h5>Humidity</h5>
+                    <div class="center-block c100 p{{ sensors.humidity | int }} blue">
+                        <a class="circle" data-hover="{{ sensors.humidity | float | round(1) }}%">
+                            <span><i class="mdi mdi-water"></i></span>
+                        </a>
+                        <div class="slice">
+                            <div class="bar"></div>
+                            <div class="fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-offset-2  col-sm-4 col-xs-6 text-xs-center">
+                    <h5>CPU</h5>
+                    <div class="center-block c100 p{{ sensors.system_cpu  | int }} violet">
+                        <a>{{ sensors.system_cpu | float | round(1) }}%</a>
+                        <div class="slice">
+                            <div class="bar"></div>
+                            <div class="fill"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4 col-xs-6 text-xs-center">
+                    <h5>Memory</h5>
+                    <div class="center-block c100 p{{ sensors.system_mem | int }}">
+                        <a>{{ sensors.system_mem | float | round(1) }}%</a>
+                        <div class="slice">
+                            <div class="bar"></div>
+                            <div class="fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row panel">
+                <h5>Lights</h5>
+                {% for sensor, data in sensors | dictsort if "light" in sensor %}
+                <div class="col-xs-4 col-sm-3 col-lg-2">
+                    <div class="my-card text-xs-center">
+                        <span class="display-5 {% if data != None %}{% if data %}text-warning{% endif %}{% endif %}">
+                            <i class="mdi {% if data %}mdi-white-balance-incandescent{% else %} mdi-lightbulb-outline mdi-flip{% endif %}"></i>
+                        </span>
+                        <h6>{{ sensor | replace("light_", "") | capitalize }}</h6>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-warning" role="alert">
+                    No data
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="row panel">
+                <h5>Doors</h5>
+                {% for sensor, data in sensors | dictsort if "door" in sensor %}
+                    <div class="col-xs-6 col-sm-4 col-lg-3">
+                        <div class="card card-inverse {% if data != None %}text-white {% if data %}card-danger{% else %}card-success{% endif %}{% endif %}">
+                            <div class="card-block my-card">
+                                <div class="media">
+                                    <span class="media-left">
+                                        {% if "main" in sensor %}
+                                        <span class="media-object display-5">
+                                            <i class="mdi mdi-home"></i>
+                                        </span>
+                                        {% else %}{% if "gate" in sensor %}
+                                        <span class="media-object display-5">
+                                            <i class="mdi mdi-gate"></i>
+                                        </span>
+                                        {% else %}{% if "garage" in sensor %}
+                                        <span class="media-object display-5">
+                                            <i class="mdi mdi-car"></i>
+                                        </span>
+                                        {% else %}{% if "garden" in sensor %}
+                                        <span class="media-object display-5">
+                                            <i class="mdi mdi-flower"></i>
+                                        </span>
+                                        {% endif %}{% endif %}{% endif %}{% endif %}
+                                    </span>
+                                    <div class="media-body">
+                                        <h5>{% if data != None %}{% if data %}Open{% else %}Closed{% endif %}{% endif %}</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                <div class="alert alert-warning" role="alert">
+                    No data
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="row panel">
+                <h5>Windows</h5>
+                {% for sensor, data in sensors | dictsort if "window" in sensor %}
+                    <div class="col-xs-4 col-sm-3 col-lg-2">
+                        <div class="text-xs-center card card-inverse {% if data != None %}text-white {% if data %}card-info{% else %}card-success{% endif %}{% endif %}">
+                            <div class="card-block my-card ">
+                                {% if "kitchen" in sensor %}
+                                <span class="media-object display-5">
+                                    <i class="mdi mdi-silverware"></i>
+                                </span>
+                                {% else %}{% if "livingroom" in sensor %}
+                                <span class="media-object display-5">
+                                    <svg style="width:48px;height:48px" viewBox="0 0 48 48">
+                                        <path transform="scale(2, 2)" fill="#ffffff" d="M7,6H9A2,2 0 0,1 11,8V12H5V8A2,2 0 0,1 7,6M15,6H17A2,2 0 0,1 19,8V12H13V8A2,2 0 0,1 15,6M1,9H2A1,1 0 0,1 3,10V12A2,2 0 0,0 5,14H19A2,2 0 0,0 21,12V11L21,10A1,1 0 0,1 22,9H23A1,1 0 0,1 24,10V19H21V17H3V19H0V10A1,1 0 0,1 1,9Z" />
+                                    </svg>
+                                </span>
+                                {% else %}{% if "bedroom" in sensor %}
+                                <span class="media-object display-5">
+                                    <i class="mdi mdi-hotel"></i>
+                                </span>
+                                {% else %}{% if "playroom" in sensor %}
+                                <span class="media-object display-5">
+                                    <i class="mdi mdi-puzzle"></i>
+                                </span>
+                                {% endif %}{% endif %}{% endif %}{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                <div class="alert alert-warning" role="alert">
+                    No data
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="row panel">
+                <h5>Radiators</h5>
+                {% for sensor, data in sensors | dictsort if "radiator" in sensor %}
+                <div class="col-sm-3 col-xs-6 text-xs-center">
+                    <div class="center-block c100 p{{ ((data | float - 13) / 17 * 100) | int }} {% if data | int > 10 %}{% if data | int < 18 %}blue{% else %}{% if data | int < 24 %}green{% else %}{% if data | int < 27 %}orange{% else %}red{% endif %}{% endif %}{% endif %}{% endif %}">
+                        <a class="circle" data-hover="{{ data | float | round(1) }}℃">
+                            <span>
+                            {% if "kitchen" in sensor %}
+                                <i class="mdi mdi-coffee"></i>
+                            {% else %}{% if "livingroom" in sensor %}
+                                <svg style="width:24px;height:24px" viewBox="0 0 24 24">
+                                    <path fill="#cccccc" d="M7,6H9A2,2 0 0,1 11,8V12H5V8A2,2 0 0,1 7,6M15,6H17A2,2 0 0,1 19,8V12H13V8A2,2 0 0,1 15,6M1,9H2A1,1 0 0,1 3,10V12A2,2 0 0,0 5,14H19A2,2 0 0,0 21,12V11L21,10A1,1 0 0,1 22,9H23A1,1 0 0,1 24,10V19H21V17H3V19H0V10A1,1 0 0,1 1,9Z" />
+                                </svg>
+                            {% else %}{% if "bedroom" in sensor %}
+                                <i class="mdi mdi-hotel"></i>
+                            {% else %}{% if "garage" in sensor %}
+                                <i class="mdi mdi-car"></i>
+                            {% endif %}{% endif %}{% endif %}{% endif %}
+                            </span>
+                        </a>
+                        <div class="slice">
+                            <div class="bar"></div>
+                            <div class="fill"></div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-warning" role="alert">
+                    No data
+                </div>
+                {% endfor %}
+            </div>
+
+        </div>
+        <script src="/static/jquery.min.js"></script>
+        <script src="/static/tether.min.js"></script>
+        <script src="/static/bootstrap.min.js"></script>
+        <script>
+            $( document ).ready(function() {
+                $('#rawSensor').on('click', function(event) {
+                  event.preventDefault();
+                  var sensorID = $('#sensorID').val();
+                  $.ajax({
+                  url: "/" + sensorID,
+                  success: function(data) {
+                        $('#sensorID').removeClass('form-control-warning').parent().removeClass('has-warning');
+                        $('#rawSensor').removeClass('btn-warning-outline').addClass('btn-info-outline');
+                        $('#alerts').append('<div class="alert alert-info alert-dismissible fade" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>Raw ' + sensorID + ':</strong> ' + data + '</div>');
+                        setTimeout(function() {$('#alerts .alert:last').addClass('in');}, 150);
+                      },
+                  error: function(){
+                        $('#sensorID').addClass('form-control-warning').parent().addClass('has-warning');
+                        $('#rawSensor').removeClass('btn-info-outline').addClass('btn-warning-outline');
+                        $('#alerts').append('<div class="alert alert-warning alert-dismissible fade" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>Raw ' + sensorID + ':</strong> not found</div>');
+                        setTimeout(function() {$('#alerts .alert:last').addClass('in');}, 150);
+                    },
+                  });
+                });
+            });
+        </script>
+    </body>
+</html>

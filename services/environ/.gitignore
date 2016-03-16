@@ -1,6 +1,4 @@
 .idea
 .py[co]
 __pycache__
-logs/
-users.db
-status/
+sensors/
