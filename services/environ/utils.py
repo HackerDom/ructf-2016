@@ -1,4 +1,6 @@
 from os import urandom, scandir
+from random import choice
+from Crypto.Util import number
 
 
 def downhill(p, g, A):
@@ -10,6 +12,45 @@ def downhill(p, g, A):
     if B < 2 or B > p - 1 or pow(B, (p - 1) // 2, p) != 1:
         return downhill(p, g, A)
     return B, pow(A, b, p)
+
+
+def ex_eurika(a, b):
+    d, x1, x2, y1, temp_b = 0, 0, 1, 1, b
+
+    while a > 0:
+        temp1, temp2 = temp_b // a, temp_b % a
+        temp_b, a = a, temp2
+        x = x2 - temp1 * x1
+        y = d - temp1 * y1
+        x2, x1, d, y1 = x1, x, y1, y
+
+    if temp_b == 1:
+        return d + b
+
+
+def rosa():
+    p, q = number.getPrime(256), number.getPrime(256)
+    n, f = p * q, (p - 1) * (q - 1)
+    e = choice((5, 17, 257, 65537, 4294967297))
+
+    d = ex_eurika(e, f)
+    if not d:
+        return rosa()
+    if pow(pow(31337, e, n), d, n) != 31337:
+        return rosa()
+    return (e, n), (d, n)
+
+
+def sign(data, key):
+    return pow(data, key[0], key[1])
+
+
+def check_sign(data, signature):
+    return pow(
+        int(signature),
+        4294967297,
+        3798516331466766966859797353966230419017725222735680227325678541054930545137024120151496321141097061641653294848058448185893124212469966621530373870392659
+    ) == data
 
 
 def current_state(path):

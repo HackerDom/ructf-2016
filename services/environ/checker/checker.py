@@ -3,6 +3,7 @@ from os import urandom
 from random import choice, randint
 from sys import argv, stderr
 from socket import error as net_error
+from Crypto.Util import number
 
 import requests
 from scapy.all import *
@@ -21,7 +22,8 @@ class Env(Packet):
         IntField("team_id", 0),
         FieldLenField("len", None, length_of="data"),
         StrLenField("data", "", length_from=lambda pkt: pkt.len),
-        LongField("sign", 0),
+        FieldLenField("len_sign", None, length_of="sign"),
+        StrLenField("sign", "", length_from=lambda pkt: pkt.len_sign),
     ]
 
 bind_layers(LLC, Env, ssap=0)
@@ -31,20 +33,22 @@ def send_package(team_id, data, secret=0):
     encoded_data = int.from_bytes(data.encode("utf8"), byteorder='big')
     if secret:
         encoded_data *= secret
-    sign = 2707
+    sign = pow(
+        encoded_data,
+        3877672226097615336350070395322441902674398633415667976164720172330705380850995941601449510686545204133676650947109386315199468325093749130406195447725697,
+        3798516331466766966859797353966230419017725222735680227325678541054930545137024120151496321141097061641653294848058448185893124212469966621530373870392659
+    )
+
     pkg = RadioTap() / Dot11(type=2) / LLC() / Env(
         team_id=team_id,
         data=str(encoded_data),
-        sign=sign
+        sign=str(sign)
     )
     sendp(pkg, count=5, inter=0.2, verbose=0)
 
 
 def check_sign(pub_key, sign, data):
-    if sign == 2707:
-        return True
-    else:
-        return False
+    return pow(int(sign), int(pub_key[0]), int(pub_key[1])) == data
 
 
 def receive_packet(team_id, pub_key, cmd):
@@ -55,10 +59,11 @@ def receive_packet(team_id, pub_key, cmd):
                     return True
         return False
 
-    captured = {p.data for p in sniff(lfilter=is_env, timeout=3)}
-    for data in captured:
+    captured = sniff(lfilter=is_env, stop_filter=is_env, timeout=5)
+    if captured:
         try:
-            data_bytes = int(data).to_bytes(300, byteorder='big').lstrip(b'\0')
+            data_bytes = int(
+                captured[0].data).to_bytes(300, byteorder='big').lstrip(b'\0')
             if cmd in data_bytes:
                 return data_bytes.split(cmd)[1]
         except:
@@ -67,13 +72,7 @@ def receive_packet(team_id, pub_key, cmd):
 
 
 def gen_dh():
-    n = 5
-
-    # Remove this rule?
-    while (n - 2) % 3 == 0:
-        n = randint(100, 200)
-
-    p = pow(pow(2, n) - 1, 2) - 2
+    p = number.getPrime(128)
     g = choice([2, 3, 5, 7, 11, 13, 17, 23])
     a = int.from_bytes(urandom(40), byteorder='big')
     A = pow(g, a, p)
