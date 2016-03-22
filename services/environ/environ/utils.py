@@ -77,14 +77,13 @@ def get_env(metric):
 SWITCHES = [
     "window_kitchen", "window_livingroom", "window_bedroom", "window_playroom",
 
-    "door_main", "door_gate", "door_garage", "door_garden",
+    "door_main", "door_garage",
 
-    "light_kitchen", "light_livingroom", "light_bedroom", "light_bathroom",
-    "light_hall", "light_garden", "light_garage",
+    "light_kitchen", "light_lustre", "light_torchere", "light_table",
+    "light_bathroom", "light_bed", "light_garage",
 ]
 RADIATORS = [
-    "radiator_garage", "radiator_kitchen", "radiator_livingroom",
-    "radiator_bedroom"
+    "radiator_climate", "radiator_block", "radiator_portable"
 ]
 
 

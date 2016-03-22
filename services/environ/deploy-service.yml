@@ -1,0 +1,12 @@
+---
+- hosts: image
+  remote_user: root
+  tasks:
+    - name: install requiremets
+      pip: name={{item}} state=latest executable=pip3
+      with_items:
+        - flask
+        - psutil
+        - scapy-python3
+        - PyCrypto
+    - name: add user
