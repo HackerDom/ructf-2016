@@ -33,9 +33,20 @@ def rosa():
     n, f = p * q, (p - 1) * (q - 1)
     e = choice((5, 17, 257, 65537, 4294967297))
 
-    d = ex_eurika(e, f)
-    if not d:
+    temp_d, x1, x2, y1, temp_e, temp_f = 0, 0, 1, 1, e, f
+
+    while temp_e > 0:
+        temp1, temp2 = temp_f // temp_e, temp_f % temp_e
+        temp_f, temp_e = temp_e, temp2
+        x = x2 - temp1 * x1
+        y = temp_d - temp1 * y1
+        x2, x1, temp_d, y1 = x1, x, y1, y
+
+    if temp_f != 1:
         return rosa()
+
+    d = temp_d + f
+
     if pow(pow(31337, e, n), d, n) != 31337:
         return rosa()
     return (e, n), (d, n)
