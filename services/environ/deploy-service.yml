@@ -1,0 +1,42 @@
+# Ansible >2 deploy playbook
+# use: ansible-playbook -i 192.168.0.1, deploy-service.yml
+# LOOK AT COMMA, IT IS IMPORTANT     ^^^
+
+---
+- hosts: all
+  remote_user: root
+  tasks:
+    - name: enable COPR plugin
+      dnf: name=dnf-plugins-core state=latest
+    - name: enable python3.5 repo
+      command: dnf copr enable -y mstuchli/Python3.5
+    - name: install system requiremets
+      package: name={{item}} state=latest
+      with_items:
+        - python35-python3
+        - python3-devel
+        - libpcap-devel
+    - name: set_cap
+      capabilities: capability=cap_net_raw=eip path=/usr/bin/python3.5 state=present
+    - name: install requiremets
+      pip: name={{item}} state=latest executable=pip3.5
+      with_items:
+        - flask
+        - psutil
+        - scapy-python3
+        - PyCrypto
+    - name: add user
+      user: name=environ
+    - name: copy project
+      copy: src=environ dest=/home/ force=yes owner=environ
+    - name: copy service
+      copy:
+        dest=/usr/lib/systemd/system/environ.service
+        content="[Unit]\nDescription=Environ\nAfter=network.target\n[Service]\nExecStart=/usr/bin/python3.5 /home/environ/controller.py\nUser=environ\nRestart=always\nWorkingDirectory=/home/environ\n[Install]\nWantedBy=multi-user.target"
+        force=yes
+    - name: reload daemon
+      command: systemctl daemon-reload
+    - name: service enable
+      service: name=environ enabled=yes
+    - name: service restart
+      service: name=environ state=restarted
