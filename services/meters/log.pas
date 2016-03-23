@@ -48,4 +48,7 @@ implementation
 
 initialization
 
+finalization
+	info('exiting...');
+
 end.
