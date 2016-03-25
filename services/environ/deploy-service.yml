@@ -21,6 +21,7 @@
     - name: install requiremets
       pip: name={{item}} state=latest executable=pip3.5
       with_items:
+        - pip
         - flask
         - psutil
         - scapy-python3
@@ -29,14 +30,25 @@
       user: name=environ
     - name: copy project
       copy: src=environ dest=/home/ force=yes owner=environ
-    - name: copy service
+    - name: copy environ-web.service
+      copy:
+        dest=/usr/lib/systemd/system/environ-web.service
+        content="[Unit]\nDescription=Environ\nAfter=network.target\n[Service]\nExecStart=/usr/bin/python3.5 /home/environ/web.py\nUser=environ\nRestart=always\nWorkingDirectory=/home/environ\n[Install]\nWantedBy=multi-user.target"
+        force=yes
+    - name: copy environ.service
       copy:
         dest=/usr/lib/systemd/system/environ.service
-        content="[Unit]\nDescription=Environ\nAfter=network.target\n[Service]\nExecStart=/usr/bin/python3.5 /home/environ/controller.py\nUser=environ\nRestart=always\nWorkingDirectory=/home/environ\n[Install]\nWantedBy=multi-user.target"
+        content="[Unit]\nDescription=Environ\nAfter=network.target environ-web.service\nRequires=environ-web.service\n[Service]\nPermissionsStartOnly=true\nExecStartPre=/bin/bash -c '/usr/bin/systemctl set-environment WIFICARD=$(/usr/sbin/iwconfig 2> /dev/null | grep IEEE | cut -d \" \" -f 1)'\nExecStartPre=/bin/bash -c '/usr/sbin/iwconfig $WIFICARD mode monitor'\nExecStart=/usr/bin/python3.5 /home/environ/server.py\nUser=environ\nRestart=always\nWorkingDirectory=/home/environ\n[Install]\nWantedBy=multi-user.target"
         force=yes
     - name: reload daemon
       command: systemctl daemon-reload
-    - name: service enable
-      service: name=environ enabled=yes
-    - name: service restart
-      service: name=environ state=restarted
+    - name: services enable
+      service: name={{item}} enabled=yes
+      with_items:
+        - environ-web
+        - environ
+    - name: services restart
+      service: name={{item}} state=restarted
+      with_items:
+        - environ-web
+        - environ
