@@ -8,9 +8,9 @@ function pack {
     NAME=$1
     rm -f $TMP/*
     cp client.conf $TMP/ructf2016-$NAME.conf
-    cp $SRC/ca.crt    $TMP/ca.crt
-    cp $SRC/$NAME.crt $TMP/client.crt
-    cp $SRC/$NAME.key $TMP/client.key
+    cp $SRC/ca.crt    $TMP/ructf2016-ca.crt
+    cp $SRC/$NAME.crt $TMP/ructf2016-client.crt
+    cp $SRC/$NAME.key $TMP/ructf2016-client.key
     pushd $TMP
     tar czvf ../$OUT/$NAME.tgz *
     popd
