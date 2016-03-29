@@ -8,6 +8,8 @@ import socket
 from os import environ
 from os.path import join, realpath, dirname
 from multiprocessing import Pool, Manager, log_to_stderr
+from random import randint
+
 
 logger = log_to_stderr()
 logger.setLevel(logging.WARNING)
@@ -41,7 +43,9 @@ def send(iface, team_id, cmd, data, stream, dh_key=1):
         data=str(encoded_data),
         sign=str(sign(encoded_data, private_key))
     )
-    sendp(pkg, iface=iface, count=15, inter=0.2, verbose=0)
+    for i in range(10):
+        time.sleep(randint(10, 200) / 1000)
+        sendp(pkg, iface=iface, verbose=0)
 
 
 def handle(iface, team_id, pkt):
@@ -53,12 +57,11 @@ def handle(iface, team_id, pkt):
 
     if pkt['cmd'] == 0:
         try:
-            data = int(pkt['data']).to_bytes(
-                300, byteorder='big').lstrip(b'\0')
+            data = int(pkt['data']).to_bytes(300, byteorder='big').lstrip(b'\0')
             if b"start:" in data and pkt['stream'] not in current_streams:
                 try:
+                    current_streams[pkt['stream']] = 1
                     B, dh_key = downhill(*data.split(b':')[1:4])
-                    current_streams.append(pkt['stream'])
                 except:
                     return
                 else:
@@ -66,7 +69,8 @@ def handle(iface, team_id, pkt):
                         dh_keys[pkt['stream']] = dh_key
                     send(iface, team_id, 1, b'pub:%d' % B, pkt['stream'])
                     return
-        except:
+        except Exception as e:
+            logger.error(e)
             return
 
     elif pkt['cmd'] == 2 and pkt['stream'] in dh_keys:
@@ -77,16 +81,15 @@ def handle(iface, team_id, pkt):
             if b"put:" in data:
                 sens_data = data.split(b'put:')[1]
                 sensor = str(uuid4())
+                del dh_keys[pkt['stream']]
                 with open(sensors.value + sensor, 'wb') as s:
                     s.write(sens_data)
                 send(iface, team_id, 3, b'ACCEPT:%s' % sensor.encode("utf8"),
                      pkt['stream'], dh_key)
-                logger.warning("new data by: %s" % sensor)
-                del current_streams[current_streams.index(pkt['stream'])]
-                del dh_keys[pkt['stream']]
+                del current_streams[pkt['stream']]
                 return
         except Exception as e:
-            print(e)
+            logger.error(e)
             pass
 
 
@@ -104,10 +107,12 @@ if __name__ == '__main__':
         # TODO: change it to checksystem addr
         s.connect(("ructf.org", 80))
         TEAM_ID = int(s.getsockname()[0].split('.')[2])
-
+    # TEST: just for test
+    TEAM_ID = 1
+    # <<<<<
     manager = Manager()
     dh_keys = manager.dict()
-    current_streams = manager.list()
+    current_streams = manager.dict()
     sensors = manager.Value('c', join(dirname(realpath(__file__)), 'sensors/'))
 
     try:

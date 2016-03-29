@@ -5,7 +5,11 @@
 ---
 - hosts: all
   remote_user: root
+  become_user: root
+  become: yes
   tasks:
+    - name: install deps for ansible
+      command: dnf install -y python2 python2-dnf libselinux-python
     - name: enable COPR plugin
       dnf: name=dnf-plugins-core state=latest
     - name: enable python3.5 repo
@@ -13,6 +17,8 @@
     - name: install system requiremets
       dnf: name={{item}} state=latest disable_gpg_check=yes
       with_items:
+        - gcc
+        - redhat-rpm-config
         - python35-python3
         - python3-devel
         - libpcap-devel
@@ -38,7 +44,7 @@
     - name: copy environ.service
       copy:
         dest=/usr/lib/systemd/system/environ.service
-        content="[Unit]\nDescription=Environ\nAfter=network.target environ-web.service\nRequires=environ-web.service\n[Service]\nPermissionsStartOnly=true\nExecStartPre=/bin/bash -c '/usr/bin/systemctl set-environment WIFICARD=$(/usr/sbin/iwconfig 2> /dev/null | grep IEEE | cut -d \" \" -f 1)'\nExecStartPre=/bin/bash -c '/usr/sbin/iwconfig $WIFICARD mode monitor'\nExecStart=/usr/bin/python3.5 /home/environ/server.py\nUser=environ\nRestart=always\nWorkingDirectory=/home/environ\n[Install]\nWantedBy=multi-user.target"
+        content="[Unit]\nDescription=Environ\nAfter=network.target environ-web.service\nRequires=environ-web.service\n[Service]\nPermissionsStartOnly=true\nExecStartPre=/bin/bash -c '/usr/bin/systemctl set-environment WIFICARD=$(/usr/sbin/iwconfig 2> /dev/null | grep IEEE | cut -d \" \" -f 1)'\nExecStartPre=/bin/bash -c '/usr/sbin/ifconfig $WIFICARD down'\nExecStartPre=/bin/bash -c '/usr/sbin/iwconfig $WIFICARD mode monitor'\nExecStartPre=/bin/bash -c '/usr/sbin/ifconfig $WIFICARD up'\nExecStart=/usr/bin/python3.5 /home/environ/server.py\nUser=environ\nRestart=always\nWorkingDirectory=/home/environ\n[Install]\nWantedBy=multi-user.target"
         force=yes
     - name: reload daemon
       command: systemctl daemon-reload

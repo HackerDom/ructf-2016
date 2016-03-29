@@ -8,6 +8,8 @@ import requests
 from scapy.layers.dot11 import RadioTap, Dot11
 from scapy.layers.l2 import LLC
 from Crypto.Util import number
+from multiprocessing import Pool
+from multiprocessing.context import TimeoutError
 
 __author__ = 'm_messiah'
 
@@ -48,11 +50,16 @@ def send_package(team_id, cmd, data, stream, secret=1):
         data=str(encoded_data),
         sign=str(sign)
     )
-    sendp(pkg, iface=IFACE, count=5, inter=0.2, verbose=0)
+    for i in range(10):
+        time.sleep(randint(10, 100) / 1000)
+        sendp(pkg, iface=IFACE, verbose=0)
 
 
 def check_sign(pub_key, sign, data):
-    return pow(int(sign), int(pub_key[0]), int(pub_key[1])) == int(data)
+    try:
+        return pow(int(sign), int(pub_key[0]), int(pub_key[1])) == int(data)
+    except:
+        return False
 
 
 def receive_packet(team_id, pub_key, cmd_type, cmd, stream, secret=1):
@@ -66,6 +73,8 @@ def receive_packet(team_id, pub_key, cmd_type, cmd, stream, secret=1):
 
     def success(p):
         try:
+            if not is_env(p):
+                return False
             data_bytes = int(
                 int(p.data) // secret
             ).to_bytes(300, byteorder='big').strip(b'\0')
@@ -73,14 +82,10 @@ def receive_packet(team_id, pub_key, cmd_type, cmd, stream, secret=1):
         except:
             return None
 
-    captured = sniff(
-        iface=IFACE, lfilter=is_env, stop_filter=success,
-        timeout=3)
-    if captured:
+    captured = sniff(iface=IFACE, lfilter=is_env, stop_filter=success)
+    for capt in captured[::-1]:
         try:
-            data_bytes = int(
-                int(captured[-1].data) // secret
-            ).to_bytes(300, byteorder='big').strip(b'\0')
+            data_bytes = int(int(capt.data) // secret).to_bytes(300, byteorder='big').strip(b'\0')
             if cmd in data_bytes:
                 return data_bytes.split(cmd)[1]
         except:
@@ -124,17 +129,22 @@ def put(*args):
     stream = randint(0, 10000)
     if not addr or not flag_id or not flag:
         close(INTERNAL_ERROR, None, "Incorrect parameters")
+    pool = Pool(processes=1)
     #try:
-    pub_key = [int(i) for i in requests.get("http://%s:27000/id_pub" % addr).text.split(":")]
+    pub_key = [
+        int(i)
+        for i in requests.get("http://%s:27000/id_pub" % addr).text.split(":")
+    ]
     p, g, A, a = gen_dh()
     data = "start:%s:%s:%s" % (p, g, A)
     team_id = int(addr.split(".")[2])
+    B = pool.apply_async(receive_packet, (team_id, pub_key, 1, b'pub:', stream))
     send_package(team_id, 0, data, stream)
-
-    B = receive_packet(team_id, pub_key, 1, b'pub:', stream)
-    if not B:
-        close(CORRUPT, "DH negotiation failed",
-              "DH: not receive pub key (B)")
+    try:
+        B = B.get(timeout=5)
+    except TimeoutError:
+            close(CORRUPT, "DH negotiation failed",
+                  "DH: not receive pub key (B)")
 
     secret = 1
     try:
@@ -144,12 +154,13 @@ def put(*args):
               "DH: received wrong pub key (B)")
 
     data = "put:%s" % flag
+    answer = pool.apply_async(receive_packet,
+                              (team_id, pub_key, 3, b'ACCEPT:', stream, secret))
     send_package(team_id, 2, data, stream, secret)
-    answer = receive_packet(team_id, pub_key, 3, b'ACCEPT:', stream, secret)
-
-    if answer:
+    try:
+        answer = answer.get(timeout=5)
         close(OK, answer.decode("utf8"), None)
-    else:
+    except TimeoutError:
         close(CORRUPT, "ID not found",
               "ID not found in ACCEPT")
 
