@@ -55,22 +55,21 @@
   /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */
 }
  
-.icon-door_garage:before { content: '\e800'; }
-.icon-light_garage:before { content: '\e800'; }
-.icon-door_main:before { content: '\e801'; }
+.icon-garage:before { content: '\e800'; }
+.icon-main:before { content: '\e801'; }
 .icon-диван:before { content: '\e802'; }
-.icon-radiator_portable:before { content: '\e803'; }
-.icon-radiator_climate:before { content: '\e804'; }
-.icon-radiator_block:before { content: '\e805'; }
-.icon-light_kitchen:before { content: '\e806'; }
-.icon-light_table:before { content: '\e807'; }
-.icon-light_torchere:before { content: '\e808'; }
+.icon-portable:before { content: '\e803'; }
+.icon-climate:before { content: '\e804'; }
+.icon-block:before { content: '\e805'; }
+.icon-kitchen:before { content: '\e806'; }
+.icon-table:before { content: '\e807'; }
+.icon-floor-lamp:before { content: '\e808'; }
 .icon-лампочка:before { content: '\e809'; }
-.icon-light_lustre:before { content: '\e80a'; }
+.icon-chandelier:before { content: '\e80a'; }
 .icon-window_kitchen:before { content: '\e80b'; }
-.icon-window_bedroom:before { content: '\e80c'; }
-.icon-window_livingroom:before { content: '\e80d'; }
-.icon-window_playroom:before { content: '\e80e'; }
-.icon-light_bed:before { content: '\e80f'; }
+.icon-bedroom:before { content: '\e80c'; }
+.icon-livingroom:before { content: '\e80d'; }
+.icon-playroom:before { content: '\e80e'; }
+.icon-bed:before { content: '\e80f'; }
 .icon-temperature:before { content: '\e810'; }
-.icon-light_bathroom:before { content: '\e811'; }
+.icon-bathroom:before { content: '\e811'; }

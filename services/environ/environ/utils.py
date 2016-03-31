@@ -2,6 +2,7 @@ from os import scandir
 from random import choice
 from Crypto.Util import number
 from Crypto.Random import atfork
+from psutil import cpu_percent, virtual_memory, disk_usage
 
 
 def downhill(p, g, A):
@@ -85,30 +86,43 @@ def get_env(metric):
         return randint(0, 100)
     return None
 
-SWITCHES = [
-    "window_kitchen", "window_livingroom", "window_bedroom", "window_playroom",
-
-    "door_main", "door_garage",
-
-    "light_kitchen", "light_lustre", "light_torchere", "light_table",
-    "light_bathroom", "light_bed", "light_garage",
+PERIMETER = [
+    "window_kitchen", "livingroom", "bedroom", "playroom",
+    "main", "garage"
 ]
+
+LIGHTS = [
+    "kitchen", "chandelier", "floor-lamp", "table",
+    "bathroom", "bed", "garage",
+]
+
 RADIATORS = [
-    "radiator_climate", "radiator_block", "radiator_portable"
+    "climate", "block", "portable"
 ]
 
 
 def get_state(path):
-    result = {}
+    result = {"perimeter": {}, "lights": {}, "radiators": {}}
+    system = {
+        "cpu": cpu_percent(percpu=True),
+        "mem": virtual_memory().percent,
+        "disk": disk_usage('/').percent,
+    }
+    result['system'] = system
     state = current_state(path)
     if not state:
         return result
     if len(state) < 30:
         return result
-
-    for offset, switch in enumerate(SWITCHES):
-        result[switch] = 47 < state[offset] < 58
+    result["temperature"] = int.from_bytes(state, byteorder='big') % 400 / 10
+    result["pressure"] = (
+        int.from_bytes(state, byteorder='big') % 1000 + 500) / 10
+    result["humidity"] = int.from_bytes(state, byteorder='big') % 100
+    for offset, switch in enumerate(PERIMETER):
+        result['perimeter'][switch] = 47 < state[offset] < 58
+    for offset, switch in enumerate(LIGHTS):
+        result['lights'][switch] = 47 < state[offset + len(PERIMETER)] < 58
     for offset, sensor in enumerate(RADIATORS):
-        result[sensor] = (state[15 + offset] - 65) / 57 * 13 + 17
+        result['radiators'][sensor] = (state[15 + offset] - 65) / 57 * 13 + 17
 
     return result

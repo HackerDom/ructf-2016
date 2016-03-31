@@ -25,6 +25,7 @@
         <div class="container" id="alerts"></div>
         <div class="container">
             <div class="row">
+                <h5>General</h5>
                 <div class="col-sm-4 col-xs-6 text-xs-center">
                     <h5>Temperature</h5>
                     <div class="center-block c100 p{{ (sensors.temperature| int / 40 * 100) | int }} green">
@@ -41,7 +42,7 @@
                     <h5>Pressure</h5>
                     <div class="center-block c100 p{{ sensors.pressure | int(50) - 50 }} orange">
                         <a class="circle" data-hover="{{ sensors.pressure | int }}kPa">
-                            <span><i class="icon-pressure"></i>press</span>
+                            <span><i class="icon-pressure"></i>☁</span>
                         </a>
                         <div class="slice">
                             <div class="bar"></div>
@@ -53,7 +54,7 @@
                     <h5>Humidity</h5>
                     <div class="center-block c100 p{{ sensors.humidity | int }} blue">
                         <a class="circle" data-hover="{{ sensors.humidity | float | round(1) }}%">
-                            <span><i class="icon-humidity"></i>Hum</span>
+                            <span><i class="icon-humidity"></i>💧</span>
                         </a>
                         <div class="slice">
                             <div class="bar"></div>
@@ -62,43 +63,15 @@
                     </div>
                 </div>
             </div>
-
-            <div class="row">
-                <div class="col-sm-offset-2  col-sm-4 col-xs-6 text-xs-center">
-                    <h5>CPU</h5>
-                    <div class="center-block c100 p{{ sensors.system_cpu  | int }} violet">
-                        <a class="circle" data-hover="{{ sensors.system_cpu | float | round(1) }}%">
-                            <span><i class="icon-cpu"></i>CPU</span>
-                        </a>
-                        <div class="slice">
-                            <div class="bar"></div>
-                            <div class="fill"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-4 col-xs-6 text-xs-center">
-                    <h5>Memory</h5>
-                    <div class="center-block c100 p{{ sensors.system_mem | int }}">
-                        <a class="circle" data-hover="{{ sensors.system_mem | float | round(1) }}%">
-                            <span><i class="icon-memory"></i>MEM</span>
-                        </a>
-                        <div class="slice">
-                            <div class="bar"></div>
-                            <div class="fill"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div class="row panel">
                 <h5>Lights</h5>
-                {% for sensor, data in sensors | dictsort if "light" in sensor %}
+                {% for sensor, data in sensors.lights | dictsort %}
                 <div class="col-xs-4 col-sm-3 col-lg-2">
                     <div class="my-card text-xs-center">
                         <span class="display-5 {% if data != None %}{% if data %}text-warning{% endif %}{% endif %}">
                             <i class="{% if data %}{% else %}{% endif %} icon-{{ sensor }}"></i>
                         </span>
-                        <h6>{{ sensor | replace("light_", "") | capitalize }}</h6>
+                        <h6>{{ sensor | capitalize }}</h6>
                     </div>
                 </div>
                 {% else %}
@@ -110,7 +83,7 @@
 
             <div class="row panel">
                 <h5>Perimeter</h5>
-                {% for sensor, data in sensors | dictsort if "window" in sensor or "door" in sensor %}
+                {% for sensor, data in sensors.perimeter | dictsort %}
                     <div class="col-xs-4 col-sm-3 col-lg-2">
                         <div class="text-xs-center card card-inverse {% if data != None %}text-white {% if data %}card-warning{% else %}card-success{% endif %}{% endif %}">
                             <div class="card-block my-card ">
@@ -130,7 +103,7 @@
 
             <div class="row panel">
                 <h5>Radiators</h5>
-                {% for sensor, data in sensors | dictsort if "radiator" in sensor %}
+                {% for sensor, data in sensors.radiators | dictsort %}
                 <div class="col-sm-4 col-xs-6 text-xs-center">
                     <div class="center-block c100 p{{ ((data | float - 13) / 17 * 100) | int }} {% if data | int > 10 %}{% if data | int < 18 %}blue{% else %}{% if data | int < 24 %}green{% else %}{% if data | int < 27 %}orange{% else %}red{% endif %}{% endif %}{% endif %}{% endif %}">
                         <a class="circle" data-hover="{{ data | float | round(1) }}℃">
@@ -149,6 +122,30 @@
                 {% endfor %}
             </div>
 
+
+            <div class="row">
+                <h5>System</h5>
+                <div class="row">
+                    <span class="col-xs-3 col-md-1">CPU</span>
+                    <div class="col-xs-9 col-md-11">
+                    {% for data in sensors.system.cpu %}
+                        <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="text-xs-center" id="cpu-cap-{{ index0 }}">{{ data | float | round(1) }}%</div>
+                            <progress aria-describedby="cpu-cap-{{ index0 }}" class="progress {% if data | int  < 20 %}progress-success{% else %}{% if data | int < 70 %}progress-warning{% else %}progress-danger{% endif %}{% endif %}" value="{{ data | int }}" max="100">{{ data | float | round(1) }}%</progress>
+                        </div>
+                    {% endfor %}
+                    </div>
+                </div>
+                {% for sensor, data in sensors.system | dictsort if sensor != "cpu" %}
+                <div class="row">
+                    <span class="col-xs-3 col-md-1">{{ sensor | capitalize }}</span>
+                    <div class="col-xs-6 col-md-10">
+                        <progress class="progress {% if data | int  < 20 %}progress-success{% else %}{% if data | int < 70 %}progress-warning{% else %}progress-danger{% endif %}{% endif %}" value="{{ data | int }}" max="100">{{ data | float | round(1) }}%</progress>
+                    </div>
+                    <span class="col-xs-3 col-md-1 label label-{% if data | int  < 20 %}success{% else %}{% if data | int < 70 %}warning{% else %}danger{% endif %}{% endif %}">{{ data | float | round(1) }}%</span>
+                </div>
+                {% endfor %}
+            </div>
         </div>
         <script src="/static/jquery.min.js"></script>
         <script src="/static/tether.min.js"></script>

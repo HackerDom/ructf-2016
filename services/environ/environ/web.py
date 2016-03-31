@@ -1,7 +1,6 @@
 from os.path import join, dirname, realpath
 from flask import Flask, render_template
-from psutil import cpu_percent, virtual_memory
-from utils import get_state, get_env, rosa
+from utils import get_state, rosa
 
 app = Flask("environ")
 app.sensors_path = join(dirname(realpath(__file__)), 'sensors')
@@ -13,15 +12,7 @@ with open(join(dirname(realpath(__file__)), 'id.key'), 'w') as w:
 
 @app.route("/")
 def dashboard():
-    sensors = {
-        "temperature": get_env('t'),
-        "pressure": get_env('p'),
-        "humidity": get_env('h'),
-        "system_cpu": cpu_percent(),
-        "system_mem": virtual_memory().percent
-    }
-
-    sensors.update(get_state(app.sensors_path))
+    sensors = get_state(app.sensors_path)
     return render_template("index.html", sensors=sensors)
 
 
@@ -39,4 +30,4 @@ def show_raw(sensor):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=27000)
+    app.run(host="0.0.0.0", port=27000, debug=True)
