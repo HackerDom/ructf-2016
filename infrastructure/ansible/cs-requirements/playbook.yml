@@ -1,0 +1,4 @@
+- hosts: asus1
+  roles: [db,app]
+  gather_facts: yes
+
