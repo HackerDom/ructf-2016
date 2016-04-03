@@ -1,0 +1,95 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 52 (0x34)
+    Signature Algorithm: sha256WithRSAEncryption
+        Issuer: C=RU, ST=RU, L=Yekaterinburg, O=ructf.org, OU=ructf, CN=ructf.org CA/name=DevVPN/emailAddress=dimmoborgir@gmail.com
+        Validity
+            Not Before: Mar 25 19:22:21 2016 GMT
+            Not After : Mar 23 19:22:21 2026 GMT
+        Subject: C=RU, ST=RU, L=Yekaterinburg, O=ructf.org, OU=ructf, CN=dev21/name=DevVPN/emailAddress=dimmoborgir@gmail.com
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+                Modulus:
+                    00:ec:6d:f4:01:fd:73:d8:57:a9:2f:43:30:cd:34:
+                    c4:09:b8:cb:28:c9:e0:af:dd:e3:fe:a2:76:f4:4f:
+                    e0:8a:06:21:fa:bf:94:9f:53:82:25:d9:91:b1:67:
+                    cf:e1:07:95:76:90:75:e4:e9:e3:01:d7:d7:8f:ce:
+                    c3:9b:cb:48:37:f2:32:e1:50:87:0c:61:5d:ed:c8:
+                    46:06:8f:7d:93:37:6a:e5:0a:ce:85:23:72:e7:89:
+                    17:80:84:4e:6b:fa:49:00:78:14:2b:61:fe:35:a7:
+                    da:89:67:6c:d1:18:ea:b1:2a:d3:04:c3:15:bb:17:
+                    41:f1:8c:df:50:d4:f8:c4:0d:26:6b:5b:ab:42:b3:
+                    32:16:ee:64:7a:26:4c:f4:9f:26:7f:83:8e:15:7f:
+                    8f:f6:68:a3:1a:19:d9:db:3c:2f:32:b2:3f:06:84:
+                    7b:f6:45:3a:b8:1a:86:19:52:73:d1:21:71:03:9f:
+                    04:ab:d0:69:d7:3b:29:84:5f:46:44:3a:ee:26:71:
+                    bd:78:ca:b2:be:c9:30:d7:b7:77:21:3f:0a:62:27:
+                    db:65:03:0d:5d:34:e2:49:1e:79:a6:35:8d:7c:23:
+                    bc:17:3b:df:3e:5e:0b:91:5f:ae:54:e0:3b:e5:73:
+                    8a:27:e5:ab:47:2a:ca:68:8c:98:76:6c:76:8d:5a:
+                    b1:37
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            Netscape Comment: 
+                Easy-RSA Generated Certificate
+            X509v3 Subject Key Identifier: 
+                87:93:66:7D:D0:96:55:9A:97:3E:FE:96:0E:2E:4F:D8:6D:9C:76:38
+            X509v3 Authority Key Identifier: 
+                keyid:51:72:5A:C7:75:83:A3:39:2E:20:20:E0:70:09:2E:0B:D8:3E:8C:2B
+                DirName:/C=RU/ST=RU/L=Yekaterinburg/O=ructf.org/OU=ructf/CN=ructf.org CA/name=DevVPN/emailAddress=dimmoborgir@gmail.com
+                serial:CD:45:70:F1:6A:E7:FD:B6
+
+            X509v3 Extended Key Usage: 
+                TLS Web Client Authentication
+            X509v3 Key Usage: 
+                Digital Signature
+    Signature Algorithm: sha256WithRSAEncryption
+         6a:1a:54:bc:8a:96:09:8e:fe:ee:e4:ec:59:45:a2:aa:e7:f9:
+         db:0a:1d:ea:c4:5b:d4:15:c4:1b:43:3d:2e:d1:5d:17:de:b2:
+         9b:1d:5c:48:ac:7e:3e:39:c3:63:b1:3d:a3:dd:d2:a9:82:4e:
+         77:82:c5:04:a6:6b:e2:f4:0e:85:95:d3:a9:d0:3a:1d:23:f1:
+         3d:5e:ca:ee:ad:cf:09:19:98:7e:1e:fd:cf:d4:2b:34:77:bb:
+         e3:05:f5:53:68:8a:33:b4:48:c4:fb:9b:d1:b7:87:1d:bd:c5:
+         64:13:fd:b3:8c:88:83:0a:e7:93:74:33:18:ea:17:2c:5e:09:
+         3d:2c:8f:df:4b:d7:a0:ff:2d:af:d9:36:9e:32:21:d9:ca:50:
+         2a:be:4b:40:37:51:55:cc:b8:52:b1:0e:ee:f7:46:46:49:a6:
+         20:21:63:f2:8e:26:27:34:2e:23:0f:8a:7b:d0:bb:d6:a2:0a:
+         9c:c0:97:7b:37:60:c3:50:dc:57:b9:4d:60:7e:2b:ca:29:58:
+         03:9d:2e:07:04:33:13:6c:90:fa:f7:5e:a7:80:f5:ff:90:e8:
+         36:22:63:30:64:36:ee:f4:71:bb:a9:71:82:7e:57:d4:2b:dc:
+         bd:d8:dc:43:9b:1b:f3:d7:3b:31:2e:cd:c1:92:13:dc:fd:dd:
+         fa:8b:83:a5
+-----BEGIN CERTIFICATE-----
+MIIFGzCCBAOgAwIBAgIBNDANBgkqhkiG9w0BAQsFADCBpDELMAkGA1UEBhMCUlUx
+CzAJBgNVBAgTAlJVMRYwFAYDVQQHEw1ZZWthdGVyaW5idXJnMRIwEAYDVQQKEwly
+dWN0Zi5vcmcxDjAMBgNVBAsTBXJ1Y3RmMRUwEwYDVQQDEwxydWN0Zi5vcmcgQ0Ex
+DzANBgNVBCkTBkRldlZQTjEkMCIGCSqGSIb3DQEJARYVZGltbW9ib3JnaXJAZ21h
+aWwuY29tMB4XDTE2MDMyNTE5MjIyMVoXDTI2MDMyMzE5MjIyMVowgZ0xCzAJBgNV
+BAYTAlJVMQswCQYDVQQIEwJSVTEWMBQGA1UEBxMNWWVrYXRlcmluYnVyZzESMBAG
+A1UEChMJcnVjdGYub3JnMQ4wDAYDVQQLEwVydWN0ZjEOMAwGA1UEAxMFZGV2MjEx
+DzANBgNVBCkTBkRldlZQTjEkMCIGCSqGSIb3DQEJARYVZGltbW9ib3JnaXJAZ21h
+aWwuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA7G30Af1z2Fep
+L0MwzTTECbjLKMngr93j/qJ29E/gigYh+r+Un1OCJdmRsWfP4QeVdpB15OnjAdfX
+j87Dm8tIN/Iy4VCHDGFd7chGBo99kzdq5QrOhSNy54kXgIROa/pJAHgUK2H+Nafa
+iWds0RjqsSrTBMMVuxdB8YzfUNT4xA0ma1urQrMyFu5keiZM9J8mf4OOFX+P9mij
+GhnZ2zwvMrI/BoR79kU6uBqGGVJz0SFxA58Eq9Bp1zsphF9GRDruJnG9eMqyvskw
+17d3IT8KYifbZQMNXTTiSR55pjWNfCO8FzvfPl4LkV+uVOA75XOKJ+WrRyrKaIyY
+dmx2jVqxNwIDAQABo4IBWzCCAVcwCQYDVR0TBAIwADAtBglghkgBhvhCAQ0EIBYe
+RWFzeS1SU0EgR2VuZXJhdGVkIENlcnRpZmljYXRlMB0GA1UdDgQWBBSHk2Z90JZV
+mpc+/pYOLk/YbZx2ODCB2QYDVR0jBIHRMIHOgBRRclrHdYOjOS4gIOBwCS4L2D6M
+K6GBqqSBpzCBpDELMAkGA1UEBhMCUlUxCzAJBgNVBAgTAlJVMRYwFAYDVQQHEw1Z
+ZWthdGVyaW5idXJnMRIwEAYDVQQKEwlydWN0Zi5vcmcxDjAMBgNVBAsTBXJ1Y3Rm
+MRUwEwYDVQQDEwxydWN0Zi5vcmcgQ0ExDzANBgNVBCkTBkRldlZQTjEkMCIGCSqG
+SIb3DQEJARYVZGltbW9ib3JnaXJAZ21haWwuY29tggkAzUVw8Wrn/bYwEwYDVR0l
+BAwwCgYIKwYBBQUHAwIwCwYDVR0PBAQDAgeAMA0GCSqGSIb3DQEBCwUAA4IBAQBq
+GlS8ipYJjv7u5OxZRaKq5/nbCh3qxFvUFcQbQz0u0V0X3rKbHVxIrH4+OcNjsT2j
+3dKpgk53gsUEpmvi9A6FldOp0DodI/E9Xsrurc8JGZh+Hv3P1Cs0d7vjBfVTaIoz
+tEjE+5vRt4cdvcVkE/2zjIiDCueTdDMY6hcsXgk9LI/fS9eg/y2v2TaeMiHZylAq
+vktAN1FVzLhSsQ7u90ZGSaYgIWPyjiYnNC4jD4p70LvWogqcwJd7N2DDUNxXuU1g
+fivKKVgDnS4HBDMTbJD6916ngPX/kOg2ImMwZDbu9HG7qXGCflfUK9y92NxDmxvz
+1zsxLs3BkhPc/d36i4Ol
+-----END CERTIFICATE-----

@@ -1,0 +1,21 @@
+#####################################################
+*filter
+#####################################################
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -p icmp -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+
+-A INPUT -m state --state NEW -s 10.16.0.0/16 -p tcp --dport 80 -j ACCEPT
+-A INPUT -m state --state NEW -p tcp --dport 62674 -j ACCEPT
+-A INPUT -m state --state NEW -p udp --dport 1337 -j ACCEPT
+
+-A INPUT -j DROP
+
+-A FORWARD -s 10.16.0.0/16 -d 10.16.0.0/16 -j ACCEPT
+-A FORWARD -j DROP
+
+COMMIT

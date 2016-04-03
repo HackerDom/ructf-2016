@@ -1,0 +1,60 @@
+# Ansible >2 deploy playbook
+# use: ansible-playbook -i 192.168.0.1, deploy-service.yml
+# LOOK AT COMMA, IT IS IMPORTANT     ^^^
+
+---
+- hosts: all
+  remote_user: root
+  become_user: root
+  become: yes
+  tasks:
+    - name: install deps for ansible
+      command: dnf install -y python2 python2-dnf libselinux-python
+    - name: enable COPR plugin
+      dnf: name=dnf-plugins-core state=latest
+    - name: enable python3.5 repo
+      command: dnf copr enable -y mstuchli/Python3.5
+    - name: install system requiremets
+      dnf: name={{item}} state=latest disable_gpg_check=yes
+      with_items:
+        - gcc
+        - redhat-rpm-config
+        - python35-python3
+        - python3-devel
+        - libpcap-devel
+    - name: set_cap
+      capabilities: capability=cap_net_raw=eip path=/usr/bin/python3.5 state=present
+    - name: install requiremets
+      pip: name={{item}} state=latest executable=pip3.5
+      with_items:
+        - pip
+        - flask
+        - psutil
+        - scapy-python3
+        - PyCrypto
+    - name: add user
+      user: name=environ
+    - name: copy project
+      copy: src=environ dest=/home/ force=yes owner=environ
+    - name: copy environ-web.service
+      copy:
+        dest=/usr/lib/systemd/system/environ-web.service
+        content="[Unit]\nDescription=Environ\nAfter=network.target\n[Service]\nExecStart=/usr/bin/python3.5 /home/environ/web.py\nUser=environ\nRestart=always\nWorkingDirectory=/home/environ\n[Install]\nWantedBy=multi-user.target"
+        force=yes
+    - name: copy environ.service
+      copy:
+        dest=/usr/lib/systemd/system/environ.service
+        content="[Unit]\nDescription=Environ\nAfter=network.target environ-web.service\nRequires=environ-web.service\n[Service]\nPermissionsStartOnly=true\nExecStartPre=/bin/bash -c '/usr/bin/systemctl set-environment WIFICARD=$(/usr/sbin/iwconfig 2> /dev/null | grep IEEE | cut -d \" \" -f 1)'\nExecStartPre=/bin/bash -c '/usr/sbin/ifconfig $WIFICARD down'\nExecStartPre=/bin/bash -c '/usr/sbin/iwconfig $WIFICARD mode monitor'\nExecStartPre=/bin/bash -c '/usr/sbin/ifconfig $WIFICARD up'\nExecStart=/usr/bin/python3.5 /home/environ/server.py\nUser=environ\nRestart=always\nWorkingDirectory=/home/environ\n[Install]\nWantedBy=multi-user.target"
+        force=yes
+    - name: reload daemon
+      command: systemctl daemon-reload
+    - name: services enable
+      service: name={{item}} enabled=yes
+      with_items:
+        - environ-web
+        - environ
+    - name: services restart
+      service: name={{item}} state=restarted
+      with_items:
+        - environ-web
+        - environ

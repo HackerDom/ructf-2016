@@ -4,7 +4,7 @@ unit network;
 
 interface
 	uses
-		Sockets, configuration;
+		Sockets, configuration, baseunix;
 
 	type TConnect = record
 		socket: longint;
@@ -13,8 +13,11 @@ interface
 	end;
 
 	function accept(): TConnect;
-	function recv(const connect: TConnect): string;
-	function send(const connect: TConnect; const data: string): boolean;
+	function recv(const connect: TConnect; const buf: pointer; const size: longint; const timeout: longint): longint;
+	function recvByte(const connect: TConnect): byte;
+	function recvString(const connect: TConnect): string;
+	function send(const connect: TConnect; const data: pointer; const length: longint): boolean;
+	function sendString(const connect: TConnect; const data: string): boolean;
 	function iptostr(const connect: TConnect): string;
 
 	procedure close(const connect: TConnect);
@@ -70,6 +73,8 @@ implementation
 	end;
 	
 	function accept(): TConnect;
+	var
+		flags: longint;
 	begin
 		accept.length := sizeof(accept.address);
 	    accept.socket := fpAccept(serverSocket, @accept.address, @accept.length);
@@ -79,32 +84,89 @@ implementation
 			accept.socket := -1;
 			exit;
 		end;
+
+		flags := fpfcntl(accept.socket, F_GetFL);
+		flags := flags or O_NonBlock;
+		if fpfcntl(accept.socket, F_SetFL, flags) < 0 then
+		begin
+			error('can''t set flags for socket');
+			accept.socket := -1;
+		end;
 	end;
 
-	function recv(const connect: TConnect): string; 
+	function recv(const connect: TConnect; const buf: pointer; const size: longint; const timeout: longint): longint;
+	var
+		sel: tpollfd;
+		res: longint;
+		readed: longint;
+	begin
+		sel.fd := connect.socket;
+		sel.events := POLLIN;
+		sel.revents := 0;
+
+		res := fppoll(@sel, 1, timeout);
+
+		if res <= 0 then
+		begin
+			if res < 0 then
+				error('error while poll');
+			exit(res);
+		end;
+
+		readed := fprecv(connect.socket, buf, size, 0);
+		if readed < 0 then
+			perror('recv: ');
+
+		exit(readed);
+	end;
+
+	function recvByte(const connect: TConnect): byte;
+	const
+		timeout = 10000;
+	var
+		res: byte;
+	begin
+		if recv(connect, @res, 1, timeout) <= 0 then
+			exit(255);
+		recvByte := res;
+	end;
+
+	function recvString(const connect: TConnect): string; 
 	const
 		size = 255;
+		timeout = 1000;
 	var
 		buffer: string[size];
 		readed: longint;
 	begin
-		readed := fprecv(connect.socket, @buffer[1], size, 0);
-		if readed = -1 then
-		begin
-			perror('recv: ');
+		readed := recv(connect, @buffer[1], size, timeout);
+		if readed <= 0 then
 			exit('');
+		recvString := copy(buffer, 1, readed);
+		while true do
+		begin
+			readed := recv(connect, @buffer[1], size, 0);
+			if readed < 0 then
+				exit('');
+			if readed = 0 then
+				break;
+			recvString := recvString + copy(buffer, 1, readed);
 		end;
-		recv := copy(buffer, 1, readed);
 	end;
 
-	function send(const connect: TConnect; const data: string): boolean;
+	function send(const connect: TConnect; const data: pointer; const length: longint): boolean;
 	begin
 		send := true;
-		if fpsend(connect.socket, @data[1], length(data), 1) = -1 then
+		if fpsend(connect.socket, data, length, 1) = -1 then
 		begin
 			perror('send: ');
 			exit(false);
 		end;
+	end;
+
+	function sendString(const connect: TConnect; const data: string): boolean;
+	begin
+		sendString := send(connect, @data[1], length(data));
 	end;
 	
 	function iptostr(const connect: TConnect): string;

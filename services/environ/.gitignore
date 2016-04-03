@@ -1,4 +1,5 @@
 .idea
 .py[co]
 __pycache__
-sensors/
+environ/sensors/
+/environ/id.key
