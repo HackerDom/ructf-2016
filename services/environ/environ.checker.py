@@ -120,6 +120,21 @@ def check(*args):
     addr = args[0]
     if not addr:
         close(INTERNAL_ERROR, None, "Check without ADDR")
+    addr = args[0]
+    try:
+        answer = requests.get("http://%s:%s/" % (addr, PORT))
+        if answer.status_code != 200:
+            close(GET_ERROR, private="Bad status_code in /")
+        if "Perimeter" not in answer.text or "Lights" not in answer.text:
+            close(GET_ERROR, private="Broken index.html")
+        answer = requests.get("http://%s:%s/id_pub" % (addr, PORT))
+        if answer.status_code != 200:
+            close(GET_ERROR, private="Bad status_code in /id_pub")
+        if ":" not in answer.text:
+            close(GET_ERROR, private="Broken id_pub")
+        close(OK)
+    except:
+        close(FAIL, "No connection to %s" % addr)
 
 
 def put(*args):
