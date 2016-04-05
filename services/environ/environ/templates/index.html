@@ -7,7 +7,7 @@
         <title>🏡 Environ</title>
         <link rel="stylesheet" href="/static/bootstrap.min.css">
         <link rel="stylesheet" href="/static/circle.min.css">
-        <link rel="stylesheet" href="/static/max.css">
+        <link rel="stylesheet" href="/static/max.min.css">
         <link rel="stylesheet" href="/static/style.css">
     </head>
     <body>
@@ -29,8 +29,8 @@
                 <div class="col-sm-4 col-xs-6 text-xs-center">
                     <h5>Temperature</h5>
                     <div class="center-block c100 p{{ (sensors.temperature| int / 40 * 100) | int }} green">
-                        <a class="circle" data-hover="{{ sensors.temperature | float | round(1) }}℃">
-                            <span><i class="icon-temperature"></i></span>
+                        <a class="circle" data-hover="{{ sensors.temperature }}℃">
+                            <span><i class="icon-temperature green"></i></span>
                         </a>
                         <div class="slice">
                             <div class="bar"></div>
@@ -42,7 +42,7 @@
                     <h5>Pressure</h5>
                     <div class="center-block c100 p{{ sensors.pressure | int(50) - 50 }} orange">
                         <a class="circle" data-hover="{{ sensors.pressure | int }}kPa">
-                            <span><i class="icon-pressure"></i>☁</span>
+                            <span><i class="icon-pressure "></i>☁</span>
                         </a>
                         <div class="slice">
                             <div class="bar"></div>

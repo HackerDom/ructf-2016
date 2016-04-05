@@ -15,7 +15,7 @@ __author__ = 'm_messiah'
 
 OK, GET_ERROR, CORRUPT, FAIL, INTERNAL_ERROR = 101, 102, 103, 104, 110
 PORT = 27000
-IFACE = environ.get('WIFICARD', 'wlan0')
+IFACE = environ.get('WIFICARD', 'wlo1')
 
 
 class Env(Packet):
@@ -94,7 +94,7 @@ def receive_packet(team_id, pub_key, cmd_type, cmd, stream, secret=1):
 
 
 def gen_dh():
-    p, a = number.getPrime(128), number.getPrime(128)
+    p, a = number.getPrime(128), number.getPrime(16)
     g = choice([2, 3, 5, 7, 11, 13, 17, 23])
     A = pow(g, a, p)
     if A < 2 or A > p - 1 or pow(A, (p - 1) // 2, p) != 1:
@@ -122,18 +122,18 @@ def check(*args):
         close(INTERNAL_ERROR, None, "Check without ADDR")
     addr = args[0]
     try:
-        answer = requests.get("http://%s:%s/" % (addr, PORT))
+        answer = requests.get("http://%s:%s/" % (addr, PORT), timeout=3)
         if answer.status_code != 200:
             close(GET_ERROR, private="Bad status_code in /")
         if "Perimeter" not in answer.text or "Lights" not in answer.text:
             close(GET_ERROR, private="Broken index.html")
-        answer = requests.get("http://%s:%s/id_pub" % (addr, PORT))
+        answer = requests.get("http://%s:%s/id_pub" % (addr, PORT), timeout=2)
         if answer.status_code != 200:
             close(GET_ERROR, private="Bad status_code in /id_pub")
         if ":" not in answer.text:
             close(GET_ERROR, private="Broken id_pub")
         close(OK)
-    except:
+    except requests.exceptions.RequestException:
         close(FAIL, "No connection to %s" % addr)
 
 
@@ -145,11 +145,14 @@ def put(*args):
     if not addr or not flag_id or not flag:
         close(INTERNAL_ERROR, None, "Incorrect parameters")
     pool = Pool(processes=1)
-    #try:
-    pub_key = [
-        int(i)
-        for i in requests.get("http://%s:27000/id_pub" % addr).text.split(":")
-    ]
+    pub_key = []
+    try:
+        pub_key = [
+            int(i)
+            for i in requests.get("http://%s:27000/id_pub" % addr, timeout=2).text.split(":")
+        ]
+    except requests.exceptions.RequestException:
+        close(FAIL, "Pubkey is not available")
     p, g, A, a = gen_dh()
     data = "start:%s:%s:%s" % (p, g, A)
     team_id = int(addr.split(".")[2])
@@ -169,8 +172,7 @@ def put(*args):
               "DH: received wrong pub key (B)")
 
     data = "put:%s" % flag
-    answer = pool.apply_async(receive_packet,
-                              (team_id, pub_key, 3, b'ACCEPT:', stream, secret))
+    answer = pool.apply_async(receive_packet, (team_id, pub_key, 3, b'ACCEPT:', stream, secret))
     send_package(team_id, 2, data, stream, secret)
     try:
         answer = answer.get(timeout=5)
@@ -178,9 +180,6 @@ def put(*args):
     except TimeoutError:
         close(CORRUPT, "ID not found",
               "ID not found in ACCEPT")
-
-    #except:
-    #    close(FAIL, "No interface")
 
 
 def get(*args):
@@ -190,13 +189,13 @@ def get(*args):
     if not addr or not flag_id or not flag:
         close(INTERNAL_ERROR, None, "Incorrect parameters")
     try:
-        answer = requests.get("http://%s:%s/%s" % (addr, PORT, flag_id))
+        answer = requests.get("http://%s:%s/%s" % (addr, PORT, flag_id), timeout=5)
         if answer.status_code != 200:
             close(GET_ERROR, private="Flag not found")
         if answer.text != flag:
             close(GET_ERROR, private="Bad flag by flag_id")
         close(OK)
-    except:
+    except requests.exceptions.RequestException:
         close(FAIL, "No connection to %s" % addr)
 
 
@@ -213,7 +212,7 @@ def not_found(*args):
 
 
 if __name__ == '__main__':
-    #try:
+    try:
         COMMANDS.get(argv[1], not_found)(*argv[2:])
-    #except Exception as e:
-    #    close(INTERNAL_ERROR, "Bad-ass checker", "INTERNAL ERROR: %s" % e)
+    except Exception as e:
+        close(INTERNAL_ERROR, "Bad-ass checker", "INTERNAL ERROR: %s" % e)

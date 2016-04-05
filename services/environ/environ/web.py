@@ -1,5 +1,5 @@
 from os.path import join, dirname, realpath
-from flask import Flask, render_template
+from flask import Flask, render_template, send_file, abort
 from utils import get_state, rosa
 
 app = Flask("environ")
@@ -11,23 +11,20 @@ with open(join(dirname(realpath(__file__)), 'id.key'), 'w') as w:
 
 
 @app.route("/")
-def dashboard():
-    sensors = get_state(app.sensors_path)
-    return render_template("index.html", sensors=sensors)
+def dashboard(): return render_template("index.html", sensors=get_state(app.sensors_path))
 
 
 @app.route("/id_pub")
-def show_pub():
-    return "{0}:{1}".format(*app.rosa_key[0])
+def show_pub(): return "{0}:{1}".format(*app.rosa_key[0])
 
 
 @app.route("/<path:sensor>")
 def show_raw(sensor):
     try:
-        return open(app.sensors_path + "/{0:s}".format(sensor)).read()
-    except:
-        return "", 404
+        return send_file(join(app.sensors_path, sensor))
+    except FileNotFoundError:
+        abort(404)
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=27000, debug=True)
+    app.run(host="0.0.0.0", port=27000)
