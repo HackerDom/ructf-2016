@@ -94,7 +94,7 @@ def receive_packet(team_id, pub_key, cmd_type, cmd, stream, secret=1):
 
 
 def gen_dh():
-    p, a = number.getPrime(16), number.getPrime(16)
+    p, a = number.getPrime(64), number.getPrime(32)
     g = choice([2, 3, 5, 7, 11, 13, 17, 23])
     A = pow(g, a, p)
     if A < 2 or A > p - 1 or pow(A, (p - 1) // 2, p) != 1:
@@ -119,7 +119,7 @@ def close(code, public="", private=""):
 def check(*args):
     addr = args[0]
     if not addr:
-        close(INTERNAL_ERROR, None, "Check without ADDR")
+        close(INTERNAL_ERROR, private="Check without ADDR")
     addr = args[0]
     try:
         answer = requests.get("http://%s:%s/" % (addr, PORT), timeout=3)
@@ -143,7 +143,7 @@ def put(*args):
     flag = args[2]
     stream = randint(0, 10000)
     if not addr or not flag_id or not flag:
-        close(INTERNAL_ERROR, None, "Incorrect parameters")
+        close(INTERNAL_ERROR, private="Incorrect parameters")
     pool = Pool(processes=1)
     pub_key = []
     try:
@@ -176,7 +176,7 @@ def put(*args):
     send_package(team_id, 2, data, stream, secret)
     try:
         answer = answer.get(timeout=5)
-        close(OK, answer.decode("utf8"), None)
+        close(OK, answer.decode("utf8"))
     except TimeoutError:
         close(CORRUPT, "ID not found",
               "ID not found in ACCEPT")
@@ -187,7 +187,7 @@ def get(*args):
     flag_id = args[1]
     flag = args[2]
     if not addr or not flag_id or not flag:
-        close(INTERNAL_ERROR, None, "Incorrect parameters")
+        close(INTERNAL_ERROR, private="Incorrect parameters")
     try:
         answer = requests.get("http://%s:%s/%s" % (addr, PORT, flag_id), timeout=5)
         if answer.status_code != 200:
@@ -207,8 +207,7 @@ COMMANDS = {'check': check, 'put': put, 'get': get, 'info': info}
 
 
 def not_found(*args):
-    print("Unsupported command %s" % argv[1], file=stderr)
-    return INTERNAL_ERROR
+    close(INTERNAL_ERROR, private="Unsupported command %s" % argv[1])
 
 
 if __name__ == '__main__':
