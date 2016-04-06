@@ -94,7 +94,7 @@ def receive_packet(team_id, pub_key, cmd_type, cmd, stream, secret=1):
 
 
 def gen_dh():
-    p, a = number.getPrime(128), number.getPrime(16)
+    p, a = number.getPrime(16), number.getPrime(16)
     g = choice([2, 3, 5, 7, 11, 13, 17, 23])
     A = pow(g, a, p)
     if A < 2 or A > p - 1 or pow(A, (p - 1) // 2, p) != 1:
