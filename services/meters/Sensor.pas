@@ -4,7 +4,7 @@ unit Sensor;
 {$modeswitch advancedrecords} 
 
 interface
-	uses fgl;
+	uses fgl, SysUtils, Classes;
 
 	type
 		TRawValue = record
@@ -13,72 +13,114 @@ interface
 			class operator= (const a, b: TRawValue): Boolean;
 		end;
 		TRawValues = specialize TFPGList<TRawValue>;
-		TRawFilter = class abstract(TObject)
+
+		TRawSensor = class abstract(TObject)
+			protected
+				values: TRawValues;
+				log: Text;
+				rwSync: TSimpleRWSync;
+				logFileName: unicodestring;
+				ready: int64;
 			public
-				function GetValues(const start, finish: int64): TRawValues; virtual; abstract;
-		end;
-				
-		TRawSensor = class abstract(TRawFilter)
-			public
-				constructor Create; virtual; abstract;
+				constructor Create;
 				procedure Run; virtual; abstract;
+				function GetValues(const start, finish: int64): TRawValues;
 		end;
 
-		TValues = specialize TFPGList<single>;
-		TRawListener = class abstract(TObject)
+		TRawTick = class(TRawSensor)
 			public
-				constructor Create(const rawsensor: TRawFilter; const startTime: int64); virtual; abstract;
-				function GetValues(const start, finish: int64): TValues; virtual; abstract;
-		end;
-
-		TRawCount = class(TRawListener)
-			private
-				filter: TRawFilter;
-				lastUpdate: int64;
-				results: TValues;
-			public
-				constructor Create(const rawfilter: TRawFilter; const startTime: int64); override;
-				function GetValues(const start, finish: int64): TValues; override;
+				constructor Create;
+				procedure Run; override;
 		end;
 
 implementation
+	const
+		logDir = './logs/';
+		UnixStartDate: TDateTime = 25569.0;
+
+	function DateTimeToUnix(dtDate: TDateTime): Longint;
+	begin
+		result := Round((dtDate - UnixStartDate) * int64(86400000));
+	end;
 
 	class operator TRawValue.= (const a, b: TRawValue): Boolean;
 	begin
 		result := (a.timestamp = b.timestamp) and (a.value = b.value);
 	end;
 
-	constructor TRawCount.Create(const rawfilter: TRawFilter; const startTime: int64);
-	begin
-		filter := rawfilter;
-		lastUpdate := startTime;
-		results := TValues.Create;
-	end;
-
-	function TRawCount.GetValues(const start, finish: int64): TValues;
+	constructor TRawSensor.Create;
 	var
-		data: TRawValues;
-		i: longint;
-		timestamp: int64;
+		tmp: TRawValue;
+		logFilePath: unicodestring;
 	begin
-		if lastUpdate < finish then
+		values := TRawValues.Create;
+		logFilePath := logDir + logFileName;
+		assign(log, logFileName);
+		rwSync := TSimpleRWSync.Create;
+		ready := -1;
+
+		if not FileExists(logFileName) then
 		begin
-			for i := lastUpdate to finish do
-				results.add(0);
-			
-			data := filter.GetValues(1000 * lastUpdate, 1000 * finish);
-			for i := 0 to data.count - 1 do
-			begin
-				timestamp := data[i].timestamp div 1000;
-				results[timestamp] := results[timestamp] + 1;
-			end;
-			
-			lastUpdate := finish;
+			rewrite(log);
+			exit;
 		end;
 
-		result := TValues.Create;
-		for i := start to finish do
-			result.add(results[i]);
+		reset(log);
+		
+		while not seekeof(log) do
+		begin
+			read(log, tmp.timestamp, tmp.value);
+			values.Add(tmp);
+		end;
+		close(log);
+		append(log);
 	end;
 
+	function TRawSensor.GetValues(const start, finish: int64): TRawValues;
+	var
+		i, attempts: longint;
+	begin
+		attempts := 0;
+		while (finish > ready) and (attempts < 100) do
+		begin
+			inc(attempts);
+			TThread.Yield;
+		end;
+
+		result := TRawValues.Create;
+		rwSync.BeginRead;
+		for i := 0 to values.Count - 1 do
+			if (start <= values[i].timestamp) and (values[i].timestamp < finish) then
+				result.add(values[i]);
+		rwSync.EndRead;
+	end;
+
+	constructor TRawTick.Create;
+	begin
+		logFileName := 'ticks.log';
+		Inherited;
+	end;
+
+	procedure TRawTick.Run;
+	var
+		prev, current: TDateTime;
+		tmp: TRawValue;
+	begin
+		prev := now;
+		while true do
+		begin
+			current := now;
+			tmp.value := current - prev;
+			tmp.timestamp := DateTimeToUnix(current);
+			writeln(log, tmp.timestamp, tmp.value);
+
+			rwSync.BeginWrite;
+			values.Add(tmp);
+			if ready < tmp.timestamp then
+				ready := tmp.timestamp;
+			rwSync.EndWrite;
+
+			sleep(100);
+		end;
+	end;
 end.
