@@ -10,6 +10,8 @@ namespace Node.Routing
     {
         void AddDirectConnection(IAddress other);
 
+        bool ShouldConnectTo(IAddress other);
+
         void RemoveDirectConnection(IAddress other);
 
         IAddress FindExcessPeer();

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Node.Connections;
+using Node.Messages;
 
 namespace Node.Routing
 {
@@ -15,12 +17,62 @@ namespace Node.Routing
 
         public void PullMaps()
         {
-            throw new NotImplementedException();
+            foreach (var connection in connectionManager.Connections)
+            {
+                var message = connection.Receive() as MapMessage;
+                if (message == null)
+                    continue;
+                Map.Merge(message.Links);
+            }
         }
 
         public void PushMaps()
         {
-            throw new NotImplementedException();
+            foreach (var connection in connectionManager.Connections)
+            {
+                VersionInfo existingVersion;
+                if (!versionsByPeer.TryGetValue(connection.RemoteAddress, out existingVersion) ||
+                    (existingVersion.Version != Map.Version &&
+                     DateTime.UtcNow - existingVersion.Timestamp > TimeSpan.FromMilliseconds(100)))
+                {
+                    var message = new MapMessage(Map.Links);
+                    SendResult result;
+                    do
+                    {
+                        result = connection.Send(message);
+                    } while (result == SendResult.Partial);
+
+                    if (result == SendResult.Success)
+                        versionsByPeer[connection.RemoteAddress] = new VersionInfo(Map.Version, DateTime.UtcNow);
+                }
+            }
+        }
+
+        public void ConnectNewLinks()
+        {
+            foreach (var peer in connectionManager.GetAvailablePeers())
+            {
+                if (Map.ShouldConnectTo(peer) && connectionManager.TryConnect(peer))
+                {
+                    Map.AddDirectConnection(peer);
+                    break;
+                }
+            }
+        }
+
+        public void DisconnectExcessLinks()
+        {
+            var excessPeer = Map.FindExcessPeer();
+            if (excessPeer != null)
+            {
+                var connection = connectionManager.Connections.FirstOrDefault(c => Equals(c.RemoteAddress, excessPeer));
+                if (connection != null)
+                {
+                    connection.Close();
+                    connectionManager.PurgeDeadConnections();
+                }
+                Map.RemoveDirectConnection(excessPeer);
+            }
         }
 
         public IRoutingMap Map { get; }

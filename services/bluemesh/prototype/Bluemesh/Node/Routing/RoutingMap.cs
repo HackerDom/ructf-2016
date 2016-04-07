@@ -52,29 +52,33 @@ namespace Node.Routing
 
         public void AddDirectConnection(IAddress other)
         {
-            var peerCount = GraphHelper.GetPeers(OwnAddress, Links).Count();
-            if (peerCount >= config.MaxConnections)
-                return;
+            var newLink = new RoutingMapLink(OwnAddress, other);
+            if (Links.Add(newLink))
+                Version++;
+        }
+
+        public bool ShouldConnectTo(IAddress other)
+        {
+            var peers = GraphHelper.GetPeers(OwnAddress, Links).ToList();
+            if (peers.Count >= config.MaxConnections || peers.Contains(other))
+                return false;
 
             var newLink = new RoutingMapLink(OwnAddress, other);
             if (GraphHelper.IsReachable(other, OwnAddress, Links))
             {
-                if (peerCount >= config.DesiredConnections)
-                    return;
+                if (peers.Count >= config.DesiredConnections)
+                    return false;
 
                 var stateBefore = GraphHelper.CalculateConnectivity(Links);
                 Links.Add(newLink);
                 var stateAfter = GraphHelper.CalculateConnectivity(Links);
+                Links.Remove(newLink);
 
                 if (Equals(stateAfter, stateBefore))
-                {
-                    Links.Remove(newLink);
-                    return;
-                }
+                    return false;
             }
-            else
-                Links.Add(newLink);
-            Version++;
+
+            return true;
         }
 
         public void RemoveDirectConnection(IAddress other)

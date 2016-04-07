@@ -4,6 +4,8 @@ namespace Node.Routing
     {
         void PullMaps();
         void PushMaps();
+        void ConnectNewLinks();
+        void DisconnectExcessLinks();
         IRoutingMap Map { get; }
     }
 }

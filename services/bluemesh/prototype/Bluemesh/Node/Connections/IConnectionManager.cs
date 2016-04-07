@@ -7,7 +7,7 @@ namespace Node.Connections
     {
         List<IAddress> GetAvailablePeers();
 
-        void Connect(IAddress address);
+        bool TryConnect(IAddress address);
 
         void PurgeDeadConnections();
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Node.Connections;
 using Node.Routing;
 using Node.Serialization;
@@ -7,9 +8,9 @@ namespace Node.Messages
 {
     internal class MapMessage : IMessage
     {
-        public MapMessage(List<RoutingMapLink> links)
+        public MapMessage(IEnumerable<RoutingMapLink> links)
         {
-            Links = links;
+            Links = links.ToList();
         }
 
         public void Serialize(IBinarySerializer serializer)
