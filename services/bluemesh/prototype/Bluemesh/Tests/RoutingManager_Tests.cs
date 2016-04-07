@@ -23,7 +23,7 @@ namespace Tests
             var config = Substitute.For<IRoutingConfig>();
             config.DesiredConnections.Returns(2);
             config.MaxConnections.Returns(3);
-            var nodes = Enumerable.Range(0, 5).Select(i => new TestNode(new RoutingManager(new LocalTcpConnectionManager(), config))).ToList();
+            var nodes = Enumerable.Range(0, 5).Select(i => MakeNode(config)).ToList();
 
             ThreadPool.SetMinThreads(nodes.Count * 2, nodes.Count * 2);
 
@@ -41,11 +41,18 @@ namespace Tests
             Console.WriteLine("Communication took " + watch.Elapsed);
         }
 
+        private static TestNode MakeNode(IRoutingConfig config)
+        {
+            var connectionManager = new LocalTcpConnectionManager();
+            return new TestNode(new RoutingManager(connectionManager, config), connectionManager);
+        }
+
         private class TestNode
         {
-            public TestNode(RoutingManager routingManager)
+            public TestNode(RoutingManager routingManager, LocalTcpConnectionManager connectionManager)
             {
                 this.routingManager = routingManager;
+                this.connectionManager = connectionManager;
             }
 
             public void Start()
@@ -64,10 +71,24 @@ namespace Tests
                 routingManager.PullMaps();
                 routingManager.PushMaps();
 
+                connectionManager.PurgeDeadConnections();
+                try
+                {
+                    foreach (var peer in connectionManager.GetAvailablePeers())
+                        connectionManager.TryConnect(peer);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+                //TODO use it
+                var selectResult = connectionManager.Select();
+
                 Console.WriteLine("[{0}] v: {2} {1}", routingManager.Map.OwnAddress, routingManager.Map, routingManager.Map.Version);
             }
 
             private readonly RoutingManager routingManager;
+            private readonly LocalTcpConnectionManager connectionManager;
         }
     }
 }

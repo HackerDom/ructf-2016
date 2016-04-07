@@ -15,7 +15,7 @@ namespace Node.Connections.LocalTcp
         {
             if (writeLength < 0)
                 writeLength = new MessageContainer(message).WriteToBuffer(writeBuffer, 0);
-            var bytesSent = socket.Send(writeBuffer, writePos, writeLength - writePos, SocketFlags.None);
+            var bytesSent = socket.SendSafe(writeBuffer, writePos, writeLength - writePos);
             writePos += bytesSent;
             if (writePos >= writeLength)
             {
@@ -31,7 +31,7 @@ namespace Node.Connections.LocalTcp
             message = null;
             if (readPos < MessageContainer.HeaderSize)
             {
-                var bytesRead = socket.Receive(readBuffer, readPos, MessageContainer.HeaderSize - readPos, SocketFlags.None);
+                var bytesRead = socket.ReceiveSafe(readBuffer, readPos, MessageContainer.HeaderSize - readPos);
                 readPos += bytesRead;
                 return false;
             }
@@ -41,7 +41,7 @@ namespace Node.Connections.LocalTcp
             }
             if (readPos < readLength)
             {
-                var bytesRead = socket.Receive(readBuffer, readPos, readLength - readPos, SocketFlags.None);
+                var bytesRead = socket.ReceiveSafe(readBuffer, readPos, readLength - readPos);
                 readPos += bytesRead;
             }
             if (readPos >= readLength)
