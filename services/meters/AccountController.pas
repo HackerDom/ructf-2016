@@ -25,6 +25,7 @@ interface
 				function GetUserId(const username: string; const password: string): TUserId;
 				function GetAuthToken(const userid: TUserId): string;
 				function GetListOfUsers(): TUsers;
+				function GetCurrentUserId(const token: string): TUserId;
 		end;
 
 	var
@@ -33,6 +34,14 @@ implementation
 
 	const
 		secret: qword = 0;
+
+	function decodeToken(const token: string; var len: longint): pointer;
+	var
+		tmp: string;
+	begin
+		tmp := DecodeStringBase64(token);
+		result := decode(tmp, len);
+	end;
 	
 	procedure TAccountManager.Initialize;
 	begin
@@ -50,13 +59,11 @@ implementation
 
 	function TAccountManager.IsAuthorized(const token: string): boolean;
 	var
-		tmp: string;
-		decoded: pqword;
 		len: longint;
+		decoded: pqword;
 	begin
-		tmp := DecodeStringBase64(token);
-		decoded := pqword(decode(tmp, len));
-		result := (len > 16) and (decoded[1] = secret);
+		decoded := pqword(decodeToken(token, len));
+		result := (len >= 16) and (decoded[1] = secret);
 	end;
 
 	function TAccountManager.GetUserId(const username: string; const password: string): TUserId;
@@ -77,6 +84,18 @@ implementation
 	function TAccountManager.GetListOfUsers(): TUsers;
 	begin
 		result := TUsers.Create;
+	end;
+
+	function TAccountManager.GetCurrentUserId(const token: string): TUserId;
+	var
+		len: longint;
+		decoded: pqword;
+	begin
+		decoded := pqword(decodeToken(token, len));
+		if len >= 8 then
+			result := decoded[0]
+		else
+			result := 0;
 	end;
 
 initialization

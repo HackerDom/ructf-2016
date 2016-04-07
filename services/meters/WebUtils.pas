@@ -14,6 +14,7 @@ interface
 	function IsAuthorized(ARequest: TRequest): boolean;
 	function GetAuthCookie(ARequest: TRequest): string;
 	function GetQueryUserId(ARequest: TRequest): TUserId;
+	function GetCurrentUserId(ARequest: TRequest): TUserId;
 
 	function GetTemplate(const path: string): string;
 
@@ -42,6 +43,7 @@ implementation
 		cookie.Name := AuthCookieName;
 		cookie.Value := value;
 		cookie.HttpOnly := True;
+		cookie.Path := '/';
 	end;
 
 	procedure SetAuthCookie(AResponse: TResponse; const userid: int64);
@@ -79,6 +81,14 @@ implementation
 	begin
 			AResponse.Code := 401;
 			AResponse.Content := 'Unauthorized';
+	end;
+
+	function GetCurrentUserId(ARequest: TRequest): TUserId;
+	var
+		token: string;
+	begin
+		token := GetAuthCookie(ARequest);
+		result := AccountManager.GetCurrentUserId(token);
 	end;
 
 	function GetTemplate(const path: string): string;

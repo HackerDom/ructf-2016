@@ -26,9 +26,17 @@ implementation
 		userid: TUserId;
 //		dashboards: 
 	begin
-		userid := GetUserId(ARequest);
-		AResponse.Content := AccountController.GetDashboards(userid);
 		Handled := True;
+		userid := GetQueryUserId(ARequest);
+		if userid = 0 then
+			userId := GetCurrentUserId(ARequest);
+		if userid = 0 then
+		begin
+			AResponse.Content := 'bad request';
+			AResponse.Code := 400;
+			exit;
+		end;
+		AResponse.Content := AccountController.GetDashboards(userid);
 	end;
 
 	procedure TDashboardModule.OnView(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
