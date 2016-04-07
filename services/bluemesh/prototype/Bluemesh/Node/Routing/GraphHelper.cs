@@ -23,7 +23,7 @@ namespace Node.Routing
                 var source = nodes.First(node => !visitedNodes.Contains(node));
                 bicomponents += CountCutPoints(source, links, visitedNodes, entryTime, bestTime, 0, true) + 1;
             }
-
+            
             return new GraphConnectivity(components, bicomponents);
         }
 
@@ -45,10 +45,7 @@ namespace Node.Routing
 
         public static bool IsReachable(IAddress destination, IAddress source, ICollection<RoutingMapLink> links)
         {
-            if (Equals(source, destination))
-                return true;
-
-            return GetPeers(source, links).Any(peer => IsReachable(destination, peer, links));
+            return IsReachable(destination, source, links, new HashSet<IAddress>());
         }
 
         public static string ToDOT(this IEnumerable<RoutingMapLink> links, string name = "")
@@ -58,6 +55,16 @@ namespace Node.Routing
 graph {name} {{
 {string.Join(Environment.NewLine, links.Select(link => "\t" + link.A + " -- " + link.B + ";"))}
 }}";
+        }
+
+        private static bool IsReachable(IAddress destination, IAddress source, ICollection<RoutingMapLink> links, HashSet<IAddress> visitedNodes)
+        {
+            if (Equals(source, destination))
+                return true;
+
+            visitedNodes.Add(source);
+
+            return GetPeers(source, links).Any(peer => !visitedNodes.Contains(peer) && IsReachable(destination, peer, links, visitedNodes));
         }
 
         private static int CountCutPoints(
