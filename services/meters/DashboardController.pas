@@ -23,9 +23,10 @@ implementation
 
 	procedure TDashboardModule.OnList(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
 	var
-		userid: string;
+		userid: TUserId;
+//		dashboards: 
 	begin
-		userid := ARequest.QueryFields.Values['userid'];
+		userid := GetUserId(ARequest);
 		AResponse.Content := AccountController.GetDashboards(userid);
 		Handled := True;
 	end;

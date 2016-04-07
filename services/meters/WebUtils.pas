@@ -4,7 +4,7 @@ unit WebUtils;
 
 interface
 	uses
-		httpdefs, AccountController;
+		httpdefs, AccountController, SysUtils;
 
 	procedure SetAuthCookie(AResponse: TResponse; const userid: int64);
 	procedure ClearAuthCookie(AResponse: TResponse);
@@ -13,10 +13,26 @@ interface
 
 	function IsAuthorized(ARequest: TRequest): boolean;
 	function GetAuthCookie(ARequest: TRequest): string;
-	
+	function GetQueryUserId(ARequest: TRequest): TUserId;
+
+	function GetTemplate(const path: string): string;
+
 implementation
 	const
 		AuthCookieName = 'auth';
+
+	function StrToQWord(const s: string): QWord;
+	var
+		i: longint;
+	begin
+		result := 0;
+		for i := 1 to length(s) do
+		begin
+			if (s[i] < '0') or ('9' < s[i]) then
+				exit(0);
+			result := 10 * result + ord(s[i]) - 48;
+		end;
+	end;
 
 	procedure SetAuthCookie(AResponse: TResponse; const value: string);
 	var
@@ -54,9 +70,38 @@ implementation
 		result := ARequest.CookieFields.Values[AuthCookieName];
 	end;
 
+	function GetQueryUserId(ARequest: TRequest): TUserId;
+	begin
+		result := StrToQWord(ARequest.QueryFields.Values['userid']);
+	end;
+
 	procedure SendUnauthorized(AResponse: TResponse);
 	begin
 			AResponse.Code := 401;
 			AResponse.Content := 'Unauthorized';
+	end;
+
+	function GetTemplate(const path: string): string;
+	var
+		fin: text;
+		tmp: string;
+		fullPath: string;
+	begin
+		fullPath := './templates/' + path;
+		if not FileExists(fullPath) then
+		begin
+			writeln(fullPath, 'not found =(');
+			exit('!!!fail!!!');
+		end;
+
+		assign(fin, fullPath);
+		reset(fin);
+		result := '';
+		while not eof(fin) do
+		begin
+			readln(fin, tmp);
+			result := result + tmp;
+		end;
+		close(fin);
 	end;
 end.

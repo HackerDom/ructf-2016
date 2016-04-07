@@ -19,19 +19,21 @@ interface
 				values: TRawValues;
 				log: Text;
 				rwSync: TSimpleRWSync;
-				logFileName: unicodestring;
 				ready: int64;
+				procedure Initialize(const fileName: unicodestring);
 			public
-				constructor Create;
 				procedure Run; virtual; abstract;
 				function GetValues(const start, finish: int64): TRawValues;
 		end;
 
 		TRawTick = class(TRawSensor)
 			public
-				constructor Create;
+				procedure Initialize;
 				procedure Run; override;
 		end;
+
+	var
+		RawTickSensor: TRawTick;
 
 implementation
 	const
@@ -40,7 +42,7 @@ implementation
 
 	function DateTimeToUnix(dtDate: TDateTime): Longint;
 	begin
-		result := Round((dtDate - UnixStartDate) * int64(86400000));
+		result := Round((dtDate - UnixStartDate) * int64(86400000)); // TODO fix fail
 	end;
 
 	class operator TRawValue.= (const a, b: TRawValue): Boolean;
@@ -48,18 +50,18 @@ implementation
 		result := (a.timestamp = b.timestamp) and (a.value = b.value);
 	end;
 
-	constructor TRawSensor.Create;
+	procedure TRawSensor.Initialize(const fileName: unicodestring);
 	var
 		tmp: TRawValue;
 		logFilePath: unicodestring;
 	begin
 		values := TRawValues.Create;
-		logFilePath := logDir + logFileName;
-		assign(log, logFileName);
+		logFilePath := logDir + fileName;
+		assign(log, logFilePath);
 		rwSync := TSimpleRWSync.Create;
 		ready := -1;
 
-		if not FileExists(logFileName) then
+		if not FileExists(logFilePath) then
 		begin
 			rewrite(log);
 			exit;
@@ -95,10 +97,9 @@ implementation
 		rwSync.EndRead;
 	end;
 
-	constructor TRawTick.Create;
+	procedure TRawTick.Initialize;
 	begin
-		logFileName := 'ticks.log';
-		Inherited;
+		Inherited Initialize('ticks.log');
 	end;
 
 	procedure TRawTick.Run;
@@ -123,4 +124,8 @@ implementation
 			sleep(100);
 		end;
 	end;
+
+initialization
+	RawTickSensor := TRawTick.Create;
+
 end.

@@ -8,12 +8,6 @@ object UserModule: TUserModule
 			Template.AllowTagParams = False
 		end
 		item
-			Name = 'logout'
-			Default = False
-			OnRequest = OnLogout
-			Template.AllowTagParams = False
-		end
-		item
 			Name = 'register'
 			Default = False
 			OnRequest = OnRegister
