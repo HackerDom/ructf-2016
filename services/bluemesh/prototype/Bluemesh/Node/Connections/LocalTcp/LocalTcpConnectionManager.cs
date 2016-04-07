@@ -85,7 +85,7 @@ namespace Node.Connections.LocalTcp
                     socket.Close();
                 }
                 else
-                    connections.Add(new LocalTcpConnection(address, socket));
+                    connections.Add(new LocalTcpConnection(address, socket, Utility));
 
             }
             foreach (var socket in checkWrite)
@@ -98,7 +98,7 @@ namespace Node.Connections.LocalTcp
                         socket.Close();
                         continue;
                     }
-                    connections.Add(new LocalTcpConnection(address, socket));
+                    connections.Add(new LocalTcpConnection(address, socket, Utility));
                 }
             }
             foreach (var socket in checkError)

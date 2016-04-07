@@ -48,5 +48,10 @@ namespace Node.Routing
             serializer.Write(A);
             serializer.Write(B);
         }
+
+        public static RoutingMapLink Deserialize(IBinaryDeserializer deserializer, IConnectionUtility utility)
+        {
+            return new RoutingMapLink(utility.DeserializeAddress(deserializer), utility.DeserializeAddress(deserializer));
+        }
     }
 }

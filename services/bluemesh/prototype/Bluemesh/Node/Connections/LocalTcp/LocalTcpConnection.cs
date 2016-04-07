@@ -11,11 +11,11 @@ namespace Node.Connections.LocalTcp
 {
     internal class LocalTcpConnection : IConnection
     {
-        public LocalTcpConnection(LocalTcpAddress address, Socket socket)
+        public LocalTcpConnection(LocalTcpAddress address, Socket socket, IConnectionUtility connectionUtility)
         {
             RemoteAddress = address;
             this.socket = socket;
-            stream = new NonblockingSocketStream(socket);
+            stream = new NonblockingSocketStream(socket, connectionUtility);
         }
 
         public SendResult Send(IMessage message)

@@ -14,9 +14,11 @@ namespace Node.Routing
             Links = new HashSet<RoutingMapLink>();
         }
 
-        public void Serialize(IBinarySerializer serializer)
+        public RoutingMap(IAddress ownAddress, IEnumerable<RoutingMapLink> links, IRoutingConfig config)
         {
-            serializer.WriteList(Links.ToList());
+            this.config = config;
+            OwnAddress = ownAddress;
+            Links = new HashSet<RoutingMapLink>(links);
         }
 
         public IAddress FindExcessPeer()
@@ -40,10 +42,10 @@ namespace Node.Routing
             return excessPeer;
         }
 
-        public void Merge(IRoutingMap other)
+        public void Merge(IEnumerable<RoutingMapLink> links)
         {
             var countBefore = Links.Count;
-            Links.UnionWith(other.Links);
+            Links.UnionWith(links);
             if (Links.Count > countBefore)
                 Version++;
         }
