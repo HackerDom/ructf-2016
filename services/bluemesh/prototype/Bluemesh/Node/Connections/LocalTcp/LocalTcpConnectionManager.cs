@@ -19,12 +19,13 @@ namespace Node.Connections.LocalTcp
             connectingSockets = new List<Socket>();
             Utility = new LocalTcpUtility();
 
+            var foundPort = false;
             for (int port = LocalTcpAddress.MinPort; port <= LocalTcpAddress.MaxPort; port++)
-                if (TryCreateListener(port))
+                if (foundPort = TryCreateListener(port))
                     break;
-            if (tcpListener == null)
+            if (!foundPort)
                 throw new Exception("Failed to find a free port!");
-            Address = new LocalTcpAddress(((IPEndPoint)tcpListener.LocalEndpoint).Port);
+            Address = new LocalTcpAddress(((IPEndPoint)serverSocket.LocalEndPoint).Port);
         }
 
         public List<IAddress> GetAvailablePeers()
@@ -69,7 +70,7 @@ namespace Node.Connections.LocalTcp
             List<Socket> checkRead, checkWrite, checkError;
             if (GetUsedConnectionSlots() < routingConfig.MaxConnections)
             {
-                checkRead = new[] { tcpListener.Server }.Concat(connections.Select(c => c.Socket)).ToList();
+                checkRead = new[] { serverSocket }.Concat(connections.Select(c => c.Socket)).ToList();
                 checkWrite = connectingSockets.Concat(connections.Select(c => c.Socket)).ToList();
                 checkError = connectingSockets.Concat(connections.Select(c => c.Socket)).ToList();
             }
@@ -82,7 +83,8 @@ namespace Node.Connections.LocalTcp
 
             try
             {
-                Socket.Select(checkRead, checkWrite, checkError, 100 * 1000);
+                if (checkRead.Count + checkWrite.Count + checkError.Count > 0)
+                    Socket.Select(checkRead, checkWrite, checkError, 100 * 1000);
             }
             catch (SocketException e)
             {
@@ -154,7 +156,7 @@ namespace Node.Connections.LocalTcp
         {
             var socket = new Socket(SocketType.Stream, ProtocolType.Tcp) { Blocking = false };
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-            socket.Bind(tcpListener.LocalEndpoint);
+            socket.Bind(serverSocket.LocalEndPoint);
             try
             {
                 socket.Connect(IPAddress.Loopback, port);
@@ -171,23 +173,24 @@ namespace Node.Connections.LocalTcp
 
         private bool TryCreateListener(int port)
         {
-            var listener = new TcpListener(IPAddress.Loopback, port);
-            listener.Server.Blocking = false;
-            listener.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            serverSocket = new Socket(SocketType.Stream, ProtocolType.Tcp) { Blocking = false };
+            serverSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             try
             {
-                listener.Start();
+                serverSocket.Bind(new IPEndPoint(IPAddress.Loopback, port));
 
                 if (TryCreateLock(port))
                 {
-                    tcpListener = listener;
+                    //serverSocket.Listen(5);
                     return true;
                 }
 
+                serverSocket.Close();
                 return false;
             }
             catch
             {
+                serverSocket.Close();
                 return false;
             }
         }
@@ -207,7 +210,7 @@ namespace Node.Connections.LocalTcp
         }
 
         private FileStream lockHolder;
-        private TcpListener tcpListener;
+        private Socket serverSocket;
         private readonly List<LocalTcpConnection> connections;
         private readonly List<Socket> connectingSockets;
         private readonly IRoutingConfig routingConfig;

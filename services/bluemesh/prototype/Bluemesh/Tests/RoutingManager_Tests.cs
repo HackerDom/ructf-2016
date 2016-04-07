@@ -21,9 +21,9 @@ namespace Tests
         public void Measure_map_negotiation()
         {
             var config = Substitute.For<IRoutingConfig>();
-            config.DesiredConnections.Returns(1);
-            config.MaxConnections.Returns(1);
-            var nodes = Enumerable.Range(0, 3).Select(i => MakeNode(config)).ToList();
+            config.DesiredConnections.Returns(3);
+            config.MaxConnections.Returns(3);
+            var nodes = Enumerable.Range(0, 5).Select(i => MakeNode(config)).ToList();
 
             ThreadPool.SetMinThreads(nodes.Count * 2, nodes.Count * 2);
 
@@ -66,6 +66,8 @@ namespace Tests
 
             private void Tick()
             {
+                //TODO handshake
+
                 connectionManager.PurgeDeadConnections();
                 //TODO use it
                 var selectResult = connectionManager.Select();
