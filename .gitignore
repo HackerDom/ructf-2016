@@ -17,3 +17,8 @@
 /services/strongbox/tmp
 .idea
 /services/strongbox/.idea
+
+# Python
+*.pyc
+*.pyo
+
