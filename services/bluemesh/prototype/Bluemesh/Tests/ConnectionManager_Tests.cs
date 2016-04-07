@@ -8,6 +8,8 @@ using FluentAssertions;
 using Node.Connections;
 using Node.Connections.LocalTcp;
 using Node.Messages;
+using Node.Routing;
+using NSubstitute;
 using NUnit.Framework;
 
 namespace Tests
@@ -20,7 +22,9 @@ namespace Tests
         [TestCase(0.5)]
         public void Measure_fully_interconnected_communication(double errorProbability)
         {
-            var nodes = Enumerable.Range(0, 2).Select(i => new TestNode(new LocalTcpConnectionManager(), errorProbability)).ToList();
+            var config = Substitute.For<IRoutingConfig>();
+            config.MaxConnections.Returns(int.MaxValue);
+            var nodes = Enumerable.Range(0, 2).Select(i => new TestNode(new LocalTcpConnectionManager(config), errorProbability)).ToList();
 
             ThreadPool.SetMinThreads(nodes.Count * 2, nodes.Count * 2);
 

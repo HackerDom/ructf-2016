@@ -21,9 +21,9 @@ namespace Tests
         public void Measure_map_negotiation()
         {
             var config = Substitute.For<IRoutingConfig>();
-            config.DesiredConnections.Returns(2);
-            config.MaxConnections.Returns(3);
-            var nodes = Enumerable.Range(0, 5).Select(i => MakeNode(config)).ToList();
+            config.DesiredConnections.Returns(1);
+            config.MaxConnections.Returns(1);
+            var nodes = Enumerable.Range(0, 3).Select(i => MakeNode(config)).ToList();
 
             ThreadPool.SetMinThreads(nodes.Count * 2, nodes.Count * 2);
 
@@ -43,7 +43,7 @@ namespace Tests
 
         private static TestNode MakeNode(IRoutingConfig config)
         {
-            var connectionManager = new LocalTcpConnectionManager();
+            var connectionManager = new LocalTcpConnectionManager(config);
             return new TestNode(new RoutingManager(connectionManager, config), connectionManager);
         }
 
@@ -60,29 +60,23 @@ namespace Tests
                 while (true)
                 {
                     Tick();
-                    Thread.Sleep(100.Milliseconds());
+                    Thread.Sleep(10.Milliseconds());
                 }
             }
 
             private void Tick()
             {
-                routingManager.DisconnectExcessLinks();
-                routingManager.ConnectNewLinks();
+                connectionManager.PurgeDeadConnections();
+                //TODO use it
+                var selectResult = connectionManager.Select();
+
+                routingManager.UpdateConnections();
+
                 routingManager.PullMaps();
                 routingManager.PushMaps();
 
-                connectionManager.PurgeDeadConnections();
-                try
-                {
-                    foreach (var peer in connectionManager.GetAvailablePeers())
-                        connectionManager.TryConnect(peer);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
-                //TODO use it
-                var selectResult = connectionManager.Select();
+                routingManager.DisconnectExcessLinks();
+                routingManager.ConnectNewLinks();
 
                 Console.WriteLine("[{0}] v: {2} {1}", routingManager.Map.OwnAddress, routingManager.Map, routingManager.Map.Version);
             }

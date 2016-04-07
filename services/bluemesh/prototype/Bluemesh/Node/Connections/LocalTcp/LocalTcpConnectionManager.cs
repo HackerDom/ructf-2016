@@ -6,13 +6,15 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Node.Routing;
 
 namespace Node.Connections.LocalTcp
 {
     internal class LocalTcpConnectionManager : IConnectionManager
     {
-        public LocalTcpConnectionManager()
+        public LocalTcpConnectionManager(IRoutingConfig routingConfig)
         {
+            this.routingConfig = routingConfig;
             connections = new List<LocalTcpConnection>();
             connectingSockets = new List<Socket>();
             Utility = new LocalTcpUtility();
@@ -61,9 +63,20 @@ namespace Node.Connections.LocalTcp
 
         public SelectResult Select()
         {
-            var checkRead = new[] { tcpListener.Server }.Concat(connections.Select(c => c.Socket)).ToList();
-            var checkWrite = connectingSockets.Concat(connections.Select(c => c.Socket)).ToList();
-            var checkError = connectingSockets.Concat(connections.Select(c => c.Socket)).ToList();
+            List<Socket> checkRead, checkWrite, checkError;
+            if (connections.Count < routingConfig.MaxConnections)
+            {
+                checkRead = new[] { tcpListener.Server }.Concat(connections.Select(c => c.Socket)).ToList();
+                checkWrite = connectingSockets.Concat(connections.Select(c => c.Socket)).ToList();
+                checkError = connectingSockets.Concat(connections.Select(c => c.Socket)).ToList();
+            }
+            else
+            {
+                checkRead = connections.Select(c => c.Socket).ToList();
+                checkWrite = connections.Select(c => c.Socket).ToList();
+                checkError = connectingSockets.Concat(connections.Select(c => c.Socket)).ToList();
+            }
+
             try
             {
                 Socket.Select(checkRead, checkWrite, checkError, 100 * 1000);
@@ -188,5 +201,6 @@ namespace Node.Connections.LocalTcp
         private TcpListener tcpListener;
         private readonly List<LocalTcpConnection> connections;
         private readonly List<Socket> connectingSockets;
+        private readonly IRoutingConfig routingConfig;
     }
 }

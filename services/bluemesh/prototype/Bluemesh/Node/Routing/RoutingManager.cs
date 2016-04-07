@@ -32,8 +32,8 @@ namespace Node.Routing
             {
                 VersionInfo existingVersion;
                 if (!versionsByPeer.TryGetValue(connection.RemoteAddress, out existingVersion) ||
-                    (existingVersion.Version != Map.Version &&
-                     DateTime.UtcNow - existingVersion.Timestamp > TimeSpan.FromMilliseconds(100)))
+                    (existingVersion.Version != Map.Version ||
+                     DateTime.UtcNow - existingVersion.Timestamp > TimeSpan.FromMilliseconds(50)))
                 {
                     var message = new MapMessage(Map.Links);
                     SendResult result;
@@ -48,13 +48,28 @@ namespace Node.Routing
             }
         }
 
+        public void UpdateConnections()
+        {
+            foreach (var connection in connectionManager.Connections)
+            {
+                Map.AddDirectConnection(connection.RemoteAddress);
+            }
+            foreach (var peer in GraphHelper.GetPeers(Map.OwnAddress, Map.Links).ToList())
+            {
+                if (!connectionManager.Connections.Any(c => Equals(c.RemoteAddress, peer)))
+                    Map.RemoveDirectConnection(peer);
+            }
+        }
+
         public void ConnectNewLinks()
         {
+            if (DateTime.UtcNow - lastConnect < TimeSpan.FromSeconds(0.2))
+                return;
             foreach (var peer in connectionManager.GetAvailablePeers())
             {
                 if (Map.ShouldConnectTo(peer) && connectionManager.TryConnect(peer))
                 {
-                    Map.AddDirectConnection(peer);
+                    lastConnect = DateTime.UtcNow;
                     break;
                 }
             }
@@ -62,6 +77,8 @@ namespace Node.Routing
 
         public void DisconnectExcessLinks()
         {
+            if (DateTime.UtcNow - lastDisconnect < TimeSpan.FromSeconds(1))
+                return;
             var excessPeer = Map.FindExcessPeer();
             if (excessPeer != null)
             {
@@ -69,9 +86,8 @@ namespace Node.Routing
                 if (connection != null)
                 {
                     connection.Close();
-                    connectionManager.PurgeDeadConnections();
+                    lastDisconnect = DateTime.UtcNow;
                 }
-                Map.RemoveDirectConnection(excessPeer);
             }
         }
 
@@ -79,6 +95,8 @@ namespace Node.Routing
         
         private readonly IConnectionManager connectionManager;
         private readonly Dictionary<IAddress, VersionInfo> versionsByPeer; 
+        private DateTime lastDisconnect = DateTime.MinValue;
+        private DateTime lastConnect = DateTime.MinValue;
 
         private struct VersionInfo
         {
