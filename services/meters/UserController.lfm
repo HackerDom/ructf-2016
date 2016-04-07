@@ -1,0 +1,30 @@
+object UserModule: TUserModule
+	OldCreateOrder = False
+	Actions = <
+		item
+			Name = 'login'
+			Default = False
+			OnRequest = OnLogin
+			Template.AllowTagParams = False
+		end
+		item
+			Name = 'logout'
+			Default = False
+			OnRequest = OnLogout
+			Template.AllowTagParams = False
+		end
+		item
+			Name = 'register'
+			Default = False
+			OnRequest = OnRegister
+			Template.AllowTagParams = False
+		end
+		item
+			Name = 'list'
+			Default = False
+			OnRequest = OnList
+			Template.AllowTagParams = False
+		end
+	>
+	CreateSession = False
+end	

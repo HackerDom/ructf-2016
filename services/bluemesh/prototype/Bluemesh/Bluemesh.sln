@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bluemesh", "Bluemesh\Bluemesh.csproj", "{5FA219AC-5300-44C2-A913-1698AE36C017}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Node", "Node\Node.csproj", "{2D0BFA48-007D-4E03-8283-7D66CB516540}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{436DF312-3FC6-4DA1-9BEC-4203A23AC1D7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5FA219AC-5300-44C2-A913-1698AE36C017}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FA219AC-5300-44C2-A913-1698AE36C017}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FA219AC-5300-44C2-A913-1698AE36C017}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FA219AC-5300-44C2-A913-1698AE36C017}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D0BFA48-007D-4E03-8283-7D66CB516540}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D0BFA48-007D-4E03-8283-7D66CB516540}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D0BFA48-007D-4E03-8283-7D66CB516540}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D0BFA48-007D-4E03-8283-7D66CB516540}.Release|Any CPU.Build.0 = Release|Any CPU
+		{436DF312-3FC6-4DA1-9BEC-4203A23AC1D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{436DF312-3FC6-4DA1-9BEC-4203A23AC1D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{436DF312-3FC6-4DA1-9BEC-4203A23AC1D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{436DF312-3FC6-4DA1-9BEC-4203A23AC1D7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

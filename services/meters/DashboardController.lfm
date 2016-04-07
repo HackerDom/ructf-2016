@@ -1,0 +1,24 @@
+object DashboardModule: TDashboardModule
+	OldCreateOrder = False
+	Actions = <
+		item
+			Name = 'list'
+			Default = False
+			OnRequest = OnList
+			Template.AllowTagParams = False
+		end
+		item
+			Name = 'view'
+			Default = False
+			OnRequest = OnView
+			Template.AllowTagParams = False
+		end
+		item
+			Name = 'create'
+			Default = False
+			OnRequest = OnCreate
+			Template.AllowTagParams = False
+		end
+	>
+	CreateSession = False
+end
