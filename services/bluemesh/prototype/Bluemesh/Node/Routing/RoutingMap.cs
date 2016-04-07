@@ -24,15 +24,17 @@ namespace Node.Routing
         public IAddress FindExcessPeer()
         {
             var stateBefore = GraphHelper.CalculateConnectivity(Links);
+            var nodesBefore = GraphHelper.GetNodes(Links);
 
             IAddress excessPeer = null;
             foreach (var peerLink in Links.Where(link => link.Contains(OwnAddress)).ToList())
             {
                 Links.Remove(peerLink);
                 var stateAfter = GraphHelper.CalculateConnectivity(Links);
+                var nodesAfter = GraphHelper.GetNodes(Links);
                 Links.Add(peerLink);
 
-                if (Equals(stateAfter, stateBefore))
+                if (Equals(stateAfter, stateBefore) && nodesAfter.Count == nodesBefore.Count)
                 {
                     excessPeer = peerLink.OtherEnd(OwnAddress);
                     break;

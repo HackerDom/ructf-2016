@@ -64,7 +64,7 @@ namespace Tests
                 routingManager.PullMaps();
                 routingManager.PushMaps();
 
-                Console.WriteLine("[{0}] {1}", routingManager.Map.OwnAddress, routingManager.Map);
+                Console.WriteLine("[{0}] v: {2} {1}", routingManager.Map.OwnAddress, routingManager.Map, routingManager.Map.Version);
             }
 
             private readonly RoutingManager routingManager;
