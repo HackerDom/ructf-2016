@@ -22,3 +22,6 @@
 *.pyc
 *.pyo
 
+# Socks server
+/services/socks/target/
+/services/socks/Cargo.lock
