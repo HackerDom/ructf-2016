@@ -17,3 +17,11 @@
 /services/strongbox/tmp
 .idea
 /services/strongbox/.idea
+
+# Python
+*.pyc
+*.pyo
+
+# Socks server
+/services/socks/target/
+/services/socks/Cargo.lock
