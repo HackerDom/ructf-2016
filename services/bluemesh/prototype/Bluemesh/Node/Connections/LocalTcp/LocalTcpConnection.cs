@@ -29,6 +29,7 @@ namespace Node.Connections.LocalTcp
             catch (Exception e)
             {
                 Console.WriteLine("Send : " + e.Message);
+                socket.Close();
                 State = ConnectionState.Failed;
                 return SendResult.Failure;
             }
@@ -46,6 +47,7 @@ namespace Node.Connections.LocalTcp
             catch (Exception e)
             {
                 Console.WriteLine("Receive : " + e.Message);
+                socket.Close();
                 State = ConnectionState.Failed;
                 return null;
             }

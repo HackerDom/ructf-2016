@@ -28,6 +28,7 @@ namespace Node.Routing
 
         public void PushMaps()
         {
+            Console.WriteLine("!! conns : " + string.Join(", ", connectionManager.Connections.Select(c => Map.OwnAddress + " <-> " + c.RemoteAddress)));
             foreach (var connection in connectionManager.Connections)
             {
                 VersionInfo existingVersion;
@@ -41,6 +42,7 @@ namespace Node.Routing
                     {
                         result = connection.Send(message);
                     } while (result == SendResult.Partial);
+                    Console.WriteLine("!! {0} -> {1} : {2}", Map.OwnAddress, connection.RemoteAddress, result);
 
                     if (result == SendResult.Success)
                         versionsByPeer[connection.RemoteAddress] = new VersionInfo(Map.Version, DateTime.UtcNow);

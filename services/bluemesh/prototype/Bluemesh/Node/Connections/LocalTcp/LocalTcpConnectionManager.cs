@@ -45,6 +45,9 @@ namespace Node.Connections.LocalTcp
 
             if (connections.Any(c => Equals(c.RemoteAddress, address)))
                 return true;
+
+            if (GetUsedConnectionSlots() >= routingConfig.MaxConnections)
+                return false;
             
             var socket = TryConnect(tcpAddress.Port);
             if (socket != null)
@@ -64,7 +67,7 @@ namespace Node.Connections.LocalTcp
         public SelectResult Select()
         {
             List<Socket> checkRead, checkWrite, checkError;
-            if (connections.Count < routingConfig.MaxConnections)
+            if (GetUsedConnectionSlots() < routingConfig.MaxConnections)
             {
                 checkRead = new[] { tcpListener.Server }.Concat(connections.Select(c => c.Socket)).ToList();
                 checkWrite = connectingSockets.Concat(connections.Select(c => c.Socket)).ToList();
@@ -73,7 +76,7 @@ namespace Node.Connections.LocalTcp
             else
             {
                 checkRead = connections.Select(c => c.Socket).ToList();
-                checkWrite = connections.Select(c => c.Socket).ToList();
+                checkWrite = connectingSockets.Concat(connections.Select(c => c.Socket)).ToList();
                 checkError = connectingSockets.Concat(connections.Select(c => c.Socket)).ToList();
             }
 
@@ -92,8 +95,9 @@ namespace Node.Connections.LocalTcp
                 return null;
             }
             //Console.WriteLine("[{3}] Select : {0} {1} {2}", checkRead.Count, checkWrite.Count, checkError.Count, Address);
-            if (checkRead.Contains(tcpListener.Server))
+            /*if (checkRead.Contains(tcpListener.Server))
             {
+                Console.WriteLine("!! {0} accept : {1} + {2} < {3}", Address, Connections.Count, connectingSockets.Count, routingConfig.MaxConnections);
                 var socket = tcpListener.AcceptSocket();
                 if (socket.Blocking)
                     throw new Exception("FUCK");
@@ -105,7 +109,7 @@ namespace Node.Connections.LocalTcp
                 else
                     connections.Add(new LocalTcpConnection(address, socket, Utility));
 
-            }
+            }*/
             foreach (var socket in checkWrite)
             {
                 if (connectingSockets.Remove(socket))
@@ -140,6 +144,11 @@ namespace Node.Connections.LocalTcp
 
         public IConnectionUtility Utility { get; }
         public IAddress Address { get; }
+
+        private int GetUsedConnectionSlots()
+        {
+            return connections.Count + connectingSockets.Count;
+        }
 
         private Socket TryConnect(int port)
         {
