@@ -35,18 +35,23 @@ namespace Node.Connections.LocalTcp
                 .ToList();
         }
 
-        public void Connect(IAddress address)
+        public bool TryConnect(IAddress address)
         {
             var tcpAddress = address as LocalTcpAddress;
             if (tcpAddress == null)
-                return;
+                return false;
 
             if (connections.Any(c => Equals(c.RemoteAddress, address)))
-                return;
+                return true;
             
             var socket = TryConnect(tcpAddress.Port);
             if (socket != null)
+            {
                 connectingSockets.Add(socket);
+                return true;
+            }
+
+            return false;
         }
 
         public void PurgeDeadConnections()
@@ -85,7 +90,7 @@ namespace Node.Connections.LocalTcp
                     socket.Close();
                 }
                 else
-                    connections.Add(new LocalTcpConnection(address, socket));
+                    connections.Add(new LocalTcpConnection(address, socket, Utility));
 
             }
             foreach (var socket in checkWrite)
@@ -98,7 +103,7 @@ namespace Node.Connections.LocalTcp
                         socket.Close();
                         continue;
                     }
-                    connections.Add(new LocalTcpConnection(address, socket));
+                    connections.Add(new LocalTcpConnection(address, socket, Utility));
                 }
             }
             foreach (var socket in checkError)

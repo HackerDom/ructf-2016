@@ -108,7 +108,7 @@ namespace Tests
                 try
                 {
                     foreach (var peer in connectionManager.GetAvailablePeers())
-                        connectionManager.Connect(peer);
+                        connectionManager.TryConnect(peer);
                 }
                 catch (Exception e)
                 {

@@ -6,15 +6,17 @@ using Node.Serialization;
 
 namespace Node.Routing
 {
-    internal interface IRoutingMap : IBinarySerializable
+    internal interface IRoutingMap
     {
         void AddDirectConnection(IAddress other);
+
+        bool ShouldConnectTo(IAddress other);
 
         void RemoveDirectConnection(IAddress other);
 
         IAddress FindExcessPeer();
 
-        void Merge(IRoutingMap other);
+        void Merge(IEnumerable<RoutingMapLink> links);
 
         IAddress OwnAddress { get; }
 

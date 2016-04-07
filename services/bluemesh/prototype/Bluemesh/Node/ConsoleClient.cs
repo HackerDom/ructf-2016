@@ -90,7 +90,7 @@ namespace Node
         {
             var address = node.ConnectionManager.Utility.ParseAddress(addressString);
             
-            node.ConnectionManager.Connect(address);
+            node.ConnectionManager.TryConnect(address);
         }
 
         private void ListPeers()

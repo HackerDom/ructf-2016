@@ -14,9 +14,11 @@ namespace Node.Routing
             Links = new HashSet<RoutingMapLink>();
         }
 
-        public void Serialize(IBinarySerializer serializer)
+        public RoutingMap(IAddress ownAddress, IEnumerable<RoutingMapLink> links, IRoutingConfig config)
         {
-            serializer.WriteList(Links.ToList());
+            this.config = config;
+            OwnAddress = ownAddress;
+            Links = new HashSet<RoutingMapLink>(links);
         }
 
         public IAddress FindExcessPeer()
@@ -40,39 +42,43 @@ namespace Node.Routing
             return excessPeer;
         }
 
-        public void Merge(IRoutingMap other)
+        public void Merge(IEnumerable<RoutingMapLink> links)
         {
             var countBefore = Links.Count;
-            Links.UnionWith(other.Links);
+            Links.UnionWith(links);
             if (Links.Count > countBefore)
                 Version++;
         }
 
         public void AddDirectConnection(IAddress other)
         {
-            var peerCount = GraphHelper.GetPeers(OwnAddress, Links).Count();
-            if (peerCount >= config.MaxConnections)
-                return;
+            var newLink = new RoutingMapLink(OwnAddress, other);
+            if (Links.Add(newLink))
+                Version++;
+        }
+
+        public bool ShouldConnectTo(IAddress other)
+        {
+            var peers = GraphHelper.GetPeers(OwnAddress, Links).ToList();
+            if (peers.Count >= config.MaxConnections || peers.Contains(other))
+                return false;
 
             var newLink = new RoutingMapLink(OwnAddress, other);
             if (GraphHelper.IsReachable(other, OwnAddress, Links))
             {
-                if (peerCount >= config.DesiredConnections)
-                    return;
+                if (peers.Count >= config.DesiredConnections)
+                    return false;
 
                 var stateBefore = GraphHelper.CalculateConnectivity(Links);
                 Links.Add(newLink);
                 var stateAfter = GraphHelper.CalculateConnectivity(Links);
+                Links.Remove(newLink);
 
                 if (Equals(stateAfter, stateBefore))
-                {
-                    Links.Remove(newLink);
-                    return;
-                }
+                    return false;
             }
-            else
-                Links.Add(newLink);
-            Version++;
+
+            return true;
         }
 
         public void RemoveDirectConnection(IAddress other)

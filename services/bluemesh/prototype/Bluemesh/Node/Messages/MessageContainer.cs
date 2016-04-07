@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Node.Connections;
 using Node.Serialization;
 
 namespace Node.Messages
@@ -26,14 +27,14 @@ namespace Node.Messages
             }
         }
 
-        public static MessageContainer ReadFromBuffer(byte[] buffer, int offset)
+        public static MessageContainer ReadFromBuffer(byte[] buffer, int offset, IConnectionUtility utility)
         {
             using (var stream = new MemoryStream(buffer, offset, buffer.Length - offset, false))
             {
                 var deserializer = new StreamDeserializer(stream);
                 deserializer.ReadInt();
                 var messageType = (MessageType)deserializer.ReadInt();
-                return new MessageContainer(MessageHelper.GetDeserializeMethod(messageType)(deserializer));
+                return new MessageContainer(MessageHelper.GetDeserializeMethod(messageType, utility)(deserializer));
             }
         }
         

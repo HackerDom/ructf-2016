@@ -16,7 +16,7 @@ namespace Node.Messages
             serializer.Write(Encoding.UTF8.GetBytes(Text));
         }
 
-        public static StringMessage DeserializeBinary(IBinaryDeserializer deserializer)
+        public static StringMessage Deserialize(IBinaryDeserializer deserializer)
         {
             return new StringMessage(Encoding.UTF8.GetString(deserializer.ReadBytes()));
         }

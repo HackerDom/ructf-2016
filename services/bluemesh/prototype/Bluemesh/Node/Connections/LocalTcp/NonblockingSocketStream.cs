@@ -5,9 +5,10 @@ namespace Node.Connections.LocalTcp
 {
     internal class NonblockingSocketStream
     {
-        public NonblockingSocketStream(Socket socket)
+        public NonblockingSocketStream(Socket socket, IConnectionUtility connectionUtility)
         {
             this.socket = socket;
+            this.connectionUtility = connectionUtility;
         }
 
         public bool TryWrite(IMessage message)
@@ -47,7 +48,7 @@ namespace Node.Connections.LocalTcp
             {
                 readLength = -1;
                 readPos = 0;
-                message = MessageContainer.ReadFromBuffer(readBuffer, 0).Message;
+                message = MessageContainer.ReadFromBuffer(readBuffer, 0, connectionUtility).Message;
                 return true;
             }
 
@@ -61,5 +62,6 @@ namespace Node.Connections.LocalTcp
         private readonly byte[] readBuffer = new byte[4096];
         private readonly byte[] writeBuffer = new byte[4096];
         private readonly Socket socket;
+        private readonly IConnectionUtility connectionUtility;
     }
 }
