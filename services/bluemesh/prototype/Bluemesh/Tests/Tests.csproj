@@ -59,6 +59,7 @@
     <Compile Include="ConnectionManager_Tests.cs" />
     <Compile Include="GraphHelper_Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RoutingManager_Tests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
