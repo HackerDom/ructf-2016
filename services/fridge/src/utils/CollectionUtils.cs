@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace frɪdʒ.utils
@@ -10,6 +12,18 @@ namespace frɪdʒ.utils
 		{
 			TValue value;
 			return key != null && source.TryGetValue(key, out value) ? value : defaultValue;
+		}
+
+		public static IEnumerable<TKey> EnumerateKeys<TKey, TValue>(this IDictionary<TKey, TValue> source)
+		{
+			return source.Select(pair => pair.Key);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool TryRemove<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> source, TKey key)
+		{
+			TValue value;
+			return source.TryRemove(key, out value);
 		}
 	}
 }

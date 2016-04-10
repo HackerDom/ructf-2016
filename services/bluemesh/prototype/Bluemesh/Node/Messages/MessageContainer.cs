@@ -34,6 +34,7 @@ namespace Node.Messages
                 var deserializer = new StreamDeserializer(stream);
                 deserializer.ReadInt();
                 var messageType = (MessageType)deserializer.ReadInt();
+                Console.WriteLine(" !! MessageType = " + messageType);
                 return new MessageContainer(MessageHelper.GetDeserializeMethod(messageType, utility)(deserializer));
             }
         }

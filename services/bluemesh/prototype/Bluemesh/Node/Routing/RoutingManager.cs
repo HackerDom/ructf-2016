@@ -15,9 +15,9 @@ namespace Node.Routing
             Map = new RoutingMap(connectionManager.Address, config);
         }
 
-        public void PullMaps()
+        public void PullMaps(IEnumerable<IConnection> readyConnections)
         {
-            foreach (var connection in connectionManager.Connections)
+            foreach (var connection in readyConnections)
             {
                 var message = connection.Receive() as MapMessage;
                 if (message == null)
@@ -26,10 +26,10 @@ namespace Node.Routing
             }
         }
 
-        public void PushMaps()
+        public void PushMaps(IEnumerable<IConnection> readyConnections)
         {
-            Console.WriteLine("!! conns : " + string.Join(", ", connectionManager.Connections.Select(c => Map.OwnAddress + " <-> " + c.RemoteAddress)));
-            foreach (var connection in connectionManager.Connections)
+            Console.WriteLine("!! conns : " + string.Join(", ", readyConnections.Select(c => Map.OwnAddress + " <-> " + c.RemoteAddress)));
+            foreach (var connection in readyConnections)
             {
                 VersionInfo existingVersion;
                 if (!versionsByPeer.TryGetValue(connection.RemoteAddress, out existingVersion) ||
@@ -52,13 +52,13 @@ namespace Node.Routing
 
         public void UpdateConnections()
         {
-            foreach (var connection in connectionManager.Connections)
+            foreach (var connection in connectionManager.EstablishedConnections)
             {
                 Map.AddDirectConnection(connection.RemoteAddress);
             }
             foreach (var peer in GraphHelper.GetPeers(Map.OwnAddress, Map.Links).ToList())
             {
-                if (!connectionManager.Connections.Any(c => Equals(c.RemoteAddress, peer)))
+                if (!connectionManager.EstablishedConnections.Any(c => Equals(c.RemoteAddress, peer)))
                     Map.RemoveDirectConnection(peer);
             }
         }

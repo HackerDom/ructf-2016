@@ -1,6 +1,7 @@
 # Ansible >2 deploy playbook
 # use: ansible-playbook -i 192.168.0.1, deploy-service.yml
 # LOOK AT COMMA, IT IS IMPORTANT     ^^^
+# or as usual: ansible-playbook -i hosts.list deploy-service.yml
 
 ---
 - hosts: all
@@ -22,6 +23,8 @@
         - python35-python3
         - python3-devel
         - libpcap-devel
+        - wireless-tools
+        - tcpdump
     - name: set_cap
       capabilities: capability=cap_net_raw=eip path=/usr/bin/python3.5 state=present
     - name: install requiremets
@@ -36,6 +39,8 @@
       user: name=environ
     - name: copy project
       copy: src=environ dest=/home/ force=yes owner=environ
+    - name: add sensors dir
+      file: path=/home/environ/sensors state=directory mode=0755 owner=environ
     - name: copy environ-web.service
       copy:
         dest=/usr/lib/systemd/system/environ-web.service
@@ -44,7 +49,7 @@
     - name: copy environ.service
       copy:
         dest=/usr/lib/systemd/system/environ.service
-        content="[Unit]\nDescription=Environ\nAfter=network.target environ-web.service\nRequires=environ-web.service\n[Service]\nPermissionsStartOnly=true\nExecStartPre=/bin/bash -c '/usr/bin/systemctl set-environment WIFICARD=$(/usr/sbin/iwconfig 2> /dev/null | grep IEEE | cut -d \" \" -f 1)'\nExecStartPre=/bin/bash -c '/usr/sbin/ifconfig $WIFICARD down'\nExecStartPre=/bin/bash -c '/usr/sbin/iwconfig $WIFICARD mode monitor'\nExecStartPre=/bin/bash -c '/usr/sbin/ifconfig $WIFICARD up'\nExecStart=/usr/bin/python3.5 /home/environ/server.py\nUser=environ\nRestart=always\nWorkingDirectory=/home/environ\n[Install]\nWantedBy=multi-user.target"
+        content="[Unit]\nDescription=Environ\nAfter=network.target environ-web.service\nRequires=environ-web.service\n[Service]\nPermissionsStartOnly=true\nExecStartPre=/bin/bash -c '/usr/bin/systemctl set-environment WIFICARD=$(/usr/sbin/iwconfig 2> /dev/null | grep IEEE | cut -d \" \" -f 1)'\nExecStartPre=/bin/bash -c '/usr/sbin/ifconfig $WIFICARD down'\nExecStartPre=/bin/bash -c '/usr/sbin/iwconfig $WIFICARD mode monitor'\nExecStartPre=-/bin/bash -c '/usr/sbin/iwconfig $WIFICARD channel 1'\nExecStartPre=/bin/bash -c '/usr/sbin/ifconfig $WIFICARD up'\nExecStart=/usr/bin/python3.5 /home/environ/server.py\nUser=environ\nRestart=always\nWorkingDirectory=/home/environ\n[Install]\nWantedBy=multi-user.target"
         force=yes
     - name: reload daemon
       command: systemctl daemon-reload

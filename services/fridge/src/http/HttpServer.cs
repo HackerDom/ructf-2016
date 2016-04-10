@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace frɪdʒ.http
@@ -21,22 +22,30 @@ namespace frɪdʒ.http
 			return this;
 		}
 
-		public async Task Loop()
+		public async Task AcceptLoopAsync(CancellationToken token)
 		{
+			token.Register(() =>
+			{
+				listener.Stop();
+				Console.Error.WriteLine("HttpServer stopped");
+			});
+
 			listener.Start();
-			while(true)
+			Console.Error.WriteLine($"HttpServer started at '{string.Join(";", listener.Prefixes)}'");
+			while(!token.IsCancellationRequested)
 			{
 				try
 				{
-					var context = await listener.GetContextAsync();
+					var context = await listener.GetContextAsync().ConfigureAwait(false);
 					//Console.WriteLine($"[{context.Request.RemoteEndPoint}] {context.Request.HttpMethod} {context.Request.Url.PathAndQuery}");
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-					Task.Run(() => TryProcessRequestAsync(context));
+					Task.Run(() => TryProcessRequestAsync(context), token);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 				}
 				catch(Exception e)
 				{
-					Console.Error.WriteLine(e);
+					if(!token.IsCancellationRequested)
+						Console.Error.WriteLine(e);
 				}
 			}
 		}
@@ -51,15 +60,16 @@ namespace frɪdʒ.http
 				//using(var response = context.Response)
 				try
 				{
-					await ProcessRequestAsync(context);
+					await ProcessRequestAsync(context).ConfigureAwait(false);
 				}
+				catch(HttpConnectionClosed) {}
 				catch(Exception e)
 				{
 					//Console.Error.WriteLine(e);
 					var httpException = e as HttpException;
 					response.StatusCode = httpException?.Status ?? 500;
 					response.ContentType = "text/plain; charset=utf-8";
-					await response.WriteStringAsync(httpException?.Message ?? "Internal Server Error");
+					await context.WriteStringAsync(httpException?.Message ?? "Internal Server Error");
 				}
 				finally
 				{
@@ -91,7 +101,7 @@ namespace frɪdʒ.http
 					throw new HttpException(413, "Request Entity Too Large");
 			}
 
-			await handler.Callback(context);
+			await handler.Callback(context).ConfigureAwait(false);
 		}
 
 		private Handler FindHandler(string path)
@@ -119,5 +129,13 @@ namespace frɪdʒ.http
 		}
 
 		public int Status { get; }
+	}
+
+	public class HttpConnectionClosed : Exception
+	{
+		public HttpConnectionClosed(Exception innerException)
+			: base(null, innerException)
+		{
+		}
 	}
 }

@@ -63,6 +63,7 @@
     <Compile Include="Connections\IConnectionManager.cs" />
     <Compile Include="Flags\FlagStorage.cs" />
     <Compile Include="Flags\IFlagStorage.cs" />
+    <Compile Include="Messages\HelloMessage.cs" />
     <Compile Include="Messages\MapMessage.cs" />
     <Compile Include="Messages\MessageHelper.cs" />
     <Compile Include="Messages\MessageContainer.cs" />

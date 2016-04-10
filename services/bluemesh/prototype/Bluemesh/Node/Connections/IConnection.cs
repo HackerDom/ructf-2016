@@ -11,6 +11,8 @@ namespace Node.Connections
 
         IMessage Receive();
 
+        void Tick(bool canRead);
+
         void Close();
 
         ConnectionState State { get; }

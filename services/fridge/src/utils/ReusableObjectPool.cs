@@ -10,42 +10,47 @@ namespace frɪdʒ.utils
 	{
 		public ReusableObjectPool(Func<T> factory, int size)
 		{
-			items = new ConcurrentBag<PooledObject<T>>(Enumerable.Range(0, size).Select(i => new PooledObject<T>(this, factory())));
+			items = new ConcurrentBag<T>(Enumerable.Range(0, size).Select(i => factory()));
 			semaphore = new SemaphoreSlim(size, size);
 		}
 
-		public async Task<PooledObject<T>> AcquireAsync()
+		public async Task<PooledObject> AcquireAsync()
 		{
-			PooledObject<T> item;
-			await semaphore.WaitAsync();
-			return items.TryTake(out item) ? item : null;
+			T item;
+			await semaphore.WaitAsync().ConfigureAwait(false);
+			if(items.TryTake(out item))
+				return new PooledObject(item, this);
+			throw new InvalidOperationException("Pool is empty");
 		}
 
-		public void Release(PooledObject<T> item)
+		private void Release(PooledObject obj)
 		{
-			items.Add(item);
+			items.Add(obj.Item);
 			semaphore.Release();
 		}
 
-		private static ConcurrentBag<PooledObject<T>> items;
-		private static SemaphoreSlim semaphore;
-	}
-
-	internal class PooledObject<T> : IDisposable
-	{
-		public PooledObject(ReusableObjectPool<T> pool, T item)
+		internal struct PooledObject : IDisposable
 		{
-			this.pool = pool;
-			Item = item;
+			public PooledObject(T item, ReusableObjectPool<T> pool)
+			{
+				sync = 0;
+				Item = item;
+				this.pool = pool;
+			}
+
+			public void Dispose()
+			{
+				if(Interlocked.CompareExchange(ref sync, 1, 0) == 0)
+					pool.Release(this);
+			}
+
+			public readonly T Item;
+
+			private readonly ReusableObjectPool<T> pool;
+			private int sync;
 		}
 
-		public void Dispose()
-		{
-			pool.Release(this);
-		}
-
-		public readonly T Item;
-
-		private readonly ReusableObjectPool<T> pool;
+		private readonly ConcurrentBag<T> items;
+		private readonly SemaphoreSlim semaphore;
 	}
 }

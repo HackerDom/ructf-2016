@@ -12,6 +12,7 @@ namespace Node.Connections
         void PurgeDeadConnections();
 
         List<IConnection> Connections { get; }
+        IEnumerable<IConnection> EstablishedConnections { get; }
 
         IConnectionUtility Utility { get; }
 
