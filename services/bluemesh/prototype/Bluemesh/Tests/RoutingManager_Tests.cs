@@ -66,16 +66,24 @@ namespace Tests
 
             private void Tick()
             {
-                //TODO handshake
-
                 connectionManager.PurgeDeadConnections();
-                //TODO use it
                 var selectResult = connectionManager.Select();
+
+                foreach (var connection in selectResult.ReadableConnections)
+                {
+                    //Console.WriteLine("[{0}] tick: {1} -> {2}", connectionManager.Address, connectionManager.Address, connection.RemoteAddress);
+                    connection.Tick(true);
+                }
+                foreach (var connection in selectResult.WritableConnections)
+                {
+                    //Console.WriteLine("[{0}] tick: {1} -> {2}", connectionManager.Address, connectionManager.Address, connection.RemoteAddress);
+                    connection.Tick(false);
+                }
 
                 routingManager.UpdateConnections();
 
-                routingManager.PullMaps(selectResult.ReadableConnections);
-                routingManager.PushMaps(selectResult.WritableConnections);
+                routingManager.PullMaps(selectResult.ReadableConnections.Where(c => c.State == ConnectionState.Connected));
+                routingManager.PushMaps(selectResult.WritableConnections.Where(c => c.State == ConnectionState.Connected));
 
                 routingManager.DisconnectExcessLinks();
                 routingManager.ConnectNewLinks();

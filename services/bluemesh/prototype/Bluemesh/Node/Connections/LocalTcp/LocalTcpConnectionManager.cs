@@ -62,7 +62,7 @@ namespace Node.Connections.LocalTcp
 
         public void PurgeDeadConnections()
         {
-            connections.RemoveAll(c => c.State != ConnectionState.Connected || !c.Socket.Connected);
+            connections.RemoveAll(c => c.State > ConnectionState.Connected || !c.Socket.Connected);
         }
 
         public SelectResult Select()
@@ -143,6 +143,8 @@ namespace Node.Connections.LocalTcp
         }
 
         public List<IConnection> Connections => new List<IConnection>(connections);
+
+        public IEnumerable<IConnection> EstablishedConnections => Connections.Where(c => c.State == ConnectionState.Connected); 
 
         public IConnectionUtility Utility { get; }
         public IAddress Address { get; }

@@ -14,6 +14,8 @@ namespace Node.Messages
                     return StringMessage.Deserialize;
                 case MessageType.Map:
                     return d => MapMessage.Deserialize(d, utility);
+                case MessageType.Hello:
+                    return d => new HelloMessage();
                 default:
                     throw new ArgumentOutOfRangeException("Unknown message type: " + type);
             }

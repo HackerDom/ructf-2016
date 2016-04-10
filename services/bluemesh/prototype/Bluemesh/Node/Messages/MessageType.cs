@@ -3,6 +3,7 @@
     internal enum MessageType
     {
         String = 0,
-        Map = 1
+        Map = 1,
+        Hello = 2
     }
 }
