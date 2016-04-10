@@ -1,0 +1,13 @@
+<html>
+	<head>
+		<title>meters: login</title>
+	</head>
+	<body>
+		<p style='color: red'>{-message-}</p>
+		<form action='/user/login' method='post'>
+			<input type='text' name='username' required>
+			<input type='password' name='password' required>
+			<input type='submit'>
+		</form>
+	</body>
+</html>

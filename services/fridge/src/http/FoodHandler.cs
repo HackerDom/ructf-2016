@@ -7,33 +7,41 @@ using frɪdʒ.utils;
 
 namespace frɪdʒ.http
 {
-	internal static class FoodHandler
+	internal class FoodHandler
 	{
-		public static async Task ProcessPutRequestAsync(HttpListenerContext context)
+		public FoodHandler(Action<Guid, string> callback)
 		{
-			var data = await context.Request.ReadStringAsync();
+			this.callback = callback;
+		}
+
+		public async Task ProcessPutRequestAsync(HttpListenerContext context)
+		{
+			var data = await context.ReadStringAsync();
 			if(data == null)
 				return;
 
-			var id = Guid.NewGuid().ToString("N");
+			var id = Guid.NewGuid();
 			Db[id] = data;
 
-			var result = id + ":" + string.Join(",", data.FindAll(TestPatterns));
-			await context.Response.WriteStringAsync(result);
+			var result = id.ToString("N") + ":" + string.Join(",", data.FindAll(TestPatterns));
+			await context.WriteStringAsync(result);
+
+			callback(id, data);
 		}
 
-		public static async Task ProcessGetRequestAsync(HttpListenerContext context)
+		public async Task ProcessGetRequestAsync(HttpListenerContext context)
 		{
-			var id = context.Request.QueryString["id"];
-
-			var data = Db.GetOrDefault(id);
-			if(data == null)
+			Guid id;
+			string data;
+			if(!(Guid.TryParse(context.Request.QueryString["id"], out id) && (data = Db.GetOrDefault(id)) != null))
 				throw new HttpException(404, "Food not found");
 
-			await context.Response.WriteStringAsync(data);
+			await context.WriteStringAsync(data);
 		}
 
-		private static readonly ConcurrentDictionary<string, string> Db = new ConcurrentDictionary<string, string>();
+		private static readonly ConcurrentDictionary<Guid, string> Db = new ConcurrentDictionary<Guid, string>();
 		private static readonly string[] TestPatterns = {"abc", "123"};
+
+		private readonly Action<Guid, string> callback;
 	}
 }

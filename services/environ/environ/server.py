@@ -79,12 +79,12 @@ def handle_async(pkt):
 
 
 if __name__ == '__main__':
-    IFACE = environ.get('WIFICARD', 'wlo1')
+    IFACE = environ.get('WIFICARD', 'wlan0')
     logger.warning(IFACE)
 
-    TEAM_ID = [snic.address for _, v in net_if_addrs().items() for snic in v if '10.16' in snic.address[:5]]  # TODO: actual netmask
+    TEAM_ID = [snic.address for _, v in net_if_addrs().items() for snic in v if '172.16' in snic.address[:6]]  # TODO: actual netmask
     if len(TEAM_ID):
-        TEAM_ID = int(TEAM_ID[0].split(".")[2])
+        TEAM_ID = int(TEAM_ID[0].split(".")[-1]) # TODO: change to 2 offset
     else:
         logger.error("Your TEAM_ID not found")
 
@@ -101,3 +101,4 @@ if __name__ == '__main__':
 
     pool = Pool(processes=10)
     sniff(iface=IFACE, lfilter=lambda p: p.haslayer(Env) and p.decoded == 31337 and p.team_id == TEAM_ID and (p.cmd == 0 or p.cmd == 2), prn=handle_async)
+
