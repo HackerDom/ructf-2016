@@ -4,36 +4,25 @@ unit WebUtils;
 
 interface
 	uses
-		httpdefs, AccountController, SysUtils;
+		base64, httpdefs, AccountController, Utils, DashboardContainer;
 
 	procedure SetAuthCookie(AResponse: TResponse; const userid: int64);
 	procedure ClearAuthCookie(AResponse: TResponse);
 	procedure GetUsernameAndPassword(ARequest: TRequest; var username, password: string);
 	procedure SendUnauthorized(AResponse: TResponse);
+	procedure AddPermission(ARequest: TRequest; AResponse: TResponse; dashboardid: TDashboardId);
 
 	function IsAuthorized(ARequest: TRequest): boolean;
 	function GetAuthCookie(ARequest: TRequest): string;
 	function GetQueryUserId(ARequest: TRequest): TUserId;
+	function GetQueryDashboardId(ARequest: TRequest): TUserId;
 	function GetCurrentUserId(ARequest: TRequest): TUserId;
-
-	function GetTemplate(const path: string): string;
+	function HavePermission(ARequest: TRequest; dashboard: TDashboardId): string;
 
 implementation
+
 	const
 		AuthCookieName = 'auth';
-
-	function StrToQWord(const s: string): QWord;
-	var
-		i: longint;
-	begin
-		result := 0;
-		for i := 1 to length(s) do
-		begin
-			if (s[i] < '0') or ('9' < s[i]) then
-				exit(0);
-			result := 10 * result + ord(s[i]) - 48;
-		end;
-	end;
 
 	procedure SetAuthCookie(AResponse: TResponse; const value: string);
 	var
@@ -41,7 +30,7 @@ implementation
 	begin
 		cookie := AResponse.Cookies.Add;
 		cookie.Name := AuthCookieName;
-		cookie.Value := value;
+		cookie.Value := EncodeStringBase64(value);
 		cookie.HttpOnly := True;
 		cookie.Path := '/';
 	end;
@@ -63,18 +52,28 @@ implementation
 	end;
 
 	function IsAuthorized(ARequest: TRequest): boolean;
+	var
+		token: string;
 	begin
-		result := AccountManager.IsAuthorized(GetAuthCookie(ARequest));
+		token := GetAuthCookie(ARequest);
+		if token = '' then
+			exit(false);
+		result := AccountManager.IsAuthorized(token);
 	end;
 
 	function GetAuthCookie(ARequest: TRequest): string;
 	begin
-		result := ARequest.CookieFields.Values[AuthCookieName];
+		result := DecodeStringBase64(ARequest.CookieFields.Values[AuthCookieName]);
 	end;
 
 	function GetQueryUserId(ARequest: TRequest): TUserId;
 	begin
 		result := StrToQWord(ARequest.QueryFields.Values['userid']);
+	end;
+
+	function GetQueryDashboardId(ARequest: TRequest): TUserId;
+	begin
+		result := StrToQWord(ARequest.QueryFields.Values['dashboardid']);
 	end;
 
 	procedure SendUnauthorized(AResponse: TResponse);
@@ -88,30 +87,27 @@ implementation
 		token: string;
 	begin
 		token := GetAuthCookie(ARequest);
+		if token = '' then
+			exit(0);
 		result := AccountManager.GetCurrentUserId(token);
 	end;
 
-	function GetTemplate(const path: string): string;
+	function HavePermission(ARequest: TRequest; dashboard: TDashboardId): string;
 	var
-		fin: text;
-		tmp: string;
-		fullPath: string;
+		token: string;
 	begin
-		fullPath := './templates/' + path;
-		if not FileExists(fullPath) then
-		begin
-			writeln(fullPath, 'not found =(');
-			exit('!!!fail!!!');
-		end;
+		token := GetAuthCookie(ARequest);
+		if token = '' then
+			exit('Unauthorized');
+		result := AccountManager.HavePermission(token, dashboard);
+	end;
 
-		assign(fin, fullPath);
-		reset(fin);
-		result := '';
-		while not eof(fin) do
-		begin
-			readln(fin, tmp);
-			result := result + tmp;
-		end;
-		close(fin);
+	procedure AddPermission(ARequest: TRequest; AResponse: TResponse; dashboardid: TDashboardId);
+	var
+		token: string;
+	begin
+		token := GetAuthCookie(ARequest);
+		token := AccountManager.AddPermission(token, dashboardid);
+		SetAuthCookie(AResponse, token);
 	end;
 end.

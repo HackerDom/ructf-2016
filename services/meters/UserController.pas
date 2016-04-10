@@ -5,11 +5,12 @@ unit UserController;
 interface
 
 	uses
-		httpdefs, fpHTTP, fpWeb, AccountController, WebUtils, SysUtils;
+		httpdefs, fpHTTP, fpWeb, AccountController, WebUtils, SysUtils, Utils;
 
 	type
 		TUserModule = class(TFPWebModule)
 			procedure OnLogin(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
+			procedure OnLogout(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
 			procedure OnRegister(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
 			procedure OnList(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
 		end;
@@ -20,11 +21,13 @@ interface
 implementation
 
 {$R *.lfm}
+	const
+		ModuleName = 'user';
+
 	var
 		loginTemplate: string;
 		registerTemplate: string;
 		listTemplate, listATemplate: string;
-
 
 	function TryGetUsernameAndPassword(ARequest: TRequest; AResponse: TResponse; var username, password: string; const template: string): Boolean;
 	begin
@@ -32,13 +35,13 @@ implementation
 
 		if (username = '') and (password = '') then
 		begin
-			AResponse.Content := StringReplace(template, '{-message-}', '', [rfReplaceAll]);
+			AResponse.Content := StringReplace(template, '{-message-}', '', []);
 			exit(false);
 		end;
 
 		if (username = '') or (password = '') then
 		begin
-			AResponse.Content := StringReplace(template, '{-message-}', 'both username and password are required', [rfReplaceAll]);
+			AResponse.Content := StringReplace(template, '{-message-}', 'both username and password are required', []);
 			exit(false);
 		end;
 		
@@ -48,7 +51,7 @@ implementation
 	procedure TUserModule.OnLogin(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
 	var
 		username, password: string;
-		userid: int64;
+		userid: TUserId;
 	begin
 		Handled := True;
 		AResponse.ContentType := 'text/html';
@@ -60,11 +63,18 @@ implementation
 		if userid <> 0 then
 		begin
 			SetAuthCookie(AResponse, userid);
-			AResponse.SendRedirect('/dashboards?userid=' + IntToStr(userid));
+			AResponse.SendRedirect('/dashboard/list');
 			exit;
 		end;
 
-		AResponse.Content := StringReplace(loginTemplate, '{-message-}', 'username or password is incorrect', [rfReplaceAll]);
+		AResponse.Content := StringReplace(loginTemplate, '{-message-}', 'username or password is incorrect', []);
+	end;
+
+	procedure TUserModule.OnLogout(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
+	begin
+		ClearAuthCookie(AResponse);
+		AResponse.SendRedirect('/user/login');
+		Handled := True;
 	end;
 
 	procedure TUserModule.OnRegister(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
@@ -75,7 +85,7 @@ implementation
 		Handled := True;
 		AResponse.ContentType := 'text/html';
 
-		if not TryGetUsernameAndPassword(ARequest, AResponse, username, password, loginTemplate) then
+		if not TryGetUsernameAndPassword(ARequest, AResponse, username, password, registerTemplate) then
 			exit;
 
 		message := AccountManager.CreateUser(username, password);
@@ -85,8 +95,7 @@ implementation
 			SetAuthCookie(AResponse, userid);
 		end;
 
-		AResponse.Content := StringReplace(loginTemplate, '{-message-}', message, [rfReplaceAll]);
-		Handled := True;
+		AResponse.Content := StringReplace(registerTemplate, '{-message-}', message, []);
 	end;
 
 	procedure TUserModule.OnList(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
@@ -95,33 +104,27 @@ implementation
 		links, tmp: string;
 		i: longint;
 	begin
-		if not IsAuthorized(ARequest) then
-		begin
-			SendUnauthorized(AResponse);
-			Handled := True;
-			exit;
-		end;
-
-
 		users := AccountManager.GetListOfUsers();
 		links := '';
 		for i := 0 to users.Count - 1 do
 		begin
-			tmp := StringReplace(listATemplate, '{-userid-}', IntToStr(users[i].userid), [rfReplaceAll]);
-			links := links + StringReplace(tmp, '{-username-}', users[i].username, [rfReplaceAll]);
+			tmp := StringReplace(listATemplate, '{-userid-}', IntToStr(users[i].userid), []);
+			links := links + StringReplace(tmp, '{-username-}', users[i].username, []);
 		end;
 
 		AResponse.ContentType := 'text/html';
-		AResponse.Content := StringReplace(listTemplate, '{-list-}', links, [rfReplaceAll]);
+		AResponse.Content := StringReplace(listTemplate, '{-list-}', links, []);
 		Handled := True;
 	end;
 
 initialization
-	RegisterHTTPModule('user', TUserModule);
-	loginTemplate := GetTemplate('user/login');
-	registerTemplate := GetTemplate('user/register');
-	listTemplate := GetTemplate('user/list');
-	listATemplate := GetTemplate('user/list.a');
+	writeln(stderr, 'initialization UserController');
+	flush(stderr);
+	loginTemplate := GetTemplate(ModuleName, 'login');
+	registerTemplate := GetTemplate(ModuleName, 'register');
+	listTemplate := GetTemplate(ModuleName, 'list');
+	listATemplate := GetSubTemplate(ModuleName, 'list.a');
+	RegisterHTTPModule(ModuleName, TUserModule);
 
 end.
 

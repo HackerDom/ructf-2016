@@ -3,7 +3,7 @@ program httpproject1;
 {$mode objfpc}{$H+}
 
 uses
-	cthreads, fphttpapp, fpWebFile, UserController, AccountController, DashboardController, Sensor;
+	cthreads, fphttpapp, fpWebFile, UserController, AccountController, DashboardController, Sensor, DashboardContainer;
 
 
 {
@@ -20,13 +20,18 @@ begin
 	Application.Threaded := True;
 	Application.QueueSize := 100;
 	Application.Initialize;
+
 	AccountManager.Initialize;
+	DashboardManager.Initialize;
 
 //	StartSensors;
 
 	RegisterFileLocation('js', 'js');
 	RegisterFileLocation('css', 'css');
 	MimeTypesFile := '/etc/mime.types';
+
+	writeln(stderr, 'end of initialization');
+	flush(stderr);
 
 	Application.Run;
 end.
