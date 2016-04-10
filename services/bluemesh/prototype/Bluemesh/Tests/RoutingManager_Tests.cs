@@ -17,13 +17,13 @@ namespace Tests
     [TestFixture]
     internal class RoutingManager_Tests
     {
-        [Test, Explicit, Timeout(2000)]
+        [Test, Explicit, Timeout(3000)]
         public void Measure_map_negotiation()
         {
             var config = Substitute.For<IRoutingConfig>();
-            config.DesiredConnections.Returns(1);
-            config.MaxConnections.Returns(1);
-            var nodes = Enumerable.Range(0, 3).Select(i => MakeNode(config)).ToList();
+            config.DesiredConnections.Returns(3);
+            config.MaxConnections.Returns(3);
+            var nodes = Enumerable.Range(0, 5).Select(i => MakeNode(config)).ToList();
 
             ThreadPool.SetMinThreads(nodes.Count * 2, nodes.Count * 2);
 
@@ -85,7 +85,7 @@ namespace Tests
                 routingManager.PullMaps(selectResult.ReadableConnections.Where(c => c.State == ConnectionState.Connected));
                 routingManager.PushMaps(selectResult.WritableConnections.Where(c => c.State == ConnectionState.Connected));
 
-                routingManager.DisconnectExcessLinks();
+                //routingManager.DisconnectExcessLinks();
                 routingManager.ConnectNewLinks();
 
                 Console.WriteLine("[{0}] v: {2} {1}", routingManager.Map.OwnAddress, routingManager.Map, routingManager.Map.Version);

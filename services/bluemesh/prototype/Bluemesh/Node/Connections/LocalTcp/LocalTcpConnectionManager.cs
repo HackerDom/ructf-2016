@@ -16,7 +16,7 @@ namespace Node.Connections.LocalTcp
         {
             this.routingConfig = routingConfig;
             connections = new List<LocalTcpConnection>();
-            connectingSockets = new List<Socket>();
+            connectingSockets = new List<SocketInfo>();
             Utility = new LocalTcpUtility();
 
             var foundPort = false;
@@ -53,7 +53,7 @@ namespace Node.Connections.LocalTcp
             var socket = TryConnect(tcpAddress.Port);
             if (socket != null)
             {
-                connectingSockets.Add(socket);
+                connectingSockets.Add(new SocketInfo(socket, DateTime.UtcNow));
                 return true;
             }
 
@@ -63,6 +63,13 @@ namespace Node.Connections.LocalTcp
         public void PurgeDeadConnections()
         {
             connections.RemoveAll(c => c.State > ConnectionState.Connected || !c.Socket.Connected);
+            foreach (var info in connectingSockets.Where(s => DateTime.UtcNow - s.Timestamp > TimeSpan.FromSeconds(1)).ToList())
+            {
+                info.Socket.Close();
+                connectingSockets.Remove(info);
+            }
+
+            Console.WriteLine("!! garbage : {0} conns; {1} sockets", connections.Count(c => c.State != ConnectionState.Connected), connectingSockets.Count);
         }
 
         public SelectResult Select()
@@ -71,14 +78,14 @@ namespace Node.Connections.LocalTcp
             if (GetUsedConnectionSlots() < routingConfig.MaxConnections)
             {
                 checkRead = new[] { serverSocket }.Concat(connections.Select(c => c.Socket)).ToList();
-                checkWrite = connectingSockets.Concat(connections.Select(c => c.Socket)).ToList();
-                checkError = connectingSockets.Concat(connections.Select(c => c.Socket)).ToList();
+                checkWrite = connectingSockets.Select(info => info.Socket).Concat(connections.Select(c => c.Socket)).ToList();
+                checkError = connectingSockets.Select(info => info.Socket).Concat(connections.Select(c => c.Socket)).ToList();
             }
             else
             {
                 checkRead = connections.Select(c => c.Socket).ToList();
-                checkWrite = connectingSockets.Concat(connections.Select(c => c.Socket)).ToList();
-                checkError = connectingSockets.Concat(connections.Select(c => c.Socket)).ToList();
+                checkWrite = connectingSockets.Select(info => info.Socket).Concat(connections.Select(c => c.Socket)).ToList();
+                checkError = connectingSockets.Select(info => info.Socket).Concat(connections.Select(c => c.Socket)).ToList();
             }
 
             try
@@ -114,7 +121,7 @@ namespace Node.Connections.LocalTcp
             }*/
             foreach (var socket in checkWrite)
             {
-                if (connectingSockets.Remove(socket))
+                if (connectingSockets.RemoveAll(s => s.Socket == socket) > 0)
                 {
                     var address = new LocalTcpAddress(((IPEndPoint) socket.RemoteEndPoint).Port);
                     if (connections.Any(c => c.RemoteAddress.Equals(address)))
@@ -129,7 +136,7 @@ namespace Node.Connections.LocalTcp
             {
                 try
                 {
-                    connectingSockets.Remove(socket);
+                    connectingSockets.RemoveAll(s => s.Socket == socket);
                     socket.Close();
                 }
                 catch (Exception e)
@@ -214,7 +221,19 @@ namespace Node.Connections.LocalTcp
         private FileStream lockHolder;
         private Socket serverSocket;
         private readonly List<LocalTcpConnection> connections;
-        private readonly List<Socket> connectingSockets;
+        private readonly List<SocketInfo> connectingSockets;
         private readonly IRoutingConfig routingConfig;
+
+        private struct SocketInfo
+        {
+            public SocketInfo(Socket socket, DateTime timestamp)
+            {
+                Socket = socket;
+                Timestamp = timestamp;
+            }
+
+            public readonly Socket Socket;
+            public readonly DateTime Timestamp;
+        }
     }
 }
