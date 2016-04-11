@@ -2,7 +2,7 @@
 
 import sys
 import traceback
-import socket
+import requests
 
 PORT = 9123
 
@@ -17,7 +17,6 @@ def ructf_error(status=110, message=None, error=None, exception=None):
         sys.stderr.write("\n")
 
     if exception:
-        print(dir(exception))
         sys.stderr.write("Exception: {}\n".format(exception))
         traceback.print_tb(exception.__traceback__, file=sys.stderr)
 
@@ -38,31 +37,6 @@ def service_down(status=104, *args, **kwargs):
 def make_err_message(message, request, reply):
     return "{}\n->\n{}\n<-\n{}\n=".format(message, request, reply)
 
-
-def connect_to_service(hostname):
-    try:
-        return socket.create_connection((hostname, PORT))
-    except Exception as e:
-        service_down(message=str(e), exception=e)
-
-def check_reply(request, socket, socket_fd):
-    try:
-        socket.sendall(request.encode("utf-8"))
-        socket.sendall(b'\n')
-        reply = socket_fd.readline().strip()
-    except Exception as e:
-        return service_down(message=str(e), exception=e)
-
-    status, value = reply.split(" ", 1)
-    if status not in ("[OK]", "[ERR]"):
-        return service_mumble(message="Bad status", error=make_err_message("Bad status", request, reply))
-
-    if status == "[ERR]":
-        return service_corrupt(message="Service return error on request!", error=make_err_message("Error on request", request, reply))
-
-    return status, value
-
-
 def handler_info(*args):
     service_ok(message="vulns: 1")
 
@@ -71,24 +45,31 @@ def handler_check(*args):
 
 def handler_get(args):
     _, _, hostname, id, flag, vuln = args
-    socket = connect_to_service(hostname)
-    socket_fd = socket.makefile()
+    request = "http://{}:3000/search?text={}".format(hostname, id)
+    try:
+        r = requests.get(request)
+        r.raise_for_status()
+        reply = r.text
+    except requests.exceptions.ConnectionError as e:
+        return service_down(message="Cant connect to server", exception=e)
+    except requests.exceptions.HTTPError as e:
+        return service_mumble(message="Protocol error", exception=e)
 
-    request = "GET\t{}".format(id)
-    status, value = check_reply(request, socket, socket_fd)
-
-    if value != flag:
+    if reply != flag:
         return service_corrupt(message="Bad flag", error=make_err_message("Bad flag", request, reply))
 
     return service_ok()
 
 def handler_put(args):
     _, _, hostname, id, flag, vuln = args
-    socket = connect_to_service(hostname)
-    socket_fd = socket.makefile()
+    try:
+        r = requests.post("http://{}:3000/set?text={}".format(hostname, id), data=flag)
+        r.raise_for_status()
+    except requests.exceptions.ConnectionError as e:
+        return service_down(message="Cant connect to server", exception=e)
+    except requests.exceptions.HTTPError as e:
+        return service_mumble(message="Protocol error", exception=e)
 
-    request = "PUT\t{}\t{}".format(id, flag)
-    status, value = check_reply(request, socket, socket_fd)
 
     return service_ok()
 
