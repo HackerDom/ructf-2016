@@ -6,11 +6,8 @@ namespace Node.Connections
     internal interface IConnection
     {
         IAddress RemoteAddress { get; }
-
-        string RemoteName { get; }
+        
         IAddress LocalAddress { get; }
-
-        string LocalName { get; }
 
         SendResult Send(IMessage message);
 

@@ -48,7 +48,6 @@ namespace Tests
             var connectionConfig = Substitute.For<IConnectionConfig>();
             var address = new TcpAddress(new IPEndPoint(IPAddress.Loopback, 16800 + id));
             connectionConfig.LocalAddress.Returns(address);
-            connectionConfig.NodeName.Returns(id.ToString());
             connectionConfig.PreconfiguredNodes.Returns(_ => nodes.Where(n => !Equals(n, address)).ToList());
             nodes.Add(address);
             var connectionManager = new TcpConnectionManager(connectionConfig, routingConfig);

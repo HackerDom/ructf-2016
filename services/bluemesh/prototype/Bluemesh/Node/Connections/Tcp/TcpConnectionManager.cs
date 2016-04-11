@@ -138,14 +138,12 @@ namespace Node.Connections.Tcp
 
         public IAddress Address => connectionConfig.LocalAddress;
 
-        public string NodeName => connectionConfig.NodeName;
-
         private TcpConnection CreateConnection(TcpAddress address, Socket socket)
         {
-            var connection = new TcpConnection((TcpAddress)Address, address, socket, connectionConfig.NodeName, Utility);
+            var connection = new TcpConnection((TcpAddress)Address, address, socket, Utility);
             connection.ValidateConnection += conn => 
-                StringComparer.OrdinalIgnoreCase.Compare(conn.LocalName, conn.RemoteName) >= 0 || 
-                connections.All(c => ReferenceEquals(c, conn) || c.State != ConnectionState.Connected || !Equals(c.RemoteName, conn.RemoteName));
+                StringComparer.OrdinalIgnoreCase.Compare(conn.LocalAddress.ToString(), conn.RemoteAddress.ToString()) >= 0 || 
+                connections.All(c => ReferenceEquals(c, conn) || c.State != ConnectionState.Connected || !Equals(c.RemoteAddress, conn.RemoteAddress));
             return connection;
         }
 

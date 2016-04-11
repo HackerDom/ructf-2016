@@ -17,7 +17,5 @@ namespace Node.Connections
         IConnectionUtility Utility { get; }
 
         IAddress Address { get; }
-
-        string NodeName { get; }
     }
 }

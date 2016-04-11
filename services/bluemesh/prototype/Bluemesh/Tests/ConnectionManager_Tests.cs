@@ -47,7 +47,6 @@ namespace Tests
             var connectionConfig = Substitute.For<IConnectionConfig>();
             var address = new TcpAddress(new IPEndPoint(IPAddress.Loopback, 16800 + id));
             connectionConfig.LocalAddress.Returns(address);
-            connectionConfig.NodeName.Returns(id.ToString());
             connectionConfig.PreconfiguredNodes.Returns(_ => nodes.Where(n => !Equals(n, address)).ToList());
             nodes.Add(address);
             return new TestNode(new TcpConnectionManager(connectionConfig, routingConfig));
@@ -58,28 +57,28 @@ namespace Tests
             public TestNode(TcpConnectionManager connectionManager)
             {
                 this.connectionManager = connectionManager;
-                var id = connectionManager.NodeName;
+                var id = connectionManager.Address;
                 strategyBuilder = CommunicationStrategyBuilder.Start()
                     .Send(new StringMessage("hello from " + id))
-                    .Receive(conn => new StringMessage("hello from " + conn.RemoteName))
+                    .Receive(conn => new StringMessage("hello from " + conn.RemoteAddress))
                     .Wait(100.Milliseconds())
                     .Send(new StringMessage("ping from " + id))
-                    .Receive(conn => new StringMessage("ping from " + conn.RemoteName))
+                    .Receive(conn => new StringMessage("ping from " + conn.RemoteAddress))
                     .Wait(100.Milliseconds())
                     .Send(new StringMessage("ping from " + id))
-                    .Receive(conn => new StringMessage("ping from " + conn.RemoteName))
+                    .Receive(conn => new StringMessage("ping from " + conn.RemoteAddress))
                     .Wait(100.Milliseconds())
                     .Send(new StringMessage("ping from " + id))
-                    .Receive(conn => new StringMessage("ping from " + conn.RemoteName))
+                    .Receive(conn => new StringMessage("ping from " + conn.RemoteAddress))
                     .Wait(100.Milliseconds())
                     .Send(new StringMessage("bye from " + id))
-                    .Receive(conn => new StringMessage("bye from " + conn.RemoteName));
+                    .Receive(conn => new StringMessage("bye from " + conn.RemoteAddress));
             }
 
             public void Start(int peerCount)
             {
                 int ticks = 0;
-                while (stages.GroupBy(pair => pair.Key.RemoteName).Count(g => g.Any(pair => pair.Value.Completed)) < peerCount)
+                while (stages.GroupBy(pair => pair.Key.RemoteAddress).Count(g => g.Any(pair => pair.Value.Completed)) < peerCount)
                 {
                     Tick();
                     ticks++;

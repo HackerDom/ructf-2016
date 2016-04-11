@@ -6,12 +6,11 @@ namespace Node.Connections.Tcp
 {
     internal class TcpConnection : IConnection
     {
-        public TcpConnection(TcpAddress localAddress, TcpAddress remoteAddress, Socket socket, string name, IConnectionUtility connectionUtility)
+        public TcpConnection(TcpAddress localAddress, TcpAddress remoteAddress, Socket socket,  IConnectionUtility connectionUtility)
         {
             RemoteAddress = remoteAddress;
             this.localAddress = localAddress;
             this.socket = socket;
-            this.name = name;
             this.connectionUtility = connectionUtility;
             stream = new NonblockingSocketStream(socket, connectionUtility);
             State = ConnectionState.Connecting;
@@ -38,7 +37,7 @@ namespace Node.Connections.Tcp
 
             if (!establishmentStage.HasFlag(EstablishmentStage.SentHello))
             {
-                if (SendInternal(new StringMessage(name + '@' + localAddress)) == SendResult.Success)
+                if (SendInternal(new StringMessage(localAddress.ToString())) == SendResult.Success)
                     establishmentStage |= EstablishmentStage.SentHello;
             }
             if (!establishmentStage.HasFlag(EstablishmentStage.ReceivedHello) && canRead)
@@ -47,9 +46,7 @@ namespace Node.Connections.Tcp
                 if (result != null)
                 {
                     establishmentStage |= EstablishmentStage.ReceivedHello;
-                    var parts = result.Text.Split('@');
-                    RemoteName = parts[0];
-                    RemoteAddress = connectionUtility.ParseAddress(parts[1]);
+                    RemoteAddress = connectionUtility.ParseAddress(result.Text);
                 }
             }
             if (establishmentStage == EstablishmentStage.Established)
@@ -73,11 +70,7 @@ namespace Node.Connections.Tcp
 
         public IAddress RemoteAddress { get; private set; }
 
-        public string RemoteName { get; private set; }
-
         public IAddress LocalAddress => localAddress;
-
-        public string LocalName => name;
 
         public ConnectionState State { get; private set; }
 
@@ -118,7 +111,6 @@ namespace Node.Connections.Tcp
 
         private readonly TcpAddress localAddress;
         private readonly Socket socket;
-        private readonly string name;
         private readonly IConnectionUtility connectionUtility;
         private readonly NonblockingSocketStream stream;
 
