@@ -25,7 +25,7 @@ namespace Tests
             config.DesiredConnections.Returns(1);
             config.MaxConnections.Returns(1);
             var preconfiguredNodes = new List<IAddress>();
-            var nodes = Enumerable.Range(0, 2).Select(i => CreateNode(config, preconfiguredNodes, i)).ToList();
+            var nodes = Enumerable.Range(0, 4).Select(i => CreateNode(config, preconfiguredNodes, i)).ToList();
 
             ThreadPool.SetMinThreads(nodes.Count * 2, nodes.Count * 2);
 
@@ -76,6 +76,14 @@ namespace Tests
                 connectionManager.PurgeDeadConnections();
                 var selectResult = connectionManager.Select();
 
+                routingManager.UpdateConnections();
+
+                routingManager.PullMaps(selectResult.ReadableConnections.Where(c => c.State == ConnectionState.Connected));
+                routingManager.PushMaps(selectResult.WritableConnections.Where(c => c.State == ConnectionState.Connected));
+
+                //routingManager.DisconnectExcessLinks();
+                routingManager.ConnectNewLinks();
+                
                 foreach (var connection in selectResult.ReadableConnections)
                 {
                     //Console.WriteLine("[{0}] tick: {1} -> {2}", connectionManager.Address, connectionManager.Address, connection.RemoteAddress);
@@ -86,14 +94,6 @@ namespace Tests
                     //Console.WriteLine("[{0}] tick: {1} -> {2}", connectionManager.Address, connectionManager.Address, connection.RemoteAddress);
                     connection.Tick(false);
                 }
-
-                routingManager.UpdateConnections();
-
-                routingManager.PullMaps(selectResult.ReadableConnections.Where(c => c.State == ConnectionState.Connected));
-                routingManager.PushMaps(selectResult.WritableConnections.Where(c => c.State == ConnectionState.Connected));
-
-                //routingManager.DisconnectExcessLinks();
-                routingManager.ConnectNewLinks();
 
                 Console.WriteLine("[{0}] v: {2} {1}", routingManager.Map.OwnAddress, routingManager.Map, routingManager.Map.Version);
             }

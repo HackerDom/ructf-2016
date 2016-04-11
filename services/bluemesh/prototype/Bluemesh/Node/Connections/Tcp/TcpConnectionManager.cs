@@ -105,7 +105,7 @@ namespace Node.Connections.Tcp
                 if (connectingSockets.RemoveAll(s => s.Socket == socket) > 0)
                 {
                     var address = new TcpAddress((IPEndPoint) socket.RemoteEndPoint);
-                    if (connections.Any(c => c.RemoteAddress.Equals(address)))
+                    if (connections.Any(c => c.RemoteAddress.Equals(address)) || connections.Count >= routingConfig.MaxConnections)
                     {
                         socket.Close();
                         continue;
@@ -141,9 +141,10 @@ namespace Node.Connections.Tcp
         private TcpConnection CreateConnection(TcpAddress address, Socket socket)
         {
             var connection = new TcpConnection((TcpAddress)Address, address, socket, Utility);
-            connection.ValidateConnection += conn => 
-                StringComparer.OrdinalIgnoreCase.Compare(conn.LocalAddress.ToString(), conn.RemoteAddress.ToString()) >= 0 || 
-                connections.All(c => ReferenceEquals(c, conn) || c.State != ConnectionState.Connected || !Equals(c.RemoteAddress, conn.RemoteAddress));
+            connection.ValidateConnection += conn =>
+                EstablishedConnections.Count() < routingConfig.MaxConnections &&
+                (StringComparer.OrdinalIgnoreCase.Compare(conn.LocalAddress.ToString(), conn.RemoteAddress.ToString()) >= 0 || 
+                connections.All(c => ReferenceEquals(c, conn) || c.State != ConnectionState.Connected || !Equals(c.RemoteAddress, conn.RemoteAddress)));
             return connection;
         }
 

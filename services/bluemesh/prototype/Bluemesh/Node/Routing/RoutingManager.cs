@@ -52,8 +52,7 @@ namespace Node.Routing
         public void UpdateConnections()
         {
             Console.WriteLine("!! conns : " + 
-                string.Join(", ", connectionManager.EstablishedConnections.Select(c => Map.OwnAddress + " <-> " + c.RemoteAddress)) + " ; " + 
-                string.Join(", ", connectionManager.Connections.Select(c => Map.OwnAddress + " <-> " + c.RemoteAddress)));
+                string.Join(", ", connectionManager.EstablishedConnections.Select(c => Map.OwnAddress + " <-> " + c.RemoteAddress)));
             foreach (var connection in connectionManager.EstablishedConnections)
             {
                 Map.AddDirectConnection(connection.RemoteAddress);

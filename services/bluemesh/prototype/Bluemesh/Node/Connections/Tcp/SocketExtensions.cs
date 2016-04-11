@@ -1,3 +1,4 @@
+using System;
 using System.Net.Sockets;
 
 namespace Node.Connections.Tcp
@@ -8,6 +9,8 @@ namespace Node.Connections.Tcp
         {
             //if (socket.Available == 0)
             //    return 0;
+            if (socket.Available == 0)
+                Console.WriteLine("!! ALERT: sick motherfuckers want me to read {0} bytes from empty sock!", count);
             return socket.Receive(buffer, offset, count, SocketFlags.None);
         }
         public static int SendSafe(this Socket socket, byte[] buffer, int offset, int count)
