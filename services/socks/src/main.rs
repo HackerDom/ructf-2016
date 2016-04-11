@@ -42,8 +42,10 @@ impl Handler for Context {
 
             match stor.get(text.as_str()) {
                 Some(value) => { res.send(value.as_bytes()).unwrap() },
-                None => *res.status_mut() = StatusCode::NotFound
+                None => {}
             }
+
+            return;
         }
 
         if url.path == "/set" {
@@ -52,7 +54,10 @@ impl Handler for Context {
             let text = query.get_first_from_str("text").unwrap();
             req.read_to_string(&mut data);
             stor.insert(text, data.clone());
+            return;
         }
+
+        *res.status_mut() = StatusCode::NotFound;
     }
 
 }
