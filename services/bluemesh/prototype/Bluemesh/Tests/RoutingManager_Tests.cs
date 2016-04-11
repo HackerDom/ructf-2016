@@ -22,10 +22,10 @@ namespace Tests
         public void Measure_map_negotiation()
         {
             var config = Substitute.For<IRoutingConfig>();
-            config.DesiredConnections.Returns(3);
-            config.MaxConnections.Returns(3);
+            config.DesiredConnections.Returns(1);
+            config.MaxConnections.Returns(2);
             var preconfiguredNodes = new List<IAddress>();
-            var nodes = Enumerable.Range(0, 5).Select(i => CreateNode(config, preconfiguredNodes, i)).ToList();
+            var nodes = Enumerable.Range(0, 3).Select(i => CreateNode(config, preconfiguredNodes, i)).ToList();
 
             ThreadPool.SetMinThreads(nodes.Count * 2, nodes.Count * 2);
 
@@ -78,10 +78,10 @@ namespace Tests
 
                 routingManager.UpdateConnections();
 
-                routingManager.PullMaps(selectResult.ReadableConnections.Where(c => c.State == ConnectionState.Connected));
+                routingManager.ProcessMessages(selectResult.ReadableConnections.Where(c => c.State == ConnectionState.Connected));
                 routingManager.PushMaps(selectResult.WritableConnections.Where(c => c.State == ConnectionState.Connected));
 
-                //routingManager.DisconnectExcessLinks();
+                routingManager.DisconnectExcessLinks();
                 routingManager.ConnectNewLinks();
                 
                 foreach (var connection in selectResult.ReadableConnections)

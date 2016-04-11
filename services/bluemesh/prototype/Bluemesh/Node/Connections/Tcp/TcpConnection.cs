@@ -23,6 +23,17 @@ namespace Node.Connections.Tcp
             return SendInternal(message);
         }
 
+        public SendResult Push(IMessage message)
+        {
+            // TODO do something with it
+            SendResult result;
+            do
+            {
+                result = Send(message);
+            } while (result == SendResult.Partial);
+            return result;
+        }
+
         public IMessage Receive()
         {
             if (State != ConnectionState.Connected)

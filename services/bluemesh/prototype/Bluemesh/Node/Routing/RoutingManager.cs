@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Node.Connections;
@@ -15,14 +15,15 @@ namespace Node.Routing
             Map = new RoutingMap(connectionManager.Address, config);
         }
 
-        public void PullMaps(IEnumerable<IConnection> readyConnections)
+        public void ProcessMessages(IEnumerable<IConnection> readyConnections)
         {
             foreach (var connection in readyConnections)
             {
-                var message = connection.Receive() as MapMessage;
+                var message = connection.Receive();
                 if (message == null)
                     continue;
-                Map.Merge(message.Links);
+                ProcessMap(message as MapMessage, connection);
+                ProcessString(message as StringMessage, connection);
             }
         }
 
@@ -36,11 +37,7 @@ namespace Node.Routing
                      DateTime.UtcNow - existingVersion.Timestamp > TimeSpan.FromMilliseconds(50)))
                 {
                     var message = new MapMessage(Map.Links);
-                    SendResult result;
-                    do
-                    {
-                        result = connection.Send(message);
-                    } while (result == SendResult.Partial);
+                    var result = connection.Push(message);
                     Console.WriteLine("!! {0} -> {1} : {2}", Map.OwnAddress, connection.RemoteAddress, result);
 
                     if (result == SendResult.Success)
@@ -60,7 +57,10 @@ namespace Node.Routing
             foreach (var peer in GraphHelper.GetPeers(Map.OwnAddress, Map.Links).ToList())
             {
                 if (!connectionManager.EstablishedConnections.Any(c => Equals(c.RemoteAddress, peer)))
+                {
                     Map.RemoveDirectConnection(peer);
+                    lastDisconnect = DateTime.UtcNow;
+                }
             }
         }
 
@@ -80,22 +80,38 @@ namespace Node.Routing
 
         public void DisconnectExcessLinks()
         {
-            if (DateTime.UtcNow - lastDisconnect < TimeSpan.FromSeconds(1))
+            if (DateTime.UtcNow - lastDisconnect < TimeSpan.FromSeconds(.1))
                 return;
             var excessPeer = Map.FindExcessPeer();
             if (excessPeer != null)
             {
                 var connection = connectionManager.Connections.FirstOrDefault(c => Equals(c.RemoteAddress, excessPeer));
-                if (connection != null)
-                {
-                    connection.Close();
-                    lastDisconnect = DateTime.UtcNow;
-                }
+                connection?.Push(new StringMessage("心中"));
             }
         }
 
         public IRoutingMap Map { get; }
-        
+
+        private void ProcessMap(MapMessage message, IConnection connection)
+        {
+            if (message == null)
+                return;
+            Map.Merge(message.Links, connection.RemoteAddress);
+        }
+        private void ProcessString(StringMessage message, IConnection connection)
+        {
+            if (message == null)
+                return;
+            if (message.Text == "心中")
+            {
+                if (Map.IsLinkExcess(new RoutingMapLink(Map.OwnAddress, connection.RemoteAddress)))
+                {
+                    Console.WriteLine("!! closing connection by agreement");
+                    connection.Close();
+                }
+            }
+        }
+
         private readonly IConnectionManager connectionManager;
         private readonly Dictionary<IAddress, VersionInfo> versionsByPeer; 
         private DateTime lastDisconnect = DateTime.MinValue;

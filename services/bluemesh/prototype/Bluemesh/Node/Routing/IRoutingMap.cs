@@ -16,7 +16,9 @@ namespace Node.Routing
 
         IAddress FindExcessPeer();
 
-        void Merge(IEnumerable<RoutingMapLink> links);
+        bool IsLinkExcess(RoutingMapLink link);
+
+        void Merge(ICollection<RoutingMapLink> links, IAddress source);
 
         IAddress OwnAddress { get; }
 

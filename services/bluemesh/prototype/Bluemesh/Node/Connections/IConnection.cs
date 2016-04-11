@@ -11,6 +11,8 @@ namespace Node.Connections
 
         SendResult Send(IMessage message);
 
+        SendResult Push(IMessage message);
+
         IMessage Receive();
 
         void Tick(bool canRead);

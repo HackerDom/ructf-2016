@@ -23,18 +23,10 @@ namespace Node.Routing
 
         public IAddress FindExcessPeer()
         {
-            var stateBefore = GraphHelper.CalculateConnectivity(Links);
-            var nodesBefore = GraphHelper.GetNodes(Links);
-
             IAddress excessPeer = null;
             foreach (var peerLink in Links.Where(link => link.Contains(OwnAddress)).ToList())
             {
-                Links.Remove(peerLink);
-                var stateAfter = GraphHelper.CalculateConnectivity(Links);
-                var nodesAfter = GraphHelper.GetNodes(Links);
-                Links.Add(peerLink);
-
-                if (Equals(stateAfter, stateBefore) && nodesAfter.Count == nodesBefore.Count)
+                if (IsLinkExcess(peerLink))
                 {
                     excessPeer = peerLink.OtherEnd(OwnAddress);
                     break;
@@ -44,11 +36,38 @@ namespace Node.Routing
             return excessPeer;
         }
 
-        public void Merge(IEnumerable<RoutingMapLink> links)
+        public bool IsLinkExcess(RoutingMapLink link)
+        {
+            var stateBefore = GraphHelper.CalculateConnectivity(Links);
+            var nodesBefore = GraphHelper.GetNodes(Links);
+
+            if (!Links.Remove(link))
+                return false;
+
+            var stateAfter = GraphHelper.CalculateConnectivity(Links);
+            var nodesAfter = GraphHelper.GetNodes(Links);
+
+            Links.Add(link);
+
+            return Equals(stateAfter, stateBefore) && nodesAfter.Count == nodesBefore.Count;
+        }
+
+        public void Merge(ICollection<RoutingMapLink> links, IAddress source)
         {
             var countBefore = Links.Count;
+            var changed = false;
+
             Links.UnionWith(links);
+
             if (Links.Count > countBefore)
+                changed = true;
+            countBefore = Links.Count;
+
+            Links.RemoveWhere(link => link.Contains(source) && !links.Contains(link));
+
+            if (Links.Count < countBefore)
+                changed = true;
+            if (changed)
                 Version++;
         }
 
