@@ -22,10 +22,10 @@ namespace Tests
         public void Measure_map_negotiation()
         {
             var config = Substitute.For<IRoutingConfig>();
-            config.DesiredConnections.Returns(1);
-            config.MaxConnections.Returns(1);
+            config.DesiredConnections.Returns(3);
+            config.MaxConnections.Returns(3);
             var preconfiguredNodes = new List<IAddress>();
-            var nodes = Enumerable.Range(0, 4).Select(i => CreateNode(config, preconfiguredNodes, i)).ToList();
+            var nodes = Enumerable.Range(0, 5).Select(i => CreateNode(config, preconfiguredNodes, i)).ToList();
 
             ThreadPool.SetMinThreads(nodes.Count * 2, nodes.Count * 2);
 
