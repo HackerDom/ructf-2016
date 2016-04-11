@@ -1,0 +1,10 @@
+- synchronize: src=../../../../../../checkers/ dest={{cs_dir}}/checkers
+
+- file: path={{cs_dir}}/checkers owner={{cs_user}} group={{cs_user}} recurse=yes
+
+# 'environ' checker requirements
+
+- shell: pip3 install requests PyCrypto scapy-python3
+
+- apt: name=tcpdump
+
