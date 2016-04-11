@@ -9,7 +9,6 @@ interface
 	procedure SetAuthCookie(AResponse: TResponse; const userid: int64);
 	procedure ClearAuthCookie(AResponse: TResponse);
 	procedure GetUsernameAndPassword(ARequest: TRequest; var username, password: string);
-	procedure SendUnauthorized(AResponse: TResponse);
 	procedure AddPermission(ARequest: TRequest; AResponse: TResponse; dashboardid: TDashboardId);
 
 	function IsAuthorized(ARequest: TRequest): boolean;
@@ -74,12 +73,6 @@ implementation
 	function GetQueryDashboardId(ARequest: TRequest): TUserId;
 	begin
 		result := StrToQWord(ARequest.QueryFields.Values['dashboardid']);
-	end;
-
-	procedure SendUnauthorized(AResponse: TResponse);
-	begin
-			AResponse.Code := 401;
-			AResponse.Content := 'Unauthorized';
 	end;
 
 	function GetCurrentUserId(ARequest: TRequest): TUserId;
