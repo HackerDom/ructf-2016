@@ -63,7 +63,7 @@ implementation
 			list := list + StringReplace(tmp, '{-dashboard-}', dashboard.Name, []);
 		end;
 
-		ARequest.Content := StringReplace(listTemplate, '{-list-}', list, []);
+		AResponse.Content := StringReplace(listTemplate, '{-list-}', list, []);
 	end;
 
 	procedure TDashboardModule.OnView(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
