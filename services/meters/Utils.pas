@@ -11,6 +11,8 @@ interface
 	function readFile(const path: string): string;
 	function GetGuid: QWord;
 	function HasBadSymbols(const s: string): boolean;
+	function GetLayout: string;
+	function GetLayout(const module, action: string): string;
 	function GetTemplate(const module, action: string): string;
 	function GetSubTemplate(const module, name: string): string;
 	function StrToQWord(const s: string): QWord;
@@ -22,6 +24,7 @@ implementation
 
 	var 
 		getGuidLock: TRTLCriticalSection;
+		layout: string;
 
 	function readFile(const path: string): string;
 	var
@@ -70,7 +73,15 @@ implementation
 
 	function GetLayout: string;
 	begin
-		result := readFile(templatesDir + 'layout.html');
+		result := layout; 
+	end;
+
+	function GetLayout(const module, action: string): string;
+	var
+		layout: string;
+	begin
+		layout := GetLayout();
+		result := StringReplace(layout, '{-title-}', module + ': ' + action, []);
 	end;
 
 	function GetTemplate(const module, action: string): string;
@@ -78,9 +89,8 @@ implementation
 		layout: string;
 		template: string;
 	begin
-		layout := GetLayout;	
 		template := readFile(templatesDir + module + '/' + action);
-		layout := StringReplace(layout, '{-title-}', module + ': ' + action, []);
+		layout := GetLayout(module, action);
 		result := StringReplace(layout, '{-body-}', template, []);
 	end;
 
@@ -117,5 +127,6 @@ initialization
 		writeln('can''t write to directory ', writeDir);
 		halt(1);
 	end;
+	layout := readFile(templatesDir + 'layout.html');
 
 end.

@@ -221,7 +221,7 @@ implementation
 				for j := 0 to dashboards.Count - 1 do
 				begin
 					dt := now;
-					dashboardId := dashboards[i];
+					dashboardId := dashboards[j];
 					result := appendBlock(result, dt);
 					result := appendBlock(result, dashboardId);
 				end;
@@ -275,7 +275,7 @@ implementation
 		dt: TDateTime;
 	begin
 		decoded := decode(token);
-		for i := 1 to decoded.Count div 2- 1 do
+		for i := 1 to decoded.Count div 2 - 1 do
 			if decoded[2 * i + 1] = dashboard then
 			begin
 				dt := unpack(decoded[2 * i]);

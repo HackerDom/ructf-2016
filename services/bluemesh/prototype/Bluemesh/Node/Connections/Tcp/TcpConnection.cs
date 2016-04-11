@@ -1,21 +1,17 @@
 using System;
-using System.CodeDom;
-using System.Collections.Generic;
-using System.IO;
 using System.Net.Sockets;
-using System.Threading;
-using System.Threading.Tasks;
 using Node.Messages;
-using Node.Serialization;
 
-namespace Node.Connections.LocalTcp
+namespace Node.Connections.Tcp
 {
-    internal class LocalTcpConnection : IConnection
+    internal class TcpConnection : IConnection
     {
-        public LocalTcpConnection(LocalTcpAddress address, Socket socket, IConnectionUtility connectionUtility)
+        public TcpConnection(TcpAddress localAddress, TcpAddress remoteAddress, Socket socket,  IConnectionUtility connectionUtility)
         {
-            RemoteAddress = address;
+            RemoteAddress = remoteAddress;
+            this.localAddress = localAddress;
             this.socket = socket;
+            this.connectionUtility = connectionUtility;
             stream = new NonblockingSocketStream(socket, connectionUtility);
             State = ConnectionState.Connecting;
         }
@@ -25,6 +21,17 @@ namespace Node.Connections.LocalTcp
             if (State != ConnectionState.Connected)
                 return SendResult.Failure;
             return SendInternal(message);
+        }
+
+        public SendResult Push(IMessage message)
+        {
+            // TODO do something with it
+            SendResult result;
+            do
+            {
+                result = Send(message);
+            } while (result == SendResult.Partial);
+            return result;
         }
 
         public IMessage Receive()
@@ -41,19 +48,31 @@ namespace Node.Connections.LocalTcp
 
             if (!establishmentStage.HasFlag(EstablishmentStage.SentHello))
             {
-                if (SendInternal(new HelloMessage()) == SendResult.Success)
+                if (SendInternal(new StringMessage(localAddress.ToString())) == SendResult.Success)
                     establishmentStage |= EstablishmentStage.SentHello;
             }
             if (!establishmentStage.HasFlag(EstablishmentStage.ReceivedHello) && canRead)
             {
-                var result = ReceiveInternal() as HelloMessage;
+                var result = ReceiveInternal() as StringMessage;
                 if (result != null)
+                {
                     establishmentStage |= EstablishmentStage.ReceivedHello;
+                    RemoteAddress = connectionUtility.ParseAddress(result.Text);
+                }
             }
             if (establishmentStage == EstablishmentStage.Established)
-                State = ConnectionState.Connected;
+            {
+                if (ValidateConnection(this))
+                    State = ConnectionState.Connected;
+                else
+                    Close();
+                if (State != ConnectionState.Closed)
+                    Console.WriteLine("Established connection : {0} <-> {1} ({2})", localAddress, RemoteAddress, GetHashCode());
+                else
+                    Console.WriteLine("Discarded connection : {0} <-> {1} ({2})", localAddress, RemoteAddress, GetHashCode());
+            }
 
-            Console.WriteLine("!! conn -> {0} : {1}, {2}", RemoteAddress, establishmentStage, canRead);
+            //Console.WriteLine("!! conn -> {0} : {1}, {2}", RemoteAddress, establishmentStage, canRead);
         }
 
         public void Close()
@@ -62,11 +81,15 @@ namespace Node.Connections.LocalTcp
             State = ConnectionState.Closed;
         }
 
-        public IAddress RemoteAddress { get; }
+        public IAddress RemoteAddress { get; private set; }
+
+        public IAddress LocalAddress => localAddress;
 
         public ConnectionState State { get; private set; }
 
         public Socket Socket => socket;
+
+        public event Func<TcpConnection, bool> ValidateConnection = _ => true; 
 
         private SendResult SendInternal(IMessage message)
         {
@@ -99,7 +122,9 @@ namespace Node.Connections.LocalTcp
             }
         }
 
+        private readonly TcpAddress localAddress;
         private readonly Socket socket;
+        private readonly IConnectionUtility connectionUtility;
         private readonly NonblockingSocketStream stream;
 
         private EstablishmentStage establishmentStage;
