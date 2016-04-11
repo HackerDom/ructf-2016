@@ -2,7 +2,7 @@
 
 - apt_key: url=https://www.postgresql.org/media/keys/ACCC4CF8.asc
 
-- apt: name={{item}} state=latest update_cache=yes cache_valid_time=3600
+- apt: name={{item}} state=latest update_cache=yes
   with_items:
     - postgresql-9.5
     - python-psycopg2
@@ -10,10 +10,8 @@
 - sysctl: name=kernel.sem value='250 32000 32 1024' state=present
 
 - template: src=postgresql.conf.j2 dest=/etc/postgresql/9.5/main/postgresql.conf
-  notify: restart postgresql
 
 - template: src=pg_hba.conf.j2 dest=/etc/postgresql/9.5/main/pg_hba.conf
-  notify: restart postgresql
 
 - service: name=postgresql state=restarted
 
@@ -29,9 +27,9 @@
   sudo: yes
   sudo_user: postgres
 
-- file: path={{item}} state=directory mode=0755 owner=postgres
-  with_items:
-    - /place/postgresql-backup
+#- file: path={{item}} state=directory mode=0755 owner=postgres
+#  with_items:
+#    - /place/postgresql-backup
 
 #todo: backup db task
 #- cron: user="postgres" minute="0" job="..."
