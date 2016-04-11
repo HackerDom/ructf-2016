@@ -7,6 +7,11 @@ namespace Node.Connections
     {
         IAddress RemoteAddress { get; }
 
+        string RemoteName { get; }
+        IAddress LocalAddress { get; }
+
+        string LocalName { get; }
+
         SendResult Send(IMessage message);
 
         IMessage Receive();
