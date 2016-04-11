@@ -1,9 +1,11 @@
 extern crate hyper;
 extern crate urlparse;
+extern crate stemmer;
 
 use std::sync::{Arc, Mutex};
 
 use std::io::Read;
+use std::io::Write;
 
 use std::collections::HashMap;
 
@@ -13,16 +15,69 @@ use hyper::status::StatusCode;
 use urlparse::urlparse;
 use urlparse::GetQuery;  // Trait
 
+use stemmer::Stemmer;
+
 
 struct Context {
     stor : Mutex<HashMap<String, String>>,
+    docs : Mutex<Vec<String>>,
+    index : Mutex<HashMap<String, usize>>,
 }
 
 impl Context {
     pub fn new() -> Context {
-        let mut context = Context{stor : Mutex::new(HashMap::new())};
+        let mut context = Context{stor : Mutex::new(HashMap::new()),
+                                  docs : Mutex::new(Vec::new()),
+                                  index : Mutex::new(HashMap::new())};
         context
     }
+
+
+    pub fn index(&self, body: String, id: String) {
+        // let mut words: Vec<&str> = line.split(" ").collect();
+        let mut doc_id = 0;
+        {
+            let mut docs = self.docs.lock().unwrap();
+            docs.push(id);
+            doc_id = docs.len() - 1;
+        }
+
+        {
+            let mut index = self.index.lock().unwrap();
+            let mut stemmer = Stemmer::new("english").unwrap();
+            for word in body.split(" ") {
+                let stem = stemmer.stem(word);
+                index.insert(stem, doc_id);
+            }
+        }
+    }
+
+    pub fn search(&self, text:String) -> Vec<String> {
+        let mut res: Vec<String> = Vec::new();
+        let mut doc_ids: Vec<usize> = Vec::new();
+
+        {
+            let mut index = self.index.lock().unwrap();
+            let mut stemmer = Stemmer::new("english").unwrap();
+            for word in text.split(" ") {
+                let stem = stemmer.stem(word);
+                match index.get(&stem) {
+                    Some(id) => doc_ids.push(*id),
+                    None => {}
+                }
+            }
+        }
+
+        {
+            let mut docs = self.docs.lock().unwrap();
+            for doc_id in doc_ids {
+                res.push(docs[doc_id].clone());
+            }
+        }
+
+        res
+    }
+
 }
 
 impl Handler for Context {
@@ -37,12 +92,17 @@ impl Handler for Context {
         if url.path == "/search" {
             let text = query.get_first_from_str("text").unwrap();
             let stor = self.stor.lock().unwrap();
-            // let status: &mut StatusCode = res.status_mut();
             let mut data: String;
+            let mut res = res.start().unwrap();
 
             match stor.get(text.as_str()) {
-                Some(value) => { res.send(value.as_bytes()).unwrap() },
+                Some(value) => { res.write_all(value.as_bytes()).unwrap() },
                 None => {}
+            }
+
+            for id in self.search(text) {
+                res.write_all(id.as_bytes()).unwrap();
+                res.write_all(b"\n").unwrap();
             }
 
             return;
@@ -53,13 +113,13 @@ impl Handler for Context {
             let mut data = String::new();
             let text = query.get_first_from_str("text").unwrap();
             req.read_to_string(&mut data);
+            self.index(data.clone(), text.clone());
             stor.insert(text, data.clone());
             return;
         }
 
         *res.status_mut() = StatusCode::NotFound;
     }
-
 }
 
 fn main() {
