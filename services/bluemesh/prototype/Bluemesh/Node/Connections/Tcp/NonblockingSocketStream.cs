@@ -34,7 +34,7 @@ namespace Node.Connections.Tcp
             {
                 var bytesRead = socket.ReceiveSafe(readBuffer, readPos, MessageContainer.HeaderSize - readPos);
                 readPos += bytesRead;
-                Console.WriteLine("TryRead : header : bytesRead = " + bytesRead);
+                //Console.WriteLine("TryRead : header : bytesRead = " + bytesRead);
                 return false;
             }
             if (readLength < 0)
@@ -45,14 +45,14 @@ namespace Node.Connections.Tcp
             {
                 var bytesRead = socket.ReceiveSafe(readBuffer, readPos, readLength - readPos);
                 readPos += bytesRead;
-                Console.WriteLine("TryRead : body : bytesRead = " + bytesRead);
+                //Console.WriteLine("TryRead : body : bytesRead = " + bytesRead);
             }
             if (readPos >= readLength)
             {
                 readLength = -1;
                 readPos = 0;
                 message = MessageContainer.ReadFromBuffer(readBuffer, 0, connectionUtility).Message;
-                Console.WriteLine("TryRead : success : message = " + message);
+                //Console.WriteLine("TryRead : success : message = " + message);
                 return true;
             }
 

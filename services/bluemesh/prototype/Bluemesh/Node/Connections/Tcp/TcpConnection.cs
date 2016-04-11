@@ -58,8 +58,8 @@ namespace Node.Connections.Tcp
                     State = ConnectionState.Connected;
                 else
                     Close();
-                if (State != ConnectionState.Closed)
-                    Console.WriteLine("Established connection : {0} <-> {1} ({2})", localAddress, RemoteAddress, GetHashCode());
+                //if (State != ConnectionState.Closed)
+                //    Console.WriteLine("Established connection : {0} <-> {1} ({2})", localAddress, RemoteAddress, GetHashCode());
             }
 
             //Console.WriteLine("!! conn -> {0} : {1}, {2}", RemoteAddress, establishmentStage, canRead);

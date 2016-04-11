@@ -38,8 +38,8 @@ namespace Node.Connections.Tcp
             if (GetUsedConnectionSlots() >= routingConfig.MaxConnections)
                 return false;
 
-            Console.WriteLine("!! connecting to {0} ; existing sockets : {1} ; existing conns : {2}", tcpAddress, connectingSockets.Count, 
-                string.Join(", ", connections.Select(c => c.RemoteAddress)));
+            //Console.WriteLine("!! connecting to {0} ; existing sockets : {1} ; existing conns : {2}", tcpAddress, connectingSockets.Count, 
+            //    string.Join(", ", connections.Select(c => c.RemoteAddress)));
             
             var socket = Connect(tcpAddress.Endpoint);
             if (socket != null)
@@ -87,7 +87,7 @@ namespace Node.Connections.Tcp
             //Console.WriteLine("[{3}] Select : {0} {1} {2}", checkRead.Count, checkWrite.Count, checkError.Count, Address);
             if (checkRead.Contains(serverSocket))
             {
-                Console.WriteLine("!! {0} accept : {1} + {2} < {3}", Address, Connections.Count, connectingSockets.Count, routingConfig.MaxConnections);
+                //Console.WriteLine("!! {0} accept : {1} + {2} < {3}", Address, Connections.Count, connectingSockets.Count, routingConfig.MaxConnections);
                 var socket = serverSocket.Accept();
                 if (socket.Blocking)
                     throw new Exception("FUCK");

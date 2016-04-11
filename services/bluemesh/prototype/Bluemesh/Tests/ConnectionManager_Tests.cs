@@ -24,7 +24,7 @@ namespace Tests
             var routingConfig = Substitute.For<IRoutingConfig>();
             routingConfig.MaxConnections.Returns(int.MaxValue);
             var preconfiguredNodes = new List<IAddress>();
-            var nodes = Enumerable.Range(0, 2).Select(i => CreateNode(routingConfig, preconfiguredNodes, i)).ToList();
+            var nodes = Enumerable.Range(0, 10).Select(i => CreateNode(routingConfig, preconfiguredNodes, i)).ToList();
 
             ThreadPool.SetMinThreads(nodes.Count * 2, nodes.Count * 2);
 
@@ -96,8 +96,8 @@ namespace Tests
                 var countBefore = connectionManager.Connections.Count;
                 connectionManager.PurgeDeadConnections();
                 var countAfter = connectionManager.Connections.Count;
-                if (countBefore > countAfter)
-                    Console.WriteLine("Purged {0} connections", countBefore - countAfter);
+                //if (countBefore > countAfter)
+                //    Console.WriteLine("Purged {0} connections", countBefore - countAfter);
                 try
                 {
                     foreach (var peer in connectionManager.GetAvailablePeers())
@@ -130,12 +130,12 @@ namespace Tests
                 }
                 foreach (var connection in selectResult.ReadableConnections.Where(c => c.State == ConnectionState.Connected))
                 {
-                    Console.WriteLine("readable step");
+                    //Console.WriteLine("readable step");
                     stages[connection].Step(connection, true, false);
                 }
                 foreach (var connection in selectResult.WritableConnections.Where(c => c.State == ConnectionState.Connected))
                 {
-                    Console.WriteLine("writable step");
+                    //Console.WriteLine("writable step");
                     stages[connection].Step(connection, false, true);
                 }
             }
@@ -220,7 +220,7 @@ namespace Tests
             if (writable)
             {
                 var result = connection.Send(message);
-                Console.WriteLine("Send {0} by {1} <-> {2} ({3}) : {4}", message, connection.LocalAddress, connection.RemoteAddress, connection.GetHashCode(), result);
+                //Console.WriteLine("Send {0} by {1} <-> {2} ({3}) : {4}", message, connection.LocalAddress, connection.RemoteAddress, connection.GetHashCode(), result);
                 return result == SendResult.Success;
             }
             return false;
@@ -241,7 +241,7 @@ namespace Tests
             if (!readable)
                 return false;
             var result = connection.Receive();
-            Console.WriteLine("Receive by {0} <-> {1} ({2}) : {3}", connection.LocalAddress, connection.RemoteAddress, connection.GetHashCode(), result);
+            //Console.WriteLine("Receive by {0} <-> {1} ({2}) : {3}", connection.LocalAddress, connection.RemoteAddress, connection.GetHashCode(), result);
             if (result == null)
                 return false;
             result.Should().Be(messageForConnection(connection));
