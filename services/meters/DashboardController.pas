@@ -5,7 +5,7 @@ unit DashboardController;
 interface
 
 	uses
-		httpdefs, fpHTTP, fpWeb, AccountController, WebUtils;
+		httpdefs, fpHTTP, fpWeb, AccountController, WebUtils, DashboardContainer, Utils, SysUtils;
 	
 	type
 		TDashboardModule = class(TFPWebModule)
@@ -14,58 +14,134 @@ interface
 			procedure OnCreate(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
 		end;
 
-	var
-		DashboardModule: TDashboardModule;
-
 implementation
 
 {$R *.lfm}
 
+	const
+		ModuleName = 'dashboard';
+
+	var
+		listTemplate, listATemplate: string;
+		viewTemplate: string;
+		createTemplate: string;
+
 	procedure TDashboardModule.OnList(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
 	var
 		userid: TUserId;
-//		dashboards: 
+		user: TUser;
+		dashboards: TDashboards;
+		dashboard: TDashboard;
+		list, tmp: string;
+		i: longint;
 	begin
 		Handled := True;
+
 		userid := GetQueryUserId(ARequest);
 		if userid = 0 then
 			userId := GetCurrentUserId(ARequest);
 		if userid = 0 then
 		begin
-			AResponse.Content := 'bad request';
 			AResponse.Code := 400;
+			AResponse.Content := StringReplace(listTemplate, '{-list-}', 'can''t find any user in query', []);
 			exit;
 		end;
-		AResponse.Content := AccountController.GetDashboards(userid);
+
+		dashboards := AccountManager.GetDashboards(userid);
+		if dashboards = nil then
+		begin
+			user := AccountManager.GetUser(userid);
+			AResponse.Content := StringReplace(listTemplate, '{-list-}', 'can''t find dashboards for user ' + user.username, []);
+			exit;
+		end;
+
+		list := '';
+		for i := 0 to dashboards.Count - 1 do
+		begin
+			dashboard := DashboardManager.GetDashboard(dashboards[i]);
+			tmp := StringReplace(listATemplate, '{-dashboardid-}', IntToStr(dashboards[i]), []);
+			list := list + StringReplace(tmp, '{-dashboard-}', dashboard.Name, []);
+		end;
+
+		ARequest.Content := StringReplace(listTemplate, '{-list-}', list, []);
 	end;
 
 	procedure TDashboardModule.OnView(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
 	var
-		dashboardid: int64;
+		dashboardid: TDashboardId;
+		dashboard: TDashboard;
+		message: string;
+		page: string;
 	begin
-		if not HavePermission(ARequest, dashboardid) then
+		dashboardid := GetQueryDashboardId(ARequest);
+		dashboard := DashboardManager.GetDashboard(dashboardid);
+
+		page := StringReplace(viewTemplate, '{-name-}', dashboard.Name, []);
+
+		message := HavePermission(ARequest, dashboardid);
+		if message <> '' then
 		begin
-			SendUnauthorized(AResponse);
+			page := StringReplace(page, '{-description-}', message, []);
+			AResponse.Content := StringReplace(page, '{-sensors-}', '', []);
 			Handled := True;
 			exit;
 		end;
 
-		AResponse.Content := DashboardContainer.GetDashboard(dashboardid);
+		page := StringReplace(page, '{-description-}', dashboard.Description, []);
+	
+		AResponse.Content := StringReplace(page, '{-sensors-}', 'not implemented', []);
+		Handled := True;
 	end;
 
 	procedure TDashboardModule.OnCreate(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
+	var
+		dname, description: string;
+		userid: TUserId;
+		dashboardId: TDashboardId;
 	begin
+		Handled := True;
 		if not IsAuthorized(ARequest) then
 		begin
 			SendUnauthorized(AResponse);
-			Handled := True;
 			exit;
 		end;
 
+		dname := ARequest.ContentFields.Values['name'];
+		description := ARequest.ContentFields.Values['description'];
+
+		if (dname = '') and (description = '') then
+		begin
+			AResponse.Content := StringReplace(createTemplate, '{-message-}', '', []);
+			exit;
+		end;
+
+		if (dname = '') or (description = '') then
+		begin
+			AResponse.Content := StringReplace(createTemplate, '{-message-}', 'both name and description are required', []);
+			exit;
+		end;
 		
+		if HasBadSymbols(dname) or HasBadSymbols(description) then
+		begin
+			AResponse.Content := StringReplace(createTemplate, '{-message}', 'name and description must contains symbols with codes from [32 .. 127]', []);
+			exit;
+		end;
+
+		userId := GetCurrentUserId(ARequest);
+		dashboardId := DashboardManager.CreateDashboard(dname, description);
+		AccountManager.AddDashboard(userId, dashboardid);
+		AddPermission(ARequest, AResponse, dashboardid);
+
+		AResponse.SendRedirect('/dashboard/view?dashboardId=' + IntToStr(dashboardid));
 	end;
 
 initialization
-	RegisterHTTPModule('dashboard', TDashboardModule);
+	writeln(stderr, 'initialization DashboardController');
+	flush(stderr);
+	listTemplate := GetTemplate(ModuleName, 'list');
+	listATemplate := GetSubTemplate(ModuleName, 'list.a');
+	viewTemplate := GetTemplate(ModuleName, 'view');
+	createTemplate := GetTemplate(ModuleName, 'create');
+	RegisterHTTPModule(ModuleName, TDashboardModule);
 
 end.

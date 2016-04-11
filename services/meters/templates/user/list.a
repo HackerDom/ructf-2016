@@ -1,1 +1,1 @@
-<a href='/dashboards?userid={-userid-}'>{-username-}</a><br>
+<a href='/dashboard/list?userid={-userid-}'>{-username-}</a><br>

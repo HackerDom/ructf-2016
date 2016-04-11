@@ -4,7 +4,7 @@ unit Sensor;
 {$modeswitch advancedrecords} 
 
 interface
-	uses fgl, SysUtils, Classes;
+	uses fgl, SysUtils, Classes, Utils;
 
 	type
 		TRawValue = record
@@ -37,7 +37,6 @@ interface
 
 implementation
 	const
-		logDir = './logs/';
 		UnixStartDate: TDateTime = 25569.0;
 
 	function DateTimeToUnix(dtDate: TDateTime): Longint;
@@ -56,7 +55,7 @@ implementation
 		logFilePath: unicodestring;
 	begin
 		values := TRawValues.Create;
-		logFilePath := logDir + fileName;
+		logFilePath := writeDir + fileName;
 		assign(log, logFilePath);
 		rwSync := TSimpleRWSync.Create;
 		ready := -1;
@@ -114,6 +113,7 @@ implementation
 			tmp.value := current - prev;
 			tmp.timestamp := DateTimeToUnix(current);
 			writeln(log, tmp.timestamp, tmp.value);
+			flush(log);
 
 			rwSync.BeginWrite;
 			values.Add(tmp);
@@ -126,6 +126,8 @@ implementation
 	end;
 
 initialization
+	writeln(stderr, 'initialization Sensor');
+	flush(stderr);
 	RawTickSensor := TRawTick.Create;
 
 end.
