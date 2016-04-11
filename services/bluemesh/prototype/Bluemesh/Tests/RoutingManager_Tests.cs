@@ -23,9 +23,9 @@ namespace Tests
         {
             var config = Substitute.For<IRoutingConfig>();
             config.DesiredConnections.Returns(1);
-            config.MaxConnections.Returns(2);
+            config.MaxConnections.Returns(5);
             var preconfiguredNodes = new List<IAddress>();
-            var nodes = Enumerable.Range(0, 3).Select(i => CreateNode(config, preconfiguredNodes, i)).ToList();
+            var nodes = Enumerable.Range(0, 5).Select(i => CreateNode(config, preconfiguredNodes, i)).ToList();
 
             ThreadPool.SetMinThreads(nodes.Count * 2, nodes.Count * 2);
 

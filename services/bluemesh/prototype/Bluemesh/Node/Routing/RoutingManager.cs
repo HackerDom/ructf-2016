@@ -38,7 +38,7 @@ namespace Node.Routing
                 {
                     var message = new MapMessage(Map.Links);
                     var result = connection.Push(message);
-                    Console.WriteLine("!! {0} -> {1} : {2}", Map.OwnAddress, connection.RemoteAddress, result);
+                    //Console.WriteLine("!! {0} -> {1} : {2}", Map.OwnAddress, connection.RemoteAddress, result);
 
                     if (result == SendResult.Success)
                         versionsByPeer[connection.RemoteAddress] = new VersionInfo(Map.Version, DateTime.UtcNow);
@@ -59,14 +59,13 @@ namespace Node.Routing
                 if (!connectionManager.EstablishedConnections.Any(c => Equals(c.RemoteAddress, peer)))
                 {
                     Map.RemoveDirectConnection(peer);
-                    lastDisconnect = DateTime.UtcNow;
                 }
             }
         }
 
         public void ConnectNewLinks()
         {
-            if (DateTime.UtcNow - lastConnect < TimeSpan.FromSeconds(0.2))
+            if (DateTime.UtcNow - lastConnect < TimeSpan.FromSeconds(.1))
                 return;
             foreach (var peer in connectionManager.GetAvailablePeers())
             {
@@ -85,6 +84,8 @@ namespace Node.Routing
             var excessPeer = Map.FindExcessPeer();
             if (excessPeer != null)
             {
+                lastDisconnect = DateTime.UtcNow;
+                Console.WriteLine("[{0}] suggesting {1} to terminate connection", Map.OwnAddress, excessPeer);
                 var connection = connectionManager.Connections.FirstOrDefault(c => Equals(c.RemoteAddress, excessPeer));
                 connection?.Push(new StringMessage("心中"));
             }
@@ -106,7 +107,7 @@ namespace Node.Routing
             {
                 if (Map.IsLinkExcess(new RoutingMapLink(Map.OwnAddress, connection.RemoteAddress)))
                 {
-                    Console.WriteLine("!! closing connection by agreement");
+                    Console.WriteLine("[{0}] closing connection with {1} by agreement", Map.OwnAddress, connection.RemoteAddress);
                     connection.Close();
                 }
             }
