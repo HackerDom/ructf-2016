@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Node.Connections;
-using Node.Connections.LocalTcp;
+using Node.Connections.Tcp;
 using Node.Messages;
 using Node.Routing;
 using NSubstitute;
@@ -17,14 +18,13 @@ namespace Tests
     [TestFixture]
     internal class ConnectionManager_Tests
     {
-        [Explicit, Timeout(20000)]
-        [TestCase(0)]
-        [TestCase(0.5)]
-        public void Measure_fully_interconnected_communication(double errorProbability)
+        [Test, Explicit, Timeout(20000)]
+        public void Measure_fully_interconnected_communication()
         {
-            var config = Substitute.For<IRoutingConfig>();
-            config.MaxConnections.Returns(int.MaxValue);
-            var nodes = Enumerable.Range(0, 2).Select(i => new TestNode(new LocalTcpConnectionManager(config), errorProbability)).ToList();
+            var routingConfig = Substitute.For<IRoutingConfig>();
+            routingConfig.MaxConnections.Returns(int.MaxValue);
+            var preconfiguredNodes = new List<IAddress>();
+            var nodes = Enumerable.Range(0, 10).Select(i => CreateNode(routingConfig, preconfiguredNodes, i)).ToList();
 
             ThreadPool.SetMinThreads(nodes.Count * 2, nodes.Count * 2);
 
@@ -42,12 +42,21 @@ namespace Tests
             Console.WriteLine("Communication took " + watch.Elapsed);
         }
 
+        private static TestNode CreateNode(IRoutingConfig routingConfig, List<IAddress> nodes, int id)
+        {
+            var connectionConfig = Substitute.For<IConnectionConfig>();
+            var address = new TcpAddress(new IPEndPoint(IPAddress.Loopback, 16800 + id));
+            connectionConfig.LocalAddress.Returns(address);
+            connectionConfig.PreconfiguredNodes.Returns(_ => nodes.Where(n => !Equals(n, address)).ToList());
+            nodes.Add(address);
+            return new TestNode(new TcpConnectionManager(connectionConfig, routingConfig));
+        }
+
         private class TestNode
         {
-            public TestNode(LocalTcpConnectionManager connectionManager, double errorProbability = 0)
+            public TestNode(TcpConnectionManager connectionManager)
             {
                 this.connectionManager = connectionManager;
-                this.errorProbability = errorProbability;
                 var id = connectionManager.Address;
                 strategyBuilder = CommunicationStrategyBuilder.Start()
                     .Send(new StringMessage("hello from " + id))
@@ -68,37 +77,16 @@ namespace Tests
 
             public void Start(int peerCount)
             {
-                var stopped = false;
-                var nukerTask = null as Task;
-                if (errorProbability > 0)
-                {
-                    nukerTask = Task.Run(async () =>
-                    {
-                        var r = new Random();
-                        while (!stopped)
-                        {
-                            await Task.Delay(100);
-                            var connections = connectionManager.Connections;
-                            if (connections.Count > 0 && r.NextDouble() < errorProbability)
-                            {
-                                ((LocalTcpConnection) connections[r.Next(connections.Count)]).Socket.Close();
-                                Console.WriteLine("Nuked some connections, hehe");
-                                break;
-                            }
-                        }
-                    });
-                }
                 int ticks = 0;
-                while (stages.Count < peerCount || stages.Values.Any(s => !s.Completed))
+                while (stages.GroupBy(pair => pair.Key.RemoteAddress).Count(g => g.Any(pair => pair.Value.Completed)) < peerCount)
                 {
                     Tick();
                     ticks++;
 
                     Console.WriteLine("[{0}] Tick result: {1} connections, {2} completed", 
-                        connectionManager.Address, connectionManager.Connections.Count, stages.Values.Count(s => s.Completed));
+                        connectionManager.Address, connectionManager.EstablishedConnections.Count(), stages.Values.Count(s => s.Completed));
+                    Console.WriteLine("[{0}] Progress: {1}", connectionManager.Address, string.Join(", ", stages.Values.Select(s => s.Progress.ToString("f2"))));
                 }
-                stopped = true;
-                nukerTask?.Wait();
                 Console.WriteLine("[{0}] {1} ticks elapsed", connectionManager.Address, ticks);
             }
 
@@ -107,8 +95,8 @@ namespace Tests
                 var countBefore = connectionManager.Connections.Count;
                 connectionManager.PurgeDeadConnections();
                 var countAfter = connectionManager.Connections.Count;
-                if (countBefore > countAfter)
-                    Console.WriteLine("Purged {0} connections", countBefore - countAfter);
+                //if (countBefore > countAfter)
+                //    Console.WriteLine("Purged {0} connections", countBefore - countAfter);
                 try
                 {
                     foreach (var peer in connectionManager.GetAvailablePeers())
@@ -123,25 +111,36 @@ namespace Tests
                     return;
                 //Console.WriteLine("[{0}] Select result: {1} readable, {2} writable",
                 //    connectionManager.Address, selectResult.ReadableConnections.Count, selectResult.WritableConnections.Count);
-                foreach (var connection in connectionManager.Connections)
-                {
-                    CommunicationStrategy stage;
-                    if (!stages.TryGetValue(connection.RemoteAddress, out stage))
-                        stages[connection.RemoteAddress] = strategyBuilder.Build();
-                }
                 foreach (var connection in selectResult.ReadableConnections)
                 {
-                    stages[connection.RemoteAddress].Step(connection, true, false);
+                    //Console.WriteLine("[{0}] tick: {1} -> {2}", connectionManager.Address, connectionManager.Address, connection.RemoteAddress);
+                    connection.Tick(true);
                 }
                 foreach (var connection in selectResult.WritableConnections)
                 {
-                    stages[connection.RemoteAddress].Step(connection, false, true);
+                    //Console.WriteLine("[{0}] tick: {1} -> {2}", connectionManager.Address, connectionManager.Address, connection.RemoteAddress);
+                    connection.Tick(false);
+                }
+                foreach (var connection in connectionManager.EstablishedConnections)
+                {
+                    CommunicationStrategy stage;
+                    if (!stages.TryGetValue(connection, out stage))
+                        stages[connection] = strategyBuilder.Build();
+                }
+                foreach (var connection in selectResult.ReadableConnections.Where(c => c.State == ConnectionState.Connected))
+                {
+                    //Console.WriteLine("readable step");
+                    stages[connection].Step(connection, true, false);
+                }
+                foreach (var connection in selectResult.WritableConnections.Where(c => c.State == ConnectionState.Connected))
+                {
+                    //Console.WriteLine("writable step");
+                    stages[connection].Step(connection, false, true);
                 }
             }
 
-            private readonly Dictionary<IAddress, CommunicationStrategy> stages = new Dictionary<IAddress, CommunicationStrategy>();
-            private readonly LocalTcpConnectionManager connectionManager;
-            private readonly double errorProbability;
+            private readonly Dictionary<IConnection, CommunicationStrategy> stages = new Dictionary<IConnection, CommunicationStrategy>();
+            private readonly TcpConnectionManager connectionManager;
             private readonly CommunicationStrategyBuilder strategyBuilder;
         }
     }
@@ -196,6 +195,7 @@ namespace Tests
         }
 
         public bool Completed => currentStep >= steps.Count;
+        public double Progress => (double) currentStep / steps.Count;
 
         private int currentStep;
         private readonly List<ICommunicationStep> steps;
@@ -215,7 +215,14 @@ namespace Tests
 
         public bool Execute(IConnection connection, bool readable, bool writable)
         {
-            return writable && connection.Send(message) == SendResult.Success;
+            //return writable && connection.Send(message) == SendResult.Success;
+            if (writable)
+            {
+                var result = connection.Send(message);
+                //Console.WriteLine("Send {0} by {1} <-> {2} ({3}) : {4}", message, connection.LocalAddress, connection.RemoteAddress, connection.GetHashCode(), result);
+                return result == SendResult.Success;
+            }
+            return false;
         }
 
         private readonly IMessage message;
@@ -233,6 +240,7 @@ namespace Tests
             if (!readable)
                 return false;
             var result = connection.Receive();
+            //Console.WriteLine("Receive by {0} <-> {1} ({2}) : {3}", connection.LocalAddress, connection.RemoteAddress, connection.GetHashCode(), result);
             if (result == null)
                 return false;
             result.Should().Be(messageForConnection(connection));

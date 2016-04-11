@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Node.Connections;
+using Node.Connections.Tcp;
 
 namespace Node.Routing
 {
@@ -53,8 +54,15 @@ namespace Node.Routing
             return
                 $@"
 graph {name} {{
-{string.Join(Environment.NewLine, links.Select(link => "\t" + link.A + " -- " + link.B + ";"))}
+{string.Join(Environment.NewLine, links.Select(link => "\t" + MakeSafeString(link.A) + " -- " + MakeSafeString(link.B) + ";"))}
 }}";
+        }
+
+        private static string MakeSafeString(object obj)
+        {
+            if (obj is TcpAddress)
+                return (((TcpAddress) obj).Endpoint.Port % 100).ToString();
+            return obj.ToString().Replace(".", "").Replace(":", "");
         }
 
         private static bool IsReachable(IAddress destination, IAddress source, ICollection<RoutingMapLink> links, HashSet<IAddress> visitedNodes)
