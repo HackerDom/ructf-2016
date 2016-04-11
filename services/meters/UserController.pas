@@ -54,7 +54,6 @@ implementation
 		userid: TUserId;
 	begin
 		Handled := True;
-		AResponse.ContentType := 'text/html';
 
 		if not TryGetUsernameAndPassword(ARequest, AResponse, username, password, loginTemplate) then
 			exit;

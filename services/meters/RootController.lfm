@@ -1,0 +1,5 @@
+object RootModule: TRootModule
+	OldCreateOrder = False
+	OnRequest = OnRequest
+	CreateSession = False
+end

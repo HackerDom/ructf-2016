@@ -63,7 +63,7 @@ implementation
 			list := list + StringReplace(tmp, '{-dashboard-}', dashboard.Name, []);
 		end;
 
-		ARequest.Content := StringReplace(listTemplate, '{-list-}', list, []);
+		AResponse.Content := StringReplace(listTemplate, '{-list-}', list, []);
 	end;
 
 	procedure TDashboardModule.OnView(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
@@ -96,13 +96,16 @@ implementation
 	procedure TDashboardModule.OnCreate(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
 	var
 		dname, description: string;
+		layout: string;
 		userid: TUserId;
 		dashboardId: TDashboardId;
 	begin
 		Handled := True;
 		if not IsAuthorized(ARequest) then
 		begin
-			SendUnauthorized(AResponse);
+			layout := GetLayout(ModuleName, 'create');
+			AResponse.Code := 401; 
+			AResponse.Content := StringReplace(layout, '{-body-}', 'login before can create', []);
 			exit;
 		end;
 

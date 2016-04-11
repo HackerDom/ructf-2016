@@ -1,6 +1,6 @@
-- user: name=cs state=present
+- user: name={{cs_user}} state=present
 
-- apt: name={{item}} state=latest update_cache=yes cache_valid_time=3600
+- apt: name={{item}} state=latest update_cache=yes
   with_items:
     - libssl-dev
     - libpq-dev

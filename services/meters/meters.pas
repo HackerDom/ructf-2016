@@ -1,9 +1,9 @@
-program httpproject1;
+program meters;
 
 {$mode objfpc}{$H+}
 
 uses
-	cthreads, fphttpapp, fpWebFile, UserController, AccountController, DashboardController, Sensor, DashboardContainer;
+	cthreads, fphttpapp, fpWebFile, UserController, AccountController, DashboardController, Sensor, DashboardContainer, RootController;
 
 
 {
