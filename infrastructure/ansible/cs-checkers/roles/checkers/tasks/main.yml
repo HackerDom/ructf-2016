@@ -8,3 +8,6 @@
 
 - apt: name=tcpdump
 
+- name: set_cap
+  capabilities: capability=cap_net_raw=eip path=/usr/bin/python3.4 state=present
+
