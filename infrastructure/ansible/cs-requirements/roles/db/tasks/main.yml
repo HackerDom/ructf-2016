@@ -15,15 +15,15 @@
 
 - service: name=postgresql state=restarted
 
-- postgresql_user: name=cs password=jPcTXXmHIg3RfD2X1706UtXLpUpk2htk state=present
+- postgresql_user: name={{cs_user}} password={{cs_db_pass}} state=present
   sudo: yes
   sudo_user: postgres
 
-- postgresql_db: name=cs_dev owner=cs state=present
+- postgresql_db: name=cs_dev owner={{cs_user}} state=present
   sudo: yes
   sudo_user: postgres
 
-- postgresql_db: name=cs_prod owner=cs state=present
+- postgresql_db: name=cs_prod owner={{cs_user}} state=present
   sudo: yes
   sudo_user: postgres
 

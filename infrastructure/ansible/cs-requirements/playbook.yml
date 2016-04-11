@@ -1,4 +1,6 @@
 - hosts: asus1
   roles: [db,app]
-  gather_facts: yes
-
+  vars:
+    cs_user: cs
+    cs_dir: /home/cs
+    cs_db_pass: jPcTXXmHIg3RfD2X1706UtXLpUpk2htk

@@ -1,4 +1,4 @@
-- user: name=cs state=present
+- user: name={{cs_user}} state=present
 
 - apt: name={{item}} state=latest update_cache=yes
   with_items:
