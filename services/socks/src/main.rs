@@ -68,19 +68,10 @@ impl Context {
                 match index.get(&stem) {
                     Some(ids) => {
                         let word_doc_ids: HashSet<_> = ids.iter().cloned().collect();
-                        for doc_id in word_doc_ids.clone() {
-                            println!("{:?}", doc_id);
-                        }
-
                         if doc_ids.is_empty() {
                             doc_ids = word_doc_ids;
                         } else {
                             doc_ids = doc_ids.intersection(&word_doc_ids).cloned().collect();
-                        }
-
-                        println!("==========");
-                        for doc_id in doc_ids.clone() {
-                            println!("{:?}", doc_id);
                         }
 
                     }
