@@ -5,7 +5,7 @@ unit Utils;
 interface
 
 	const
-		writeDir = './log/';
+		writeDir = './data/';
 		templatesDir = './templates/';
 	
 	function readFile(const path: string): string;
@@ -16,6 +16,7 @@ interface
 	function GetTemplate(const module, action: string): string;
 	function GetSubTemplate(const module, name: string): string;
 	function StrToQWord(const s: string): QWord;
+	function htmlEncode(const str: string): string;
 
 
 implementation
@@ -110,6 +111,12 @@ implementation
 				exit(0);
 			result := 10 * result + ord(s[i]) - 48;
 		end;
+	end;
+
+	function htmlEncode(const str: string): string;
+	begin
+		result := StringReplace(str, '&', '&amp;', [rfReplaceAll]);
+		result := StringReplace(result, '<', '&lt;', [rfReplaceAll]);
 	end;
 
 initialization

@@ -109,9 +109,10 @@ implementation
 		while true do
 		begin
 			current := now;
-			tmp.value := current - prev;
+			tmp.value := (current - prev) * 1e6;
 			tmp.timestamp := DateTimeToUnix(current);
-			writeln(log, tmp.timestamp, tmp.value);
+			prev := current;
+			writeln(log, tmp.timestamp, ' ', tmp.value:0:10);
 			flush(log);
 
 			rwSync.BeginWrite;

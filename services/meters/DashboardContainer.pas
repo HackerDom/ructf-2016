@@ -111,8 +111,8 @@ implementation
 		dashboard: TDashboard;
 	begin
 		dashboard.ID := GetGuid;
-		dashboard.name := name;
-		dashboard.description := description;
+		dashboard.name := htmlEncode(name);
+		dashboard.description := htmlEncode(description);
 
 		rwSync.beginWrite;
 		writeln(saveFile, dashboard.Id);

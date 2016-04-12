@@ -39,7 +39,7 @@ interface
 				procedure Initialize;
 				procedure AddDashboard(const userId: TUserId; const dashboardId: TDashboardId);
 				function CreateUser(const username: string; const password: string): string;
-				function IsAuthorized(const token: string): boolean;
+				function IsAuthorized(const token: string): string;
 				function GetUserId(const username: string; const password: string): TUserId;
 				function GetAuthToken(const userid: TUserId): string;
 				function GetCurrentUserId(const token: string): TUserId;
@@ -54,12 +54,9 @@ interface
 		AccountManager: TAccountManager;
 implementation
 
-	const
-//		secret: qword = $F3DBB0B8A67378;
-		secret: qword = 0;
-
 	var
 		defaultUser: TUser;
+		ttl: TDateTime;
 
 
 	procedure TAccountManager.InitializeUsersList;
@@ -182,12 +179,16 @@ implementation
 		usersRWSync.endWrite;
 	end;
 
-	function TAccountManager.IsAuthorized(const token: string): boolean;
+	function TAccountManager.IsAuthorized(const token: string): string;
 	var
 		decoded: TList;
 	begin
 		decoded := decode(token);
-		result := (decoded.Count >= 1) and (decoded[0] = secret);
+		if decoded.Count = 0 then
+			exit('can''t find set time');
+		if abs(unpack(decoded[0]) - now) <= ttl then
+			exit('cookies is too old. set at ' + DateTimeToStr(unpack(decoded[0])));
+		result := '';
 	end;
 
 	function TAccountManager.GetUserId(const username: string; const password: string): TUserId;
@@ -209,7 +210,7 @@ implementation
 		dt: double;
 		dashboardId: TDashboardId;
 	begin
-		result := encodeBlock(secret);
+		result := encodeBlock(now);
 		result := appendBlock(result, userId);
 
 		usersDashboardsRWSync.beginread;
@@ -271,8 +272,8 @@ implementation
 			if decoded[2 * i + 1] = dashboard then
 			begin
 				dt := unpack(decoded[2 * i]);
-				if dt > now then
-					exit('Dashboard opened for you at ' + DateTimeToStr(dt))
+				if abs(dt - now) > ttl then
+					exit('cookie is too old. set at ' + DateTimeToStr(dt))
 				else
 					exit('');
 			end;
@@ -347,6 +348,7 @@ initialization
 	flush(stderr);
 	defaultUser.userid := 0;
 	defaultUser.username := 'No user';
+	ttl := EncodeTime(0, 15, 0, 0);
 	AccountManager := TAccountManager.Create;
 
 end.
