@@ -9,7 +9,8 @@ interface
 	
 	type
 		TDashboardModule = class(TFPWebModule)
-			procedure OnList(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
+			procedure OnMy(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
+			procedure OnAll(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
 			procedure OnView(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
 			procedure OnCreate(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
 		end;
@@ -26,44 +27,53 @@ implementation
 		viewTemplate: string;
 		createTemplate: string;
 
-	procedure TDashboardModule.OnList(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
+	function GetList(const dashboards: TDashboards): string;
 	var
-		userid: TUserId;
-		user: TUser;
-		dashboards: TDashboards;
-		dashboard: TDashboard;
 		list, tmp: string;
 		i: longint;
 	begin
-		Handled := True;
-
-		userid := GetQueryUserId(ARequest);
-		if userid = 0 then
-			userId := GetCurrentUserId(ARequest);
-		if userid = 0 then
-		begin
-			AResponse.Code := 400;
-			AResponse.Content := StringReplace(listTemplate, '{-list-}', 'can''t find any user in query', []);
-			exit;
-		end;
-
-		dashboards := AccountManager.GetDashboards(userid);
-		if dashboards = nil then
-		begin
-			user := AccountManager.GetUser(userid);
-			AResponse.Content := StringReplace(listTemplate, '{-list-}', 'can''t find dashboards for user ' + user.username, []);
-			exit;
-		end;
-
 		list := '';
 		for i := 0 to dashboards.Count - 1 do
 		begin
-			dashboard := DashboardManager.GetDashboard(dashboards[i]);
-			tmp := StringReplace(listATemplate, '{-dashboardid-}', IntToStr(dashboards[i]), []);
-			list := list + StringReplace(tmp, '{-dashboard-}', dashboard.Name, []);
+			tmp := StringReplace(listATemplate, '{-dashboardid-}', IntToStr(dashboards[i].Id), []);
+			list := list + StringReplace(tmp, '{-dashboard-}', dashboards[i].Name, []);
 		end;
 
-		AResponse.Content := StringReplace(listTemplate, '{-list-}', list, []);
+		result := StringReplace(listTemplate, '{-list-}', list, []);
+	end;
+
+	function GetDashboards(ARequest: TRequest): TDashboards;
+	var
+		dashboards: TDashboardIds;
+		i: longint;
+	begin
+		dashboards := GetPermittedDashboards(ARequest);
+		if dashboards = nil then
+			exit(nil);
+		result := TDashboards.Create;
+		for i := 0 to dashboards.Count - 1 do
+			result.add(DashboardManager.GetDashboard(dashboards[i]));
+	end;
+
+	procedure TDashboardModule.OnMy(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
+	var
+		dashboards: TDashboards;
+	begin
+		Handled := True;
+
+		dashboards := GetDashboards(ARequest);
+		if dashboards = nil then
+			AResponse.Content := StringReplace(listTemplate, '{-list-}', 'not authorized', [])
+		else if dashboards.Count = 0 then
+			AResponse.Content := StringReplace(listTemplate, '{-list-}', 'can''t find dashboards for current user', [])
+		else
+			AResponse.Content := GetList(dashboards);
+	end;
+
+	procedure TDashboardModule.OnAll(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
+	begin
+		Handled := True;
+		AResponse.Content := GetList(DashboardManager.GetDashboards);
 	end;
 
 	procedure TDashboardModule.OnView(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
@@ -96,16 +106,17 @@ implementation
 	procedure TDashboardModule.OnCreate(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
 	var
 		dname, description: string;
-		layout: string;
+		layout, message: string;
 		userid: TUserId;
 		dashboardId: TDashboardId;
 	begin
 		Handled := True;
-		if not IsAuthorized(ARequest) then
+		message := IsAuthorized(ARequest);
+		if message <> '' then
 		begin
 			layout := GetLayout(ModuleName, 'create');
 			AResponse.Code := 401; 
-			AResponse.Content := StringReplace(layout, '{-body-}', 'login before can create', []);
+			AResponse.Content := StringReplace(layout, '{-body-}', message, []);
 			exit;
 		end;
 
@@ -135,7 +146,7 @@ implementation
 		AccountManager.AddDashboard(userId, dashboardid);
 		AddPermission(ARequest, AResponse, dashboardid);
 
-		AResponse.SendRedirect('/dashboard/view?dashboardId=' + IntToStr(dashboardid));
+		AResponse.SendRedirect('/dashboard/view/?dashboardId=' + IntToStr(dashboardid));
 	end;
 
 initialization

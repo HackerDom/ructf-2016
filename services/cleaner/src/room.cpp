@@ -29,7 +29,7 @@ const TRoomConfiguration& TRoom::GetConfiguration() const {
 bool TRoom::CheckHall(const std::string& hall_hex) const {
     auto hall_size{Configuration.size() / 2};
     TRoomConfiguration hall{hall_size};
-    boost::algorithm::unhex(hall_hex.begin(), hall_hex.begin() + hall.size() * 2, std::back_inserter(hall));
+    boost::algorithm::unhex(hall_hex.begin(), hall_hex.begin() + hall.size() / 16, std::back_inserter(hall));
 
     return std::equal(hall.begin(), hall.end(), Configuration.begin());
 }

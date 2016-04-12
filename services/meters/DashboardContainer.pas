@@ -11,7 +11,7 @@ interface
 		TSensorId = QWord;
 		TDashboardId = QWord;
 
-		TDashboards = specialize TFPGList<TDashboardId>;
+		TDashboardIds = specialize TFPGList<TDashboardId>;
 		TSensors = specialize TFPGList<TSensorId>;
 		TSensorss = specialize TFPGList<TSensors>;
 
@@ -23,17 +23,18 @@ interface
 			class operator = (const a, b: TDashboard): Boolean;
 		end;
 
-		TDashboardsList = specialize TFPGList<TDashboard>;
+		TDashboards = specialize TFPGList<TDashboard>;
 
 		TDashboardManager = class(TObject)
 			private
 				rwSync: TSimpleRWSync;
 				saveFile: Text;
-				dashboards: TDashboardsList;	
+				dashboards: TDashboards;
 			public
 				procedure Initialize;
 				function GetDashBoard(const dashboardId: TDashboardId): TDashboard;
 				function CreateDashboard(const name, description: string): TDashboardId;
+				function GetDashboards(): TDashboards;
 		end;
 
 	var
@@ -57,7 +58,7 @@ implementation
 		writeln(stderr, 'Initialize DashboardManager');
 		flush(stderr);
 		rwSync := TSimpleRWSync.Create;
-		dashboards := TDashboardsList.Create;
+		dashboards := TDashboards.Create;
 
 		filename := writeDir + 'dashboards';
 		assign(saveFile, filename);
@@ -110,8 +111,8 @@ implementation
 		dashboard: TDashboard;
 	begin
 		dashboard.ID := GetGuid;
-		dashboard.name := name;
-		dashboard.description := description;
+		dashboard.name := htmlEncode(name);
+		dashboard.description := htmlEncode(description);
 
 		rwSync.beginWrite;
 		writeln(saveFile, dashboard.Id);
@@ -123,6 +124,12 @@ implementation
 		rwSync.endWrite;
 
 		result := dashboard.ID;
+	end;
+
+	function TDashboardManager.GetDashboards(): TDashboards;
+	begin
+		result := TDashboards.Create;
+		result.assign(dashboards);
 	end;
 
 initialization

@@ -15,7 +15,7 @@ interface
 	function appendBlock(const prefix: string; const t: TDateTime): string;
 
 	function encodeBlock(const qq: qword): string;
-	function encodeBlock(a, b: dword): string;
+	function encodeBlock(const t: TDateTime): string;
 
 	function decode(const txt: string): TList;
 
@@ -93,6 +93,14 @@ implementation
 	function encodeBlock(const qq: qword): string;
 	begin
 		 result := encodeBlock(qq, qq shr 32);
+	end;
+
+	function encodeBlock(const t: TDateTime): string;
+	var
+		ts: TTimeStamp;
+	begin
+		ts := DateTimeToTimeStamp(t);
+		result := encodeBlock(ts.date, ts.time)
 	end;
 
 	function appendBlock(const prefix: string; const qq: qword): string;

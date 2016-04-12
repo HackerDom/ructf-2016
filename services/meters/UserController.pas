@@ -12,7 +12,6 @@ interface
 			procedure OnLogin(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
 			procedure OnLogout(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
 			procedure OnRegister(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
-			procedure OnList(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
 		end;
 
 	var
@@ -62,7 +61,7 @@ implementation
 		if userid <> 0 then
 		begin
 			SetAuthCookie(AResponse, userid);
-			AResponse.SendRedirect('/dashboard/list');
+			AResponse.SendRedirect('/dashboard/my/');
 			exit;
 		end;
 
@@ -72,7 +71,7 @@ implementation
 	procedure TUserModule.OnLogout(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
 	begin
 		ClearAuthCookie(AResponse);
-		AResponse.SendRedirect('/user/login');
+		AResponse.SendRedirect('/dashboard/all/');
 		Handled := True;
 	end;
 
@@ -92,28 +91,10 @@ implementation
 		begin
 			userid := AccountManager.GetUserId(username, password);
 			SetAuthCookie(AResponse, userid);
+			AResponse.SendRedirect('/dashboard/my/');
 		end;
 
 		AResponse.Content := StringReplace(registerTemplate, '{-message-}', message, []);
-	end;
-
-	procedure TUserModule.OnList(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
-	var
-		users: TUsers;
-		links, tmp: string;
-		i: longint;
-	begin
-		users := AccountManager.GetListOfUsers();
-		links := '';
-		for i := 0 to users.Count - 1 do
-		begin
-			tmp := StringReplace(listATemplate, '{-userid-}', IntToStr(users[i].userid), []);
-			links := links + StringReplace(tmp, '{-username-}', users[i].username, []);
-		end;
-
-		AResponse.ContentType := 'text/html';
-		AResponse.Content := StringReplace(listTemplate, '{-list-}', links, []);
-		Handled := True;
 	end;
 
 initialization
@@ -121,8 +102,6 @@ initialization
 	flush(stderr);
 	loginTemplate := GetTemplate(ModuleName, 'login');
 	registerTemplate := GetTemplate(ModuleName, 'register');
-	listTemplate := GetTemplate(ModuleName, 'list');
-	listATemplate := GetSubTemplate(ModuleName, 'list.a');
 	RegisterHTTPModule(ModuleName, TUserModule);
 
 end.

@@ -1,0 +1,38 @@
+- name: stop checksystem
+  service: name={{item}} state=stopped
+  when: mode=="stop" or mode=="resetdb"
+  with_items:
+    - flags
+    - manager
+    - worker-default
+
+- name: start checksystem
+  service: name={{item}} state=started
+  when: mode=="start"
+  with_items:
+    - flags
+    - manager
+    - worker-default
+
+- name: stop web
+  service: name={{item}} state=stopped
+  when: mode=="stopweb" or mode=="resetdb"
+  with_items:
+    - nginx
+    - web
+
+- name: start web
+  service: name={{item}} state=started
+  when: mode=="startweb"
+  with_items:
+    - nginx
+    - web
+
+- name: reset database
+  sudo: yes
+  sudo_user: "{{cs_user}}"
+  when: mode=="resetdb"
+  shell: "{{item}} chdir={{cs_dir}}/app"
+  with_items:
+    - script/cs reset_db
+    - script/cs init_db

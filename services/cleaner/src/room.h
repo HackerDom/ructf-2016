@@ -22,8 +22,7 @@ public:
 private:
     friend class boost::serialization::access;
     template<class TArchive>
-    void serialize(TArchive& archive, const unsigned int /*version*/)
-    {
+    void serialize(TArchive& archive, const unsigned int /*version*/) {
         archive & boost::serialization::base_object<TPassChecker>(*this);
         archive & Name;
         archive & Configuration;

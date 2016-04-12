@@ -16,7 +16,7 @@ __author__ = 'm_messiah'
 
 OK, GET_ERROR, CORRUPT, FAIL, INTERNAL_ERROR = 101, 102, 103, 104, 110
 PORT = 27000
-IFACE = environ.get('WIFICARD', 'wlo1')
+IFACE = environ.get('WIFICARD', 'wlan0')
 
 
 class Env(Packet):

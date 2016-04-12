@@ -1,6 +1,6 @@
-Target: Debian 8.3 (jessie)
+Target: Debian 8.4 jessie (debian-8.4.0-amd64-netinst.iso)
 
-Scripts:
-  cs-requirements.sh  - install requirements for checksystem (run first)
-  cs-install.sh       - install checksystem itself (run second, git repo with checksystem should exist)
-
+Scripts (run in same order):
+  cs-requirements.sh  - install requirements for checksystem
+  cs-app.sh           - install checksystem application
+  cs-checkers.sh      - upload checkers

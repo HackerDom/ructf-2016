@@ -1,0 +1,5 @@
+- hosts: dev-cs
+  roles: [checkers]
+  vars:
+    cs_user: cs
+    cs_dir: /home/cs

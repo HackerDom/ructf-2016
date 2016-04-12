@@ -2,9 +2,8 @@
 
 bool TSession::ReadSocket(std::string& data) {
     boost::system::error_code error;
-    boost::asio::streambuf response;
-    boost::asio::read_until(Socket, response, "\n", error);
-    std::istream response_stream(&response);
+    boost::asio::read_until(Socket, Response, "\n", error);
+    std::istream response_stream(&Response);
     std::getline(response_stream, data);
 
     if (error == boost::asio::error::eof)

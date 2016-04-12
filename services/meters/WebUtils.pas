@@ -11,12 +11,13 @@ interface
 	procedure GetUsernameAndPassword(ARequest: TRequest; var username, password: string);
 	procedure AddPermission(ARequest: TRequest; AResponse: TResponse; dashboardid: TDashboardId);
 
-	function IsAuthorized(ARequest: TRequest): boolean;
+	function IsAuthorized(ARequest: TRequest): string;
 	function GetAuthCookie(ARequest: TRequest): string;
 	function GetQueryUserId(ARequest: TRequest): TUserId;
 	function GetQueryDashboardId(ARequest: TRequest): TUserId;
 	function GetCurrentUserId(ARequest: TRequest): TUserId;
 	function HavePermission(ARequest: TRequest; dashboard: TDashboardId): string;
+	function GetPermittedDashboards(ARequest: TRequest): TDashboardIds;
 
 implementation
 
@@ -50,19 +51,24 @@ implementation
 		password := ARequest.ContentFields.Values['password'];
 	end;
 
-	function IsAuthorized(ARequest: TRequest): boolean;
+	function IsAuthorized(ARequest: TRequest): string;
 	var
 		token: string;
 	begin
 		token := GetAuthCookie(ARequest);
 		if token = '' then
-			exit(false);
+			exit('can''t found cookie');
 		result := AccountManager.IsAuthorized(token);
 	end;
 
 	function GetAuthCookie(ARequest: TRequest): string;
+	var
+		cookie: string;
 	begin
-		result := DecodeStringBase64(ARequest.CookieFields.Values[AuthCookieName]);
+		cookie := ARequest.CookieFields.Values[AuthCookieName];
+		if cookie = '' then
+			exit('');
+		result := DecodeStringBase64(cookie);
 	end;
 
 	function GetQueryUserId(ARequest: TRequest): TUserId;
@@ -102,5 +108,15 @@ implementation
 		token := GetAuthCookie(ARequest);
 		token := AccountManager.AddPermission(token, dashboardid);
 		SetAuthCookie(AResponse, token);
+	end;
+
+	function GetPermittedDashboards(ARequest: TRequest): TDashboardIds;
+	var
+		token: string;
+	begin
+		token := GetAuthCookie(ARequest);
+		if token = '' then
+			exit(nil);
+		result := AccountManager.GetPermittedDashboards(token);
 	end;
 end.

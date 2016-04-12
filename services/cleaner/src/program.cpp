@@ -1,5 +1,9 @@
 #include "program.h"
 
+#include "state.h"
+#include "command.h"
+#include "parser.h"
+
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/archive/text_iarchive.hpp>
@@ -24,6 +28,17 @@ const std::string& TProgram::GetListing() const {
 }
 
 std::string TProgram::Run(const TRoom& room) const {
-    std::string result = "runned!";
-    return std::move(result);
+    TProgramState state;
+    const auto& configuration = room.GetConfiguration();
+    std::unique_ptr<ICommand> command;
+    TCommandParser parser(Listing);
+
+    while (true) {
+        command = parser.GetNext();
+        if (!command || !command->Run(state, configuration)) {
+            break;
+        }
+    }
+
+    return state.Log;
 }

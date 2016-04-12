@@ -5,14 +5,17 @@ program meters;
 uses
 	cthreads, fphttpapp, fpWebFile, UserController, AccountController, DashboardController, Sensor, DashboardContainer, RootController;
 
+function StartTickSensor(p: pointer): int64;
+begin
+	RawTickSensor.Run;
+	result := 0;
+end;
 
-{
 procedure StartSensors;
 begin
-	RawTickSensor.Initialize;
-	BeginThread(@RawTickSensor.Run);
+	BeginThread(@StartTickSensor);
 end;
-}
+
 
 begin
 	Application.Title := 'meters';
@@ -24,7 +27,9 @@ begin
 	AccountManager.Initialize;
 	DashboardManager.Initialize;
 
-//	StartSensors;
+	RawTickSensor.Initialize;
+
+	StartSensors;
 
 	RegisterFileLocation('js', 'js');
 	RegisterFileLocation('css', 'css');

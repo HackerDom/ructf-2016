@@ -19,12 +19,6 @@ object UserModule: TUserModule
 			OnRequest = OnRegister
 			Template.AllowTagParams = False
 		end
-		item
-			Name = 'list'
-			Default = False
-			OnRequest = OnList
-			Template.AllowTagParams = False
-		end
 	>
 	CreateSession = False
 end	
