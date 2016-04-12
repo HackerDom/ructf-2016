@@ -6,15 +6,12 @@
       end   => '2018-01-01 23:59:59',
       break => ['2014-01-01 00:00:00', '2015-01-01 00:00:00']
     },
-    score_method   => 'v2',
     ctf            => {name => 'RuCTF 2016 dev mode'},
     round_length   => 60,
     flag_life_time => 15,
     flags          => {port => 31337, timeout => 5 * 60},
     admin          => {auth => 'root:DevRUCTF_2016'},
-    checkers       => {
-      hostname => sub { my ($team, $service) = @_; "$service->{name}.$team->{host}" }
-    }
+    checkers       => {}
   },
   teams => [
 {% include "teams.dev" %}

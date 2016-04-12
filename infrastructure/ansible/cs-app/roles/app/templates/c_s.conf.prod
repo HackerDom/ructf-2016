@@ -6,15 +6,12 @@
       start => '2015-11-21 11:00:00',
       end   => '2015-11-21 19:00:00'
     },
-    score_method   => 'v2',
     ctf            => {name => 'RuCTFE 2015'},
     round_length   => 60,
     flag_life_time => 15,
     flags => {port => 31337, timeout => 5 * 60},
     admin => {auth => 'root:LjdjkmysqCbybqRhjkbr'},
-    checkers       => {
-      hostname => sub { my ($team, $service) = @_; "$service->{name}.$team->{host}" }
-    }
+    checkers       => {}
   },
   teams => [
 {% include "teams.prod" %}
