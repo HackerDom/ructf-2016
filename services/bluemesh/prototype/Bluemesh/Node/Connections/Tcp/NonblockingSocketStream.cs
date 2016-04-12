@@ -63,8 +63,8 @@ namespace Node.Connections.Tcp
         private int writePos;
         private int readLength = -1;
         private int writeLength = -1;
-        private readonly byte[] readBuffer = new byte[4096];
-        private readonly byte[] writeBuffer = new byte[4096];
+        private readonly byte[] readBuffer = new byte[1024 * 1024];
+        private readonly byte[] writeBuffer = new byte[1024 * 1024];
         private readonly Socket socket;
         private readonly IConnectionUtility connectionUtility;
     }

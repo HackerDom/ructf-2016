@@ -129,6 +129,10 @@ namespace Node.Connections.Tcp
                 connections.Where(c => checkRead.Contains(c.Socket)).ToList(),
                 connections.Where(c => checkWrite.Contains(c.Socket)).ToList());
         }
+        public void Stop()
+        {
+            serverSocket.Close();
+        }
 
         public List<IConnection> Connections => new List<IConnection>(connections);
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -18,14 +19,19 @@ namespace Tests
     [TestFixture]
     internal class RoutingManager_Tests
     {
-        [Test, Explicit, Timeout(3000)]
+        [Test, Explicit, Timeout(60000)]
         public void Measure_map_negotiation()
         {
+            Console.SetOut(new StreamWriter("map-negotiation.log"));
+
             var config = Substitute.For<IRoutingConfig>();
-            config.DesiredConnections.Returns(1);
-            config.MaxConnections.Returns(5);
+            config.DesiredConnections.Returns(3);
+            config.MaxConnections.Returns(25);
+            config.ConnectCooldown.Returns(1.Seconds());
+            config.DisconnectCooldown.Returns(2.Seconds());
+            config.MapUpdateCooldown.Returns(200.Milliseconds());
             var preconfiguredNodes = new List<IAddress>();
-            var nodes = Enumerable.Range(0, 5).Select(i => CreateNode(config, preconfiguredNodes, i)).ToList();
+            var nodes = Enumerable.Range(0, 25).Select(i => CreateNode(config, preconfiguredNodes, i)).ToList();
 
             ThreadPool.SetMinThreads(nodes.Count * 2, nodes.Count * 2);
 
@@ -38,6 +44,9 @@ namespace Tests
 
             var watch = Stopwatch.StartNew();
             trigger.Set();
+
+            Task.Delay(30.Seconds()).ContinueWith(task => nodes[0].Stopped = true);
+
             Task.WhenAll(tasks).Wait();
 
             Console.WriteLine("Communication took " + watch.Elapsed);
@@ -64,12 +73,15 @@ namespace Tests
 
             public void Start()
             {
-                while (true)
+                while (!Stopped)
                 {
                     Tick();
                     Thread.Sleep(10.Milliseconds());
                 }
+                connectionManager.Stop();
             }
+
+            public bool Stopped { get; set; }
 
             private void Tick()
             {

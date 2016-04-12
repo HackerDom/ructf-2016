@@ -58,6 +58,14 @@ graph {name} {{
 }}";
         }
 
+        public static bool AreEquivalent(this ICollection<RoutingMapLink> myLinks, ICollection<RoutingMapLink> otherLinks)
+        {
+            if (myLinks.Count != otherLinks.Count)
+                return false;
+
+            return myLinks.All(myLink => otherLinks.Any(otherLink => Equals(myLink, otherLink) && myLink.Connected == otherLink.Connected));
+        }
+
         private static string MakeSafeString(object obj)
         {
             if (obj is TcpAddress)
