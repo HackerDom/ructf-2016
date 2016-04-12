@@ -76,6 +76,7 @@
     <Compile Include="Routing\RoutingManager.cs" />
     <Compile Include="Routing\RoutingMap.cs" />
     <Compile Include="Routing\RoutingMapLink.cs" />
+    <Compile Include="Routing\TimespanExtensions.cs" />
     <Compile Include="Serialization\BinaryDeserializerExtensions.cs" />
     <Compile Include="Serialization\BinarySerializerExtensions.cs" />
     <Compile Include="Serialization\IBinaryDeserializer.cs" />

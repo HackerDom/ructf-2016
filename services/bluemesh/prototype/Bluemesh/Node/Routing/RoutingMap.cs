@@ -42,6 +42,9 @@ namespace Node.Routing
             if (!link.Connected)
                 return false;
 
+            if (GraphHelper.GetPeers(OwnAddress, Links).Count() <= config.DesiredConnections)
+                return false;
+
             var stateBefore = GraphHelper.CalculateConnectivity(Links);
             var nodesBefore = GraphHelper.GetNodes(Links);
 
@@ -57,6 +60,8 @@ namespace Node.Routing
 
         public void Merge(ICollection<RoutingMapLink> links, IAddress source)
         {
+            var oldLinks = Links.ToList();
+
             var linksToAdd = links.Where(link => !link.Contains(OwnAddress) && 
                 ((link.Contains(source) && link.Connected != Links.FirstOrDefault(l => Equals(l, link)).Connected) ||  
                 link.Version > Links.FirstOrDefault(l => Equals(l, link)).Version)).ToList();
@@ -67,6 +72,8 @@ namespace Node.Routing
             foreach (var link in linksToAdd)
                 Links.Remove(link);
             Links.AddRange(linksToAdd);
+
+            Console.WriteLine("[{0}] MERGE {1} with {2} from {3} => {4}", OwnAddress, oldLinks.ToDOT(), links.ToDOT(), source, Links.ToDOT());
         }
 
         public void AddDirectConnection(IAddress other)

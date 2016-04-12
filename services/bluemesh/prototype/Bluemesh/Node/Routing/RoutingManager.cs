@@ -13,6 +13,7 @@ namespace Node.Routing
             this.connectionManager = connectionManager;
             versionsByPeer = new Dictionary<IAddress, VersionInfo>();
             Map = new RoutingMap(connectionManager.Address, config);
+            random = new Random(connectionManager.Address.GetHashCode());
         }
 
         public void ProcessMessages(IEnumerable<IConnection> readyConnections)
@@ -65,7 +66,7 @@ namespace Node.Routing
 
         public void ConnectNewLinks()
         {
-            if (DateTime.UtcNow - lastConnect < TimeSpan.FromSeconds(.1))
+            if (DateTime.UtcNow - lastConnect < TimeSpan.FromSeconds(.1).AdjustForNode(connectionManager.Address))
                 return;
             foreach (var peer in connectionManager.GetAvailablePeers())
             {
@@ -79,7 +80,7 @@ namespace Node.Routing
 
         public void DisconnectExcessLinks()
         {
-            if (DateTime.UtcNow - lastDisconnect < TimeSpan.FromSeconds(.1))
+            if (DateTime.UtcNow - lastDisconnect < TimeSpan.FromSeconds(.3).AdjustForNode(connectionManager.Address))
                 return;
             var excessPeer = Map.FindExcessPeer();
             if (excessPeer != null)
@@ -114,7 +115,8 @@ namespace Node.Routing
         }
 
         private readonly IConnectionManager connectionManager;
-        private readonly Dictionary<IAddress, VersionInfo> versionsByPeer; 
+        private readonly Dictionary<IAddress, VersionInfo> versionsByPeer;
+        private readonly Random random;
         private DateTime lastDisconnect = DateTime.MinValue;
         private DateTime lastConnect = DateTime.MinValue;
 
