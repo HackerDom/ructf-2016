@@ -19,7 +19,7 @@ interface
 
 		TUserDashboards = record
 			userid: TUserId;
-			dashboards: TDashboards;
+			dashboards: TDashboardIds;
 			class operator= (const a, b: TUserDashboards): Boolean;
 		end;
 
@@ -42,12 +42,12 @@ interface
 				function IsAuthorized(const token: string): boolean;
 				function GetUserId(const username: string; const password: string): TUserId;
 				function GetAuthToken(const userid: TUserId): string;
-				function GetListOfUsers(): TUsers;
 				function GetCurrentUserId(const token: string): TUserId;
-				function GetDashboards(const userid: TUserId): TDashboards;
+				function GetDashboards(const userid: TUserId): TDashboardIds;
 				function HavePermission(const token: string; const dashboard: TDashboardId): string;
 				function GetUser(const userId: TUserId): TUser;
 				function AddPermission(const token: string; const dashboardId: TDashboardId): string;
+				function GetPermittedDashboards(const token: string): TDashboardIds;
 		end;
 
 	var
@@ -122,7 +122,7 @@ implementation
 				if not found then
 				begin
 					tmp.userid := tmpuserid;
-					tmp.dashboards := TDashboards.Create;
+					tmp.dashboards := TDashboardIds.Create;
 					tmp.dashboards.add(tmpDashboard);
 					usersDashboards.add(tmp);
 				end;
@@ -204,7 +204,7 @@ implementation
 
 	function TAccountManager.GetAuthToken(const userid: TUserId): string;
 	var
-		dashboards: TDashboards;
+		dashboards: TDashboardIds;
 		i, j: longint;
 		dt: double;
 		dashboardId: TDashboardId;
@@ -231,14 +231,6 @@ implementation
 		usersDashboardsRWSync.endread;
 	end;
 
-	function TAccountManager.GetListOfUsers(): TUsers;
-	begin
-		result := TUsers.Create;
-		usersRWSync.beginread;
-			result.assign(users);
-		usersRWSync.endread;
-	end;
-
 	function TAccountManager.GetCurrentUserId(const token: string): TUserId;
 	var
 		decoded: TList;
@@ -250,7 +242,7 @@ implementation
 			result := 0;
 	end;
 
-	function TAccountManager.GetDashboards(const userId: TUserId): TDashboards;
+	function TAccountManager.GetDashboards(const userId: TUserId): TDashboardIds;
 	var
 		i: longint;
 	begin
@@ -260,7 +252,7 @@ implementation
 		begin
 			if usersDashboards[i].userId = userId then
 			begin
-				result := TDashboards.Create;
+				result := TDashboardIds.Create;
 				result.assign(usersDashboards[i].dashboards);
 				break;
 			end;
@@ -323,7 +315,7 @@ implementation
 		if not found then
 		begin
 			userDashboards.userid := userid;
-			userDashboards.dashboards := TDashboards.Create;
+			userDashboards.dashboards := TDashboardIds.Create;
 			userDashboards.dashboards.add(dashboardId);
 			usersDashboards.Add(userDashboards);
 		end;
@@ -339,6 +331,16 @@ implementation
 		result := appendBlock(result, dashboardId);
 	end;
 
+	function TAccountManager.GetPermittedDashboards(const token: string): TDashboardIds;
+	var
+		decoded: TList;
+		i: longint;
+	begin
+		decoded := decode(token);
+		result := TDashboardIds.Create;
+		for i := 1 to decoded.Count div 2 - 1 do
+			result.add(decoded[2 * i + 1]);
+	end;
 
 initialization
 	writeln(stderr, 'initialization AccountController');
