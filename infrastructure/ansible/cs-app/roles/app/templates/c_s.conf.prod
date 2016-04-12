@@ -17,6 +17,6 @@
 {% include "teams.prod" %}
   ],
   services => [
-{% include "services" %}
+{% include "services.prod" %}
   ]
 }

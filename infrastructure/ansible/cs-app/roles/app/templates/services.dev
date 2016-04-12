@@ -1,0 +1,2 @@
+    {name => 'environ',  path => '../checkers/environ/environ.checker-dev.py',   timeout => 10},
+{% include "services" %}
