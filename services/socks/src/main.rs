@@ -8,6 +8,7 @@ use std::io::Read;
 use std::io::Write;
 
 use std::collections::HashMap;
+use std::collections::HashSet;
 
 use hyper::server::{Handler, Server, Request, Response};
 use hyper::status::StatusCode;
@@ -51,15 +52,13 @@ impl Context {
                 if let Some(docs) = index.get_mut(&stem) {
                     (*docs).push(doc_id);
                 }
-
-                // index.insert(stem, doc_id);
             }
         }
     }
 
     pub fn search(&self, text:String) -> Vec<String> {
         let mut res: Vec<String> = Vec::new();
-        let mut doc_ids: Vec<usize> = Vec::new();
+        let mut doc_ids: HashSet<usize> = HashSet::new();
 
         {
             let mut index = self.index.lock().unwrap();
@@ -67,8 +66,25 @@ impl Context {
             for word in text.split(" ") {
                 let stem = stemmer.stem(word);
                 match index.get(&stem) {
-                    Some(id) => doc_ids.extend_from_slice(id.as_slice()),
-                    None => {}
+                    Some(ids) => {
+                        let word_doc_ids: HashSet<_> = ids.iter().cloned().collect();
+                        for doc_id in word_doc_ids.clone() {
+                            println!("{:?}", doc_id);
+                        }
+
+                        if doc_ids.is_empty() {
+                            doc_ids = word_doc_ids;
+                        } else {
+                            doc_ids = doc_ids.intersection(&word_doc_ids).cloned().collect();
+                        }
+
+                        println!("==========");
+                        for doc_id in doc_ids.clone() {
+                            println!("{:?}", doc_id);
+                        }
+
+                    }
+                    None => { println!("NONE"); }
                 }
             }
         }
