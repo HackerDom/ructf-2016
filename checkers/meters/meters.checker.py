@@ -60,49 +60,68 @@ def check_response(response):
 	check_status(response)
 	check_cookie(response)
 
+def get_dashboards(text):
+	rdash = re.compile(r"<a href='/dashboard/view\?dashboardId=(\d+)'>([^<]+)</a>", re.IGNORECASE)
+	return set((id, name) for id, name in rdash.findall(text))
+
 class State:
 	def __init__(self, hostname):
 		self.base_addr = 'http://{}:{}/'.format(hostname, PORT)
 		self.session = requests.Session()
-	def login(self, username, password):
-		response = self.session.post(self.base_addr + 'user/login', data={'username': username, 'password': password})
+	def get(self, url):
+		response = self.session.get(self.base_addr + url)
+		check_status(response)
+		return response
+	def post(self, url, d):
+		response = self.session.post(self.base_addr + url, data=d)
 		check_status(response)
 		check_cookie(self.session.cookies)
+		return response
+	def login(self, username, password):
+		return self.post('user/login', {'username': username, 'password': password})
 	def register(self):
 		username = get_rand_string(8)
 		password = get_rand_string(16)
-		response = self.session.post(self.base_addr + 'user/register', data={'username': username, 'password': password})
-		check_status(response)
-		check_cookie(self.session.cookies)
+		self.post('user/register', {'username': username, 'password': password})
 		return username, password
 	def create_dashboard(self, description=None):
 		name = get_rand_string(10)
 		if description is None:
 			description = get_rand_string(50)
-		response = self.session.post(self.base_addr + 'dashboard/create', data={'name': name, 'description': description})
-		check_status(response)
+		response = self.post('dashboard/create', {'name': name, 'description': description})
 		r = re.compile('dashboardid=(\d+)$', re.IGNORECASE)
 		m = r.search(response.url)
 		if m is None:
 			service_mumble(error="can't find dashboardId in '{}'".format(response.url))
-		return m.group(1)
-	def get_dashboard(self, id):
-		response = self.session.get(self.base_addr + 'dashboard/view?dashboardId=' + id)
-		check_status(response)
+		return (m.group(1), name)
+	def get_dashboard(self, id, name=None):
+		response = self.get('dashboard/view?dashboardId=' + id)
 		rname = re.compile('<h2>([^<]*)</h2>')
 		m = rname.search(response.text)
 		if m is None:
-			service_mumble(error="can't found dasboard name")
+			service_mumble(error="can't found dashboard name")
 		name = m.groups(1)
 		rdescription = re.compile('<p>([^<]*)</p>')
 		m = rdescription.search(response.text)
 		if m is None:
-			service_mumble(error="can't found dasboard description")
+			service_mumble(error="can't found dashboard description")
 		description = m.group(1)
 		return name, description
 	def logout(self):
-		response = self.session.get(self.base_addr + 'user/logout')
-		check_status(response)
+		response = self.get('user/logout')
+	def check_dashboards(self, dashboards):
+		response = self.get('dashboard/all')
+		all_dashboards = get_dashboards(response.text)
+		if all_dashboards >= set(dashboards):
+			return
+		service_mumble(error='not all dashboards is found: {} vs {}'.format(all_dashboards, set(dashboards)))
+	def check_my_dashboards(self, dashboards):
+		response = self.get('dashboard/my')
+		all_dashboards = get_dashboards(response.text)
+		if all_dashboards == set(dashboards):
+			return
+		service_mumble(error='list of dashboards are not equals')
+
 
 def handler_info(*args):
 	service_ok(message="vulns: 1")
@@ -112,17 +131,25 @@ def handler_check(*args):
 	state = State(hostname)
 	username, password = state.register()
 	state.logout()
-	for i in range(10):
-		state.login(username, password)
-		dashboard = state.create_dashboard()
-		state.get_dashboard(dashboard)
-		state.logout()
+	state.login(username, password)
+	dashboards = []
+	for i in range(random.randint(2, 10)):
+		dashboards.append(state.create_dashboard())
+		state.get_dashboard(dashboards[-1][0])
+	state.check_dashboards(dashboards)
+	state.check_my_dashboards(dashboards)
+	state = State(hostname)
+	state.check_dashboards(dashboards)
+	state.login(username, password)
+	state.check_dashboards(dashboards)
+	state.check_my_dashboards(dashboards)
 	service_ok()
 
 def handler_get(args):
 	hostname, id, flag, vuln = args
-	username, password, dashboard = id.split()
+	username, password, dashboard, name = id.split()
 	state = State(hostname);
+	state.check_dashboards([(dashboard, name)])
 	state.login(username, password)
 
 	_, description = state.get_dashboard(dashboard)
@@ -136,9 +163,13 @@ def handler_put(args):
 	hostname, id, flag, vuln = args
 	state = State(hostname)
 	username, password = state.register()
-	dashboard = state.create_dashboard(flag)
+	for i in range(random.randint(0, 5)):
+		state.create_dashboard()
+	dashboard, name = state.create_dashboard(flag)
+	for i in range(random.randint(0, 5)):
+		state.create_dashboard()
 
-	return service_ok(message="{}\n{}\n{}".format(username, password, dashboard))
+	return service_ok(message="{}\n{}\n{}\n{}".format(username, password, dashboard, name))
 
 HANDLERS = {
 	'info' : handler_info,
