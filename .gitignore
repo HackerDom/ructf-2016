@@ -25,3 +25,6 @@
 # Socks server
 /services/socks/target/
 /services/socks/Cargo.lock
+
+# Ansible logs
+/infrastructure/ansible/.log/

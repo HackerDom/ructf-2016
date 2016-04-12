@@ -1,0 +1,22 @@
+{ pg => {uri => 'postgresql://cs:jrCiW2c9268x@10.10.10.2/cs_prod'},
+  hypnotoad => {listen => ['http://*:8080'], workers => 64},
+  cs => {
+    base_url => 'http://monitor.e.ructf.org/',
+    time => {
+      start => '2015-11-21 11:00:00',
+      end   => '2015-11-21 19:00:00'
+    },
+    ctf            => {name => 'RuCTFE 2015'},
+    round_length   => 60,
+    flag_life_time => 15,
+    flags => {port => 31337, timeout => 5 * 60},
+    admin => {auth => 'root:LjdjkmysqCbybqRhjkbr'},
+    checkers       => {}
+  },
+  teams => [
+{% include "teams.prod" %}
+  ],
+  services => [
+{% include "services" %}
+  ]
+}

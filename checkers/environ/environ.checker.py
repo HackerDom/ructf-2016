@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import logging
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 from scapy.all import *
@@ -15,7 +16,7 @@ __author__ = 'm_messiah'
 
 OK, GET_ERROR, CORRUPT, FAIL, INTERNAL_ERROR = 101, 102, 103, 104, 110
 PORT = 27000
-IFACE = environ.get('WIFICARD', 'wlo1')
+IFACE = environ.get('WIFICARD', 'wlan0')
 
 
 class Env(Packet):

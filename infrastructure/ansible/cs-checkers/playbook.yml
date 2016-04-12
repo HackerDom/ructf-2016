@@ -1,6 +1,5 @@
 - hosts: asus1
-  roles: [checksystem]
+  roles: [checkers]
   vars:
     cs_user: cs
     cs_dir: /home/cs
-

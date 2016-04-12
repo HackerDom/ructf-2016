@@ -1,0 +1,7 @@
+- git: repo=https://github.com/HackerDom/checksystem.git dest={{cs_dir}}/app
+
+- template: src={{cs_conf}} dest={{cs_dir}}/app/c_s.conf
+
+- file: path={{cs_dir}}/app owner={{cs_user}} group={{cs_user}} recurse=yes
+
+- command: cpanm --installdeps . chdir={{cs_dir}}/app

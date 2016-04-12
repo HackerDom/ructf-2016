@@ -23,7 +23,7 @@ namespace NSaveloader {
     }
 
     template <typename T>
-    bool Load(T& obj, const boost::filesystem::path file) {
+    bool Load(T& obj, const boost::filesystem::path& file) {
         using boost::filesystem::path;
         using boost::filesystem::exists;
         using boost::filesystem::ifstream;
