@@ -19,22 +19,19 @@ use stemmer::Stemmer;
 
 
 struct Context {
-    stor : Mutex<HashMap<String, String>>,
     docs : Mutex<Vec<String>>,
     index : Mutex<HashMap<String, usize>>,
 }
 
 impl Context {
     pub fn new() -> Context {
-        let mut context = Context{stor : Mutex::new(HashMap::new()),
-                                  docs : Mutex::new(Vec::new()),
+        let mut context = Context{docs : Mutex::new(Vec::new()),
                                   index : Mutex::new(HashMap::new())};
         context
     }
 
 
     pub fn index(&self, body: String, id: String) {
-        // let mut words: Vec<&str> = line.split(" ").collect();
         let mut doc_id = 0;
         {
             let mut docs = self.docs.lock().unwrap();
@@ -91,7 +88,6 @@ impl Handler for Context {
 
         if url.path == "/search" {
             let text = query.get_first_from_str("text").unwrap();
-            let stor = self.stor.lock().unwrap();
             let mut data: String;
             let mut res = res.start().unwrap();
 
@@ -105,12 +101,10 @@ impl Handler for Context {
         }
 
         if url.path == "/set" {
-            let mut stor = self.stor.lock().unwrap();
             let mut data = String::new();
             let text = query.get_first_from_str("text").unwrap();
             req.read_to_string(&mut data);
             self.index(data.clone(), text.clone());
-            stor.insert(text, data.clone());
             return;
         }
 
