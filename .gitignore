@@ -12,8 +12,8 @@
 /services/strongbox/db/*.sqlite3-journal
 
 # Ignore all logfiles and tempfiles.
-/services/strongbox/log/*
+/services/strongbox/log
 /services/strongbox!/log/.keep
 /services/strongbox/tmp
+/services/strongbox/Gemfile.lock
 .idea
-/services/strongbox/.idea
