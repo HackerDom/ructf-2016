@@ -84,7 +84,7 @@ implementation
 		while (finish >= ready) and (attempts < 100) do
 		begin
 			inc(attempts);
-			TThread.Yield;
+			sleep(1);
 		end;
 
 		result := TRawValues.Create;
@@ -121,7 +121,7 @@ implementation
 				ready := tmp.timestamp;
 			rwSync.EndWrite;
 
-			tthread.sleep(100);
+			sleep(100);
 		end;
 	end;
 

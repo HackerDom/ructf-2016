@@ -146,7 +146,7 @@ implementation
 		AccountManager.AddDashboard(userId, dashboardid);
 		AddPermission(ARequest, AResponse, dashboardid);
 
-		AResponse.SendRedirect('/dashboard/view?dashboardId=' + IntToStr(dashboardid));
+		AResponse.SendRedirect('/dashboard/view/?dashboardId=' + IntToStr(dashboardid));
 	end;
 
 initialization

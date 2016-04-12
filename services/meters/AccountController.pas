@@ -182,12 +182,14 @@ implementation
 	function TAccountManager.IsAuthorized(const token: string): string;
 	var
 		decoded: TList;
+		dt: TDateTime;
 	begin
 		decoded := decode(token);
 		if decoded.Count = 0 then
 			exit('can''t find set time');
-		if abs(unpack(decoded[0]) - now) > ttl then
-			exit('cookies is too old. set at ' + DateTimeToStr(unpack(decoded[0])));
+		dt := unpack(decoded[0]);
+		if abs(dt - now) > ttl then
+			exit('cookies is too old. ' + ToPrettyString(dt));
 		result := '';
 	end;
 
@@ -273,7 +275,7 @@ implementation
 			begin
 				dt := unpack(decoded[2 * i]);
 				if abs(dt - now) > ttl then
-					exit('cookie is too old. set at ' + DateTimeToStr(dt))
+					exit('cookie is too old. ' + ToPrettyString(dt))
 				else
 					exit('');
 			end;

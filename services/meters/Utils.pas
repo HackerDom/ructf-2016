@@ -17,6 +17,7 @@ interface
 	function GetSubTemplate(const module, name: string): string;
 	function StrToQWord(const s: string): QWord;
 	function htmlEncode(const str: string): string;
+	function ToPrettyString(const dt: TDateTime): string;
 
 
 implementation
@@ -117,6 +118,12 @@ implementation
 	begin
 		result := StringReplace(str, '&', '&amp;', [rfReplaceAll]);
 		result := StringReplace(result, '<', '&lt;', [rfReplaceAll]);
+	end;
+
+	function ToPrettyString(const dt: TDateTime): string;
+	begin
+
+		result := 'set ' + IntToStr(-trunc(dt)) + ' days before at ' + FormatDateTime('hh:nn:ss', dt);
 	end;
 
 initialization

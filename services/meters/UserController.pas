@@ -61,7 +61,7 @@ implementation
 		if userid <> 0 then
 		begin
 			SetAuthCookie(AResponse, userid);
-			AResponse.SendRedirect('/dashboard/my');
+			AResponse.SendRedirect('/dashboard/my/');
 			exit;
 		end;
 
@@ -71,7 +71,7 @@ implementation
 	procedure TUserModule.OnLogout(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
 	begin
 		ClearAuthCookie(AResponse);
-		AResponse.SendRedirect('/dashboard/all');
+		AResponse.SendRedirect('/dashboard/all/');
 		Handled := True;
 	end;
 
@@ -91,7 +91,7 @@ implementation
 		begin
 			userid := AccountManager.GetUserId(username, password);
 			SetAuthCookie(AResponse, userid);
-			AResponse.SendRedirect('/dashboard/my');
+			AResponse.SendRedirect('/dashboard/my/');
 		end;
 
 		AResponse.Content := StringReplace(registerTemplate, '{-message-}', message, []);
@@ -102,8 +102,6 @@ initialization
 	flush(stderr);
 	loginTemplate := GetTemplate(ModuleName, 'login');
 	registerTemplate := GetTemplate(ModuleName, 'register');
-	listTemplate := GetTemplate(ModuleName, 'list');
-	listATemplate := GetSubTemplate(ModuleName, 'list.a');
 	RegisterHTTPModule(ModuleName, TUserModule);
 
 end.

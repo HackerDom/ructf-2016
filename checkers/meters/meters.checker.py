@@ -61,7 +61,7 @@ def check_response(response):
 	check_cookie(response)
 
 def get_dashboards(text):
-	rdash = re.compile(r"<a href='/dashboard/view\?dashboardId=(\d+)'>([^<]+)</a>", re.IGNORECASE)
+	rdash = re.compile(r"<a href='/dashboard/view/\?dashboardId=(\d+)'>([^<]+)</a>", re.IGNORECASE)
 	return set((id, name) for id, name in rdash.findall(text))
 
 class State:
@@ -78,24 +78,24 @@ class State:
 		check_cookie(self.session.cookies)
 		return response
 	def login(self, username, password):
-		return self.post('user/login', {'username': username, 'password': password})
+		return self.post('user/login/', {'username': username, 'password': password})
 	def register(self):
 		username = get_rand_string(8)
 		password = get_rand_string(16)
-		self.post('user/register', {'username': username, 'password': password})
+		self.post('user/register/', {'username': username, 'password': password})
 		return username, password
 	def create_dashboard(self, description=None):
 		name = get_rand_string(10)
 		if description is None:
 			description = get_rand_string(50)
-		response = self.post('dashboard/create', {'name': name, 'description': description})
+		response = self.post('dashboard/create/', {'name': name, 'description': description})
 		r = re.compile('dashboardid=(\d+)$', re.IGNORECASE)
 		m = r.search(response.url)
 		if m is None:
 			service_mumble(error="can't find dashboardId in '{}'".format(response.url))
 		return (m.group(1), name)
 	def get_dashboard(self, id, name=None):
-		response = self.get('dashboard/view?dashboardId=' + id)
+		response = self.get('dashboard/view/?dashboardId=' + id)
 		rname = re.compile('<h2>([^<]*)</h2>')
 		m = rname.search(response.text)
 		if m is None:
@@ -108,15 +108,15 @@ class State:
 		description = m.group(1)
 		return name, description
 	def logout(self):
-		response = self.get('user/logout')
+		response = self.get('user/logout/')
 	def check_dashboards(self, dashboards):
-		response = self.get('dashboard/all')
+		response = self.get('dashboard/all/')
 		all_dashboards = get_dashboards(response.text)
 		if all_dashboards >= set(dashboards):
 			return
 		service_mumble(error='not all dashboards is found: {} vs {}'.format(all_dashboards, set(dashboards)))
 	def check_my_dashboards(self, dashboards):
-		response = self.get('dashboard/my')
+		response = self.get('dashboard/my/')
 		all_dashboards = get_dashboards(response.text)
 		if all_dashboards == set(dashboards):
 			return
