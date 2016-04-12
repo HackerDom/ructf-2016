@@ -186,7 +186,7 @@ implementation
 		decoded := decode(token);
 		if decoded.Count = 0 then
 			exit('can''t find set time');
-		if abs(unpack(decoded[0]) - now) <= ttl then
+		if abs(unpack(decoded[0]) - now) > ttl then
 			exit('cookies is too old. set at ' + DateTimeToStr(unpack(decoded[0])));
 		result := '';
 	end;
