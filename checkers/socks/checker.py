@@ -55,10 +55,12 @@ def handler_get(args):
     except requests.exceptions.HTTPError as e:
         return service_mumble(message="Protocol error", exception=e)
 
-    if reply != flag:
-        return service_corrupt(message="Bad flag", error=make_err_message("Bad flag", request, reply))
+    for r in reply.split("\n"):
+        if flag in r:
+            return service_ok()
 
-    return service_ok()
+    return service_corrupt(message="Bad flag", error=make_err_message("Bad flag", request, reply))
+
 
 def handler_put(args):
     _, _, hostname, id, flag, vuln = args

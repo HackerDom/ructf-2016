@@ -20,7 +20,7 @@ use stemmer::Stemmer;
 
 struct Context {
     docs : Mutex<Vec<String>>,
-    index : Mutex<HashMap<String, usize>>,
+    index : Mutex<HashMap<String, Vec<usize>>>,
 }
 
 impl Context {
@@ -44,7 +44,15 @@ impl Context {
             let mut stemmer = Stemmer::new("english").unwrap();
             for word in body.split(" ") {
                 let stem = stemmer.stem(word);
-                index.insert(stem, doc_id);
+                if !index.contains_key(&stem) {
+                    index.insert(stem.clone(), Vec::new());
+                }
+
+                if let Some(docs) = index.get_mut(&stem) {
+                    (*docs).push(doc_id);
+                }
+
+                // index.insert(stem, doc_id);
             }
         }
     }
@@ -59,7 +67,7 @@ impl Context {
             for word in text.split(" ") {
                 let stem = stemmer.stem(word);
                 match index.get(&stem) {
-                    Some(id) => doc_ids.push(*id),
+                    Some(id) => doc_ids.extend_from_slice(id.as_slice()),
                     None => {}
                 }
             }
