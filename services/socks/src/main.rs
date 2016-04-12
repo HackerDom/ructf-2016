@@ -95,12 +95,8 @@ impl Handler for Context {
             let mut data: String;
             let mut res = res.start().unwrap();
 
-            match stor.get(text.as_str()) {
-                Some(value) => { res.write_all(value.as_bytes()).unwrap() },
-                None => {}
-            }
-
             for id in self.search(text) {
+                println!("{}", id);
                 res.write_all(id.as_bytes()).unwrap();
                 res.write_all(b"\n").unwrap();
             }
