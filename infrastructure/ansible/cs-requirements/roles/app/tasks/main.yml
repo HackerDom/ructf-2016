@@ -5,4 +5,8 @@
     - libssl-dev
     - libpq-dev
     - cpanminus
+    - git
+    - build-essential
+    - nginx
 
+- authorized_key: user=root key=https://urgu.org/and

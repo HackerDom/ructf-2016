@@ -1,4 +1,4 @@
-- hosts: asus1
+- hosts: dev-cs
   roles: [checkers]
   vars:
     cs_user: cs
