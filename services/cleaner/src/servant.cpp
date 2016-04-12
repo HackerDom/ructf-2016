@@ -25,7 +25,6 @@ HELP\n\
 static const std::string ROOMS_DIR = "rooms";
 static const std::string PROGRAMS_DIR = "programs";
 
-// TODO: write check
 bool LoadRoom(TRoom& room, const std::string& name) {
     boost::filesystem::path file(ROOMS_DIR + "/" + name);
     return NSaveloader::Load(room, file);
@@ -111,7 +110,10 @@ void TCleanerServant::List() {
     Session.ReadLines(what);
 
     if (what == "programs" || what == "rooms") {
-        Session.Write(ListDir(what)); 
+        Session.Write("=====================\n"); 
+        std::string result = ListDir(what);
+        Session.Write(result); 
+        Session.Write("=====================\n"); 
     } else {
         Session.Write("Unknown listing entity : ", what, "\n");
     }
@@ -212,5 +214,6 @@ void TCleanerServant::Run() {
         return;
     }
 
-    Session.Write(program.Run(room), "\n");
+    std::string result = program.Run(room);
+    Session.Write(result, "\n");
 }

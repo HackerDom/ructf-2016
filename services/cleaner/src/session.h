@@ -13,7 +13,7 @@ private:
     }
 
     template <typename T, typename ... Args>
-    void WriteImpl(std::ostream& os, const T& first, Args... args) {
+    void WriteImpl(std::ostream& os, const T& first, Args&... args) {
         os << first;
         WriteImpl(os, args...);
     }
@@ -32,7 +32,7 @@ public:
     }
 
     template <typename ... Args>
-    bool ReadLines(std::string& data, Args... args) {
+    bool ReadLines(std::string& data, Args&... args) {
         if (ReadSocket(data)) {
             return ReadLines(args...);
         }
@@ -40,7 +40,7 @@ public:
     }
 
     template <typename ... Args>
-    bool Write(Args... args) {
+    bool Write(Args&... args) {
         std::stringstream out;
         WriteImpl(out, args...);
         return WriteSocket(out.str());
@@ -48,4 +48,5 @@ public:
 
 private:
     boost::asio::ip::tcp::socket& Socket;
+    boost::asio::streambuf Response;
 };

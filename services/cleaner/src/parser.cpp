@@ -25,6 +25,7 @@ std::unique_ptr<ICommand> TCommandParser::GetNext() {
                     State = EWaitNumber2; 
                 } else {
                     Idx++;
+                    State = EWaitCmd; 
                     return std::unique_ptr<ICommand>(new TMoveCommand(cmd, num));
                 }
                 break;
@@ -33,6 +34,8 @@ std::unique_ptr<ICommand> TCommandParser::GetNext() {
                 if (!GetNum(num2)) {
                     return std::unique_ptr<ICommand>(new TErrorCommand());
                 }
+                Idx++;
+                State = EWaitCmd; 
                 return std::unique_ptr<ICommand>(new TNewCommand(num, num2));
             case EError:
                 return std::unique_ptr<ICommand>(new TErrorCommand());

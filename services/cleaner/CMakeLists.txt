@@ -7,7 +7,7 @@ set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wno-unknown-pr
 set(CMAKE_CXX_FLAGS_DEBUG   "-O0 -g3")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
-add_executable (cleaner src/main.cpp src/servant.cpp src/room.cpp src/program.cpp src/pass_checker.cpp src/saveloader.cpp src/session.cpp)
+add_executable (cleaner src/main.cpp src/servant.cpp src/room.cpp src/program.cpp src/pass_checker.cpp src/saveloader.cpp src/session.cpp src/command.cpp src/parser.cpp)
 
 target_link_libraries(cleaner 
   ${Boost_FILESYSTEM_LIBRARY}

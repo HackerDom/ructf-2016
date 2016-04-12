@@ -4,7 +4,7 @@ TPassChecker::TPassChecker()
 {
 }
 
-TPassChecker::TPassChecker(std::string&& pass)
+TPassChecker::TPassChecker(std::string pass)
     : Pass(pass)
 {
 }
