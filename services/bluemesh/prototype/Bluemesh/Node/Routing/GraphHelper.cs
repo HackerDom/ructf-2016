@@ -30,13 +30,13 @@ namespace Node.Routing
 
         public static IEnumerable<IAddress> GetPeers(IAddress source, ICollection<RoutingMapLink> links)
         {
-            return links.Where(link => link.Contains(source)).Select(link => link.OtherEnd(source));
+            return links.Where(link => link.Connected && link.Contains(source)).Select(link => link.OtherEnd(source));
         }
 
         public static HashSet<IAddress> GetNodes(ICollection<RoutingMapLink> links)
         {
             var nodes = new HashSet<IAddress>();
-            foreach (var link in links)
+            foreach (var link in links.Where(l => l.Connected))
             {
                 nodes.Add(link.A);
                 nodes.Add(link.B);
@@ -54,7 +54,7 @@ namespace Node.Routing
             return
                 $@"
 graph {name} {{
-{string.Join(Environment.NewLine, links.Select(link => "\t" + MakeSafeString(link.A) + " -- " + MakeSafeString(link.B) + ";"))}
+{string.Join(Environment.NewLine, links.Where(l => l.Connected).Select(link => "\t" + MakeSafeString(link.A) + " -- " + MakeSafeString(link.B) + "; // v: " + link.Version))}
 }}";
         }
 

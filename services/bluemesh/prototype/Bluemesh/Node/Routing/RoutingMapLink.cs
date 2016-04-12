@@ -1,18 +1,31 @@
-﻿using Node.Connections;
+﻿using System;
+using Node.Connections;
 using Node.Serialization;
 
 namespace Node.Routing
 {
     internal struct RoutingMapLink : IBinarySerializable
     {
-        public RoutingMapLink(IAddress a, IAddress b)
+        public RoutingMapLink(IAddress a, IAddress b, int version, bool connected)
         {
+            if (a == null || b == null)
+                throw new ArgumentException("Links ends must not be null!");
             A = a;
             B = b;
+            Version = version;
+            Connected = connected;
+        }
+
+
+        public RoutingMapLink(IAddress a, IAddress b)
+            : this (a, b, 1, true)
+        {
         }
 
         public readonly IAddress A;
         public readonly IAddress B;
+        public readonly int Version;
+        public readonly bool Connected;
 
         public bool Contains(IAddress address)
         {
@@ -47,11 +60,13 @@ namespace Node.Routing
         {
             serializer.Write(A);
             serializer.Write(B);
+            serializer.Write(Version);
+            serializer.Write(Connected ? 1 : 0);
         }
 
         public static RoutingMapLink Deserialize(IBinaryDeserializer deserializer, IConnectionUtility utility)
         {
-            return new RoutingMapLink(utility.DeserializeAddress(deserializer), utility.DeserializeAddress(deserializer));
+            return new RoutingMapLink(utility.DeserializeAddress(deserializer), utility.DeserializeAddress(deserializer), deserializer.ReadInt(), deserializer.ReadInt() != 0);
         }
     }
 }

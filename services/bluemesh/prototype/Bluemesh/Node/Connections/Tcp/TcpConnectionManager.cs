@@ -53,7 +53,7 @@ namespace Node.Connections.Tcp
 
         public void PurgeDeadConnections()
         {
-            connections.RemoveAll(c => c.State > ConnectionState.Connected || !c.Socket.Connected);
+            connections.RemoveAll(c => c.State > ConnectionState.Connected || !c.Socket.IsOk());
             foreach (var info in connectingSockets.Where(s => DateTime.UtcNow - s.Timestamp > TimeSpan.FromSeconds(1)).ToList())
             {
                 info.Socket.Close();
