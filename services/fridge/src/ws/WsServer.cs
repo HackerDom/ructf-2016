@@ -17,13 +17,15 @@ namespace frɪdʒ.ws
 		public WsServer(int port)
 		{
 			var timeout = TimeSpan.FromSeconds(5);
+			var readWriteTimeout = TimeSpan.FromSeconds(1);
 			var options = new WebSocketListenerOptions
 			{
 				UseNagleAlgorithm = false,
+				PingMode = PingModes.BandwidthSaving,
 				PingTimeout = timeout,
 				NegotiationTimeout = timeout,
-				WebSocketSendTimeout = timeout,
-				WebSocketReceiveTimeout = timeout,
+				WebSocketSendTimeout = readWriteTimeout,
+				WebSocketReceiveTimeout = readWriteTimeout,
 				SubProtocols = new[] {"text"}
 			};
 
@@ -49,10 +51,11 @@ namespace frɪdʒ.ws
 					var ws = await listener.AcceptWebSocketAsync(token).ConfigureAwait(false);
 					if(ws == null)
 						continue;
-					//Console.WriteLine($"[{ws.RemoteEndpoint}] WS v{ws.HttpRequest.Headers.WebSocketVersion}");
+					Console.WriteLine($"[{ws.RemoteEndpoint}] WS connected v{ws.HttpRequest.WebSocketVersion} as '{ws.HttpRequest.Headers["User-Agent"]}' from '{ws.HttpRequest.Headers["Origin"]}'");
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 					Task.Run(async () =>
 					{
+						await Task.Delay(100, token); //NOTE: ws4py issue workaround =\
 						await TrySendAsync(ws, "hello", token);
 						sockets[ws] = 0;
 					}, token);
@@ -71,7 +74,10 @@ namespace frɪdʒ.ws
 							if(ws.IsConnected)
 								return true;
 							if(sockets.TryRemove(ws))
+							{
 								ws.Dispose();
+								Console.WriteLine($"[{ws.RemoteEndpoint}] WS closed");
+							}
 							return false;
 						})
 						.Select(ws => TrySendAsync(ws, msg, token)));
@@ -82,6 +88,7 @@ namespace frɪdʒ.ws
 			try
 			{
 				await ws.WriteStringAsync(msg, token).ConfigureAwait(false);
+				Console.WriteLine($"[{ws.RemoteEndpoint}] WS sent '{msg}'");
 			}
 			catch
 			{
