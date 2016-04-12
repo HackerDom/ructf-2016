@@ -4,4 +4,11 @@
 
 - file: path={{cs_dir}}/app owner={{cs_user}} group={{cs_user}} recurse=yes
 
+- locale_gen: name={{item}}
+  with_items:
+    - en_US.UTF-8
+    - ru_RU.UTF-8
+
 - command: cpanm --installdeps . chdir={{cs_dir}}/app
+
+- command: /bin/sh -c 'cp {{cs_dir}}/app/etc/systemd/* /etc/systemd/system/'

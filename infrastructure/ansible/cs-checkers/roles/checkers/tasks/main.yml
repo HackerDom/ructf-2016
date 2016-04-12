@@ -4,10 +4,14 @@
 
 # 'environ' checker requirements
 
-- shell: pip3 install requests PyCrypto scapy-python3
+- apt: name={{item}}
+  with_items:
+    - python3
+    - python3-pip
+    - tcpdump
+    - firmware-ralink
 
-- apt: name=tcpdump
+- shell: pip3 install requests PyCrypto scapy-python3
 
 - name: set_cap
   capabilities: capability=cap_net_raw=eip path=/usr/bin/python3.4 state=present
-

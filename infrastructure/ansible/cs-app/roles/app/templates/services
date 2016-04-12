@@ -1,3 +1,4 @@
-    {name => 'environ',  path => '../checkers/environ/environ.checker.py',   timeout => 10},
     {name => 'meters',   path => '../checkers/meters/meters.checker.py',     timeout => 10},
     {name => 'socks',    path => '../checkers/socks/checker.py',             timeout => 10},
+    {name => 'fridge',   path => '../checkers/fridge/fridge.checker.py',     timeout => 10},
+    {name => 'cleaner',  path => '../checkers/cleaner/cleaner.checker.py',   timeout => 10},

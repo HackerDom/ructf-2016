@@ -6,6 +6,7 @@
   with_items:
     - postgresql-9.5
     - python-psycopg2
+    - sudo
 
 - sysctl: name=kernel.sem value='250 32000 32 1024' state=present
 
