@@ -1,0 +1,2 @@
+[farm]
+172.16.16.[101:122] ansible_user=root

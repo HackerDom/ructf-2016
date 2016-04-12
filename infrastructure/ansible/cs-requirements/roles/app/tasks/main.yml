@@ -1,0 +1,12 @@
+- user: name={{cs_user}} state=present
+
+- apt: name={{item}} state=latest update_cache=yes
+  with_items:
+    - libssl-dev
+    - libpq-dev
+    - cpanminus
+    - git
+    - build-essential
+    - nginx
+
+- authorized_key: user=root key=https://urgu.org/and

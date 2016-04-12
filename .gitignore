@@ -17,3 +17,15 @@
 /services/strongbox/tmp
 /services/strongbox/Gemfile.lock
 .idea
+/services/strongbox/.idea
+
+# Python
+*.pyc
+*.pyo
+
+# Socks server
+/services/socks/target/
+/services/socks/Cargo.lock
+
+# Ansible logs
+/infrastructure/ansible/.log/

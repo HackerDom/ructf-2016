@@ -1,0 +1,6 @@
+*.o
+*.ppu
+meters
+*.swp
+*.or
+data/*

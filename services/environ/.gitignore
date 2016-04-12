@@ -1,6 +1,5 @@
 .idea
 .py[co]
 __pycache__
-logs/
-users.db
-status/
+environ/sensors/
+/environ/id.key

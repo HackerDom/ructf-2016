@@ -1,0 +1,11 @@
+[package]
+name = "socks"
+version = "0.1.0"
+authors = ["Nikolay Zhuravlev <znick@znick.ru>"]
+
+[dependencies]
+hyper = "0.8"
+stemmer = "*"
+
+[dependencies.urlparse]
+version = "0.7.2"
