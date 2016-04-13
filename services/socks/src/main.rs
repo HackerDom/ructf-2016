@@ -31,8 +31,7 @@ impl Context {
         context
     }
 
-
-    pub fn index(&self, body: String, id: String) {
+    pub fn index(&self, body: String, id: String, owner: String) {
         let mut doc_id = 0;
         {
             let mut docs = self.docs.lock().unwrap();
@@ -52,6 +51,15 @@ impl Context {
                 if let Some(docs) = index.get_mut(&stem) {
                     (*docs).push(doc_id);
                 }
+            }
+
+            let owner_word: String = "#owner=".to_string() + &owner;
+            if !index.contains_key(&owner_word) {
+                index.insert(owner_word.clone(), Vec::new());
+            }
+
+            if let Some(docs) = index.get_mut(&owner_word) {
+                (*docs).push(doc_id);
             }
         }
     }
@@ -98,11 +106,16 @@ impl Handler for Context {
         // println!("{}", req.uri);
         let url = urlparse(req.uri.to_string());
         let query = url.get_parsed_query().unwrap();
+        let mut text = query.get_first_from_str("text").unwrap();
+        let owner = query.get_first_from_str("owner").unwrap();
 
         println!("{}", url.path);
 
         if url.path == "/search" {
-            let text = query.get_first_from_str("text").unwrap();
+            let owner_word: String = " #owner=".to_string() + &owner;
+            text.push_str(owner_word.as_str());
+            println!("TEXT:{:?}", text);
+
             let mut data: String;
             let mut res = res.start().unwrap();
 
@@ -117,9 +130,8 @@ impl Handler for Context {
 
         if url.path == "/set" {
             let mut data = String::new();
-            let text = query.get_first_from_str("text").unwrap();
             req.read_to_string(&mut data);
-            self.index(data.clone(), text.clone());
+            self.index(data.clone(), text.clone(), owner);
             return;
         }
 
