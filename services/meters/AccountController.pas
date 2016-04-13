@@ -186,10 +186,14 @@ implementation
 	begin
 		decoded := decode(token);
 		if decoded.Count = 0 then
+		begin
+			decoded.free;
 			exit('can''t find set time');
+		end;
 		dt := unpack(decoded[0]);
+		decoded.free;
 		if abs(dt - now) > ttl then
-			exit('cookies is too old. ' + ToPrettyString(dt));
+			exit('cookie is too old. set at ' + format('%.10f', [dt]));
 		result := '';
 	end;
 
@@ -243,6 +247,7 @@ implementation
 			result := decoded[1]
 		else
 			result := 0;
+		decoded.free;
 	end;
 
 	function TAccountManager.GetDashboards(const userId: TUserId): TDashboardIds;
@@ -274,12 +279,14 @@ implementation
 			if decoded[2 * i + 1] = dashboard then
 			begin
 				dt := unpack(decoded[2 * i]);
+				decoded.free;
 				if abs(dt - now) > ttl then
-					exit('cookie is too old. ' + ToPrettyString(dt))
+					exit('cookie is too old. set at ' + format('%.10f', [dt]))
 				else
 					exit('');
 			end;
 		result := 'You haven''t permission for this dashboard';
+		decoded.free;
 	end;
 
 	function TAccountManager.GetUser(const userId: TUserId): TUser;
@@ -343,6 +350,7 @@ implementation
 		result := TDashboardIds.Create;
 		for i := 1 to decoded.Count div 2 - 1 do
 			result.add(decoded[2 * i + 1]);
+		decoded.free;
 	end;
 
 initialization
@@ -350,7 +358,7 @@ initialization
 	flush(stderr);
 	defaultUser.userid := 0;
 	defaultUser.username := 'No user';
-	ttl := EncodeTime(0, 15, 0, 0);
+	ttl := EncodeTime(23, 59, 59, 999);
 	AccountManager := TAccountManager.Create;
 
 end.
