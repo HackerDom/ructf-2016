@@ -132,6 +132,10 @@ namespace Node.Connections.Tcp
         public void Stop()
         {
             serverSocket.Close();
+            foreach (var info in connectingSockets)
+                info.Socket.Close();
+            foreach (var connection in Connections)
+                connection.Close();
         }
 
         public List<IConnection> Connections => new List<IConnection>(connections);

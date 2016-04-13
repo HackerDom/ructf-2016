@@ -27,9 +27,9 @@ namespace Tests
             var config = Substitute.For<IRoutingConfig>();
             config.DesiredConnections.Returns(3);
             config.MaxConnections.Returns(25);
-            config.ConnectCooldown.Returns(1.Seconds());
-            config.DisconnectCooldown.Returns(2.Seconds());
-            config.MapUpdateCooldown.Returns(200.Milliseconds());
+            config.ConnectCooldown.Returns(100.Milliseconds());
+            config.DisconnectCooldown.Returns(100.Milliseconds());
+            config.MapUpdateCooldown.Returns(20.Milliseconds());
             var preconfiguredNodes = new List<IAddress>();
             var nodes = Enumerable.Range(0, 25).Select(i => CreateNode(config, preconfiguredNodes, i)).ToList();
 
@@ -45,7 +45,7 @@ namespace Tests
             var watch = Stopwatch.StartNew();
             trigger.Set();
 
-            Task.Delay(30.Seconds()).ContinueWith(task => nodes[0].Stopped = true);
+            Task.Delay(10.Seconds()).ContinueWith(task => nodes[0].Stopped = true).Wait();
 
             Task.WhenAll(tasks).Wait();
 
@@ -79,6 +79,7 @@ namespace Tests
                     Thread.Sleep(10.Milliseconds());
                 }
                 connectionManager.Stop();
+                Console.WriteLine("Stoppped node {0}", connectionManager.Address);
             }
 
             public bool Stopped { get; set; }

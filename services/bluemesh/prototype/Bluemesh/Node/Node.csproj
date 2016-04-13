@@ -22,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -62,6 +63,7 @@
     <Compile Include="BluemeshNode.cs" />
     <Compile Include="Connections\IConnection.cs" />
     <Compile Include="Connections\IConnectionManager.cs" />
+    <Compile Include="Encryption\BluemeshEncryptor.cs" />
     <Compile Include="Flags\FlagStorage.cs" />
     <Compile Include="Flags\IFlagStorage.cs" />
     <Compile Include="Messages\MapMessage.cs" />
