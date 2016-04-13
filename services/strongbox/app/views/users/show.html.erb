@@ -1,10 +1,11 @@
 <% provide(:title, @user.name) %>
 <div class="row">
   <aside class="span4">
-    <section>
-      <h1>
-        <%= @user.name %>/<%= @user.email %>
+    <section class="users">
+      <h1 class="users__name">
+        <%= @user.name %>
       </h1>
+      <%= @user.email %>
     </section>
   </aside>
 </div>
