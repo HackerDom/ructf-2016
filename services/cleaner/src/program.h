@@ -1,6 +1,7 @@
 #pragma once
 
 #include "room.h"
+#include "state.h"
 #include "pass_checker.h"
 
 #include <string>
@@ -16,7 +17,7 @@ public:
     const std::string& GetName() const;
     const std::string& GetListing() const;
 
-    std::string Run(const TRoom& room) const;
+    std::string Run(const TRoom& room, TProgramState& state) const;
 
 private:
     friend class boost::serialization::access;
