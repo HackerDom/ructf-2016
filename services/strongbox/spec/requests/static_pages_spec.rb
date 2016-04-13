@@ -1,15 +1,12 @@
-require 'spec_helper'
 require 'rails_helper'
-
+require 'spec_helper'
 
 describe "Static pages" do
   subject { page }
+  describe "Home page" do
+    before { visit root_path }
 
-  describe "Index page" do
-    before { visit index_path }
-    it { should have_content('Home') }
-    it { should have_title("Index") }
-    it { should have_http_status(200) }
+    it { should have_content('StaticPages#home') }
+
   end
-
 end

@@ -1,11 +1,9 @@
-<% provide(:title, 'Sign up') %>
+<% provide(:title, "Edit user") %>
+
 
 <div class="row">
-  <div class="col-md-8">
-  </div>
-  <div class="col-md-4">
-    <h1>Sign up</h1>
-
+  <div class="col-md-12">
+    <h1>Update your profile</h1>
     <%= form_for(@user) do |f| %>
         <%= render 'shared/error_messages', object: f.object %>
 
@@ -22,11 +20,11 @@
           <%= f.password_field :password, class: "form-control" %>
         </div>
         <div class="form-group">
-          <%= f.label :password_confirmation, "Confirmation" %>
-          <%= f.password_field :password_confirmation, class: "form-control"%>
+          <%= f.label :password_confirmation, "Confirm Password" %>
+          <%= f.password_field :password_confirmation, class: "form-control" %>
         </div>
-
-        <%= f.submit "Create my account", class: "btn btn-default" %>
+        <%= f.submit "Save changes", class: "btn btn-default" %>
     <% end %>
+
   </div>
 </div>
