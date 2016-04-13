@@ -53,6 +53,7 @@ implementation
 		result := TDashboards.Create;
 		for i := 0 to dashboards.Count - 1 do
 			result.add(DashboardManager.GetDashboard(dashboards[i]));
+		dashboards.free;
 	end;
 
 	procedure TDashboardModule.OnMy(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
@@ -68,12 +69,17 @@ implementation
 			AResponse.Content := StringReplace(listTemplate, '{-list-}', 'can''t find dashboards for current user', [])
 		else
 			AResponse.Content := GetList(dashboards);
+		dashboards.free;
 	end;
 
 	procedure TDashboardModule.OnAll(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
+	var
+		dashboards: TDashboards;
 	begin
 		Handled := True;
-		AResponse.Content := GetList(DashboardManager.GetDashboards);
+		dashboards := DashboardManager.GetDashboards;
+		AResponse.Content := GetList(dashboards);
+		dashboards.Free;
 	end;
 
 	procedure TDashboardModule.OnView(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
