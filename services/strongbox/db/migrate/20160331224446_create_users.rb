@@ -5,9 +5,9 @@ class CreateUsers < ActiveRecord::Migration
       t.string :email
       t.string :password_digest
       t.string :remember_token
-      t.timestamps
+      t.timestamps null: false
     end
-    add_index :users, :email, unique: true
+    add_index  :users, :email
     add_index  :users, :remember_token
   end
 end

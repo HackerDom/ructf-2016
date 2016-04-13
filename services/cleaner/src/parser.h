@@ -8,6 +8,7 @@
 namespace {
     enum EParserState {
         EWaitCmd,
+        EWaitChar,
         EWaitNumber1,
         EWaitNumber2,
         EError

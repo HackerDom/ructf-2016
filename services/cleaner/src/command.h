@@ -26,6 +26,15 @@ private:
     const size_t Len;
 };
 
+class TPrintCommand : public ICommand {
+public:
+    TPrintCommand(char c);
+    virtual bool Run(TProgramState& state, const TRoomConfiguration& configuration) const;
+private:
+    const char Char;
+};
+
 class TErrorCommand : public ICommand {
     virtual bool Run(TProgramState& state, const TRoomConfiguration& configuration) const;
 };
+

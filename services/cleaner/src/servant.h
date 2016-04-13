@@ -22,7 +22,6 @@ private:
     std::string ListDir(const std::string& dir) const;
 
     void GetRoom();
-    void ChangeRoomPass();
 
     void Run();
 
