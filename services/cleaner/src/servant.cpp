@@ -160,6 +160,17 @@ void TCleanerServant::GetRoom() {
     std::string configuration_hex;
     boost::algorithm::hex(configuration.begin(), configuration.end(), std::back_inserter(configuration_hex));
     Session.Write(configuration_hex, "\n");
+    Session.Write("Program results:\n");
+
+    for (const auto& pair: room.GetLogs()) {
+        TProgram program;
+        if (!LoadProgram(program, pair.first)) {
+            continue;
+        }
+        Session.Write(pair.first, "\n");
+        Session.Write(program.GetListing(), "\n");
+        Session.Write(pair.second, "\n");
+    }
 }
 
 void TCleanerServant::Run() {
