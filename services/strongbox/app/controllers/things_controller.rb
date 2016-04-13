@@ -47,7 +47,7 @@ class ThingsController < ApplicationController
   end
 
   def thing_params
-    params.require(:thing).permit(:content, :title, :user_id)
+    params.require(:thing).permit!
   end
 
 end
