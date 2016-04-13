@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 
+import requests
+import sqlite3
 import sys
 import traceback
-import requests
+import os
+import os.path
 
 PORT = 9123
+DIR = os.path.dirname(os.path.abspath(__file__))
 
 def ructf_error(status=110, message=None, error=None, exception=None):
     if message:
@@ -45,7 +49,7 @@ def handler_check(*args):
 
 def handler_get(args):
     _, _, hostname, id, flag, vuln = args
-    request = "http://{}:3000/search?text={}".format(hostname, id)
+    request = "http://{0}:3000/search?text={1}&owner={1}".format(hostname, id)
     try:
         r = requests.get(request)
         r.raise_for_status()
@@ -65,7 +69,7 @@ def handler_get(args):
 def handler_put(args):
     _, _, hostname, id, flag, vuln = args
     try:
-        r = requests.post("http://{}:3000/set?text={}".format(hostname, id), data=flag)
+        r = requests.post("http://{0}:3000/set?text={1}&owner={1}".format(hostname, id), data=flag)
         r.raise_for_status()
     except requests.exceptions.ConnectionError as e:
         return service_down(message="Cant connect to server", exception=e)
@@ -75,12 +79,40 @@ def handler_put(args):
 
     return service_ok()
 
+
 HANDLERS = {
     'info' : handler_info,
     'check' : handler_check,
     'get' : handler_get,
     'put' : handler_put,
 }
+
+
+class DB:
+    DB_VERSION = 1
+
+    def __init__(self, filename):
+        self.filename = filename
+        new_databse = False
+
+        if os.path.exists(filename):
+            new_databse = True
+
+        conn = sqlite3.connect(filename)
+        if new_databse:
+            c.execute('''CREATE TABLE config (key VARCHAR(128), value VARCHAR(128))''')
+            c.execute('''INSERT INTO config VALUES ("version", ?))''', (self.DB_VERSION,))
+
+            c.execute('''CREATE TABLE documents (id VARCHAR(128), document VARCHAR(128))''')
+            conn.commit()
+        else:
+            c.execute('''SELECT value FROM config WHERE key = ?''', ("version",))
+            version = c.fetchone()[0]
+            if version != self.DB_VERSION:
+                print >>sys.stderr, "Version missmatch: {} != {}".format(version, self.DB_VERSION)
+                os.remove(filename)
+                return self.__init__(filename)
+
 
 def main():
     handler = HANDLERS[sys.argv[1]]
