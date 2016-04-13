@@ -1,4 +1,4 @@
-#!/user/bin/python3
+#!/usr/bin/python3
 # do stuff
 import uuid
 import random

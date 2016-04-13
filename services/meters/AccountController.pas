@@ -189,7 +189,7 @@ implementation
 			exit('can''t find set time');
 		dt := unpack(decoded[0]);
 		if abs(dt - now) > ttl then
-			exit('cookies is too old. ' + ToPrettyString(dt));
+			exit('cookie is too old. set at ' + format('%.10f', [dt]));
 		result := '';
 	end;
 
@@ -275,7 +275,7 @@ implementation
 			begin
 				dt := unpack(decoded[2 * i]);
 				if abs(dt - now) > ttl then
-					exit('cookie is too old. ' + ToPrettyString(dt))
+					exit('cookie is too old. set at ' + format('%.10f', [dt]))
 				else
 					exit('');
 			end;
@@ -350,7 +350,7 @@ initialization
 	flush(stderr);
 	defaultUser.userid := 0;
 	defaultUser.username := 'No user';
-	ttl := EncodeTime(0, 15, 0, 0);
+	ttl := EncodeTime(23, 59, 59, 999);
 	AccountManager := TAccountManager.Create;
 
 end.

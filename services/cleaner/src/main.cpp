@@ -2,6 +2,7 @@
 #include "servant.h"
 
 #include <boost/asio.hpp>
+#include "boost/filesystem.hpp"
 
 #include <cstdlib>
 #include <iostream>
@@ -32,6 +33,17 @@ void server(boost::asio::io_service& io_service, unsigned short port) {
 }
 
 int main(int argc, char* argv[]) {
+    boost::filesystem::path programs ( "./programs" );
+    boost::filesystem::path rooms ( "./rooms" );
+
+    if (!exists(programs)) {
+        boost::filesystem::create_directory(programs);
+    }
+
+    if (!exists(rooms)) {
+        boost::filesystem::create_directory(rooms);
+    }
+
     try {
         boost::asio::io_service io_service;
         server(io_service, PORT);

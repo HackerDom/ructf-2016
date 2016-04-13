@@ -11,13 +11,13 @@ bool Allow(size_t x, size_t y, const TRoomConfiguration& configuration) {
 }
 
 bool Error(TProgramState& state) {
-    state.Log += "E";
+    state.Append('E');
     return false;
 }
 
 bool TNewCommand::Run(TProgramState& state, const TRoomConfiguration& configuration) const {
     if (Allow(X, Y, configuration)) {
-        state.Log += "N";
+        state.Append('N');
         state.PosX = X;
         state.PosY = Y;
         return true;
@@ -63,20 +63,33 @@ bool TMoveCommand::Run(TProgramState& state, const TRoomConfiguration& configura
         }
 
         if (error) {
-            break;
+            state.Append('E');
+        } else {
+            path_len++;
         }
-        path_len++;
     }
+
     if (path_len) {
-        state.Log += std::to_string(Direction);
-        state.Log += std::to_string(path_len);
+        state.Append(Direction);
+        std::string path_str = std::to_string(path_len);
+        for (char c: path_str) {
+            state.Append(c);
+        }
     }
-    if (error) {
-        return Error(state);
-    }
-    return true;
+
+    return !error;
 }
 
 bool TErrorCommand::Run(TProgramState& state, const TRoomConfiguration& /*configuration*/) const {
     return Error(state);
+}
+
+TPrintCommand::TPrintCommand(char c)
+    : Char(c)
+{
+}
+
+bool TPrintCommand::Run(TProgramState& state, const TRoomConfiguration& /*configuration*/) const {
+    state.Append(Char);
+    return true;
 }
