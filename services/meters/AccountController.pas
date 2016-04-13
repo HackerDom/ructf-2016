@@ -45,7 +45,6 @@ interface
 				function GetCurrentUserId(const token: string): TUserId;
 				function GetDashboards(const userid: TUserId): TDashboardIds;
 				function HavePermission(const token: string; const dashboard: TDashboardId): string;
-				function GetUser(const userId: TUserId): TUser;
 				function AddPermission(const token: string; const dashboardId: TDashboardId): string;
 				function GetPermittedDashboards(const token: string): TDashboardIds;
 		end;
@@ -186,8 +185,12 @@ implementation
 	begin
 		decoded := decode(token);
 		if decoded.Count = 0 then
+		begin
+			decoded.free;
 			exit('can''t find set time');
+		end;
 		dt := unpack(decoded[0]);
+		decoded.free;
 		if abs(dt - now) > ttl then
 			exit('cookie is too old. set at ' + format('%.10f', [dt]));
 		result := '';
@@ -243,6 +246,7 @@ implementation
 			result := decoded[1]
 		else
 			result := 0;
+		decoded.free;
 	end;
 
 	function TAccountManager.GetDashboards(const userId: TUserId): TDashboardIds;
@@ -274,28 +278,14 @@ implementation
 			if decoded[2 * i + 1] = dashboard then
 			begin
 				dt := unpack(decoded[2 * i]);
+				decoded.free;
 				if abs(dt - now) > ttl then
 					exit('cookie is too old. set at ' + format('%.10f', [dt]))
 				else
 					exit('');
 			end;
 		result := 'You haven''t permission for this dashboard';
-	end;
-
-	function TAccountManager.GetUser(const userId: TUserId): TUser;
-	var
-		i: longint;
-	begin
-		result := defaultUser;
-
-		usersRWSync.beginRead;
-		for i := 0 to users.count - 1 do
-			if users[i].userid = userId then
-			begin
-				result := users[i];
-				break;
-			end;
-		usersRWSync.endread;
+		decoded.free;
 	end;
 
 	procedure TAccountManager.AddDashboard(const userId: TUserId; const dashboardId: TDashboardId);
@@ -343,6 +333,7 @@ implementation
 		result := TDashboardIds.Create;
 		for i := 1 to decoded.Count div 2 - 1 do
 			result.add(decoded[2 * i + 1]);
+		decoded.free;
 	end;
 
 initialization

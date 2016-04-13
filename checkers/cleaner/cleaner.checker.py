@@ -7,10 +7,13 @@ import random
 import re
 import binascii
 import socket
+import collections
 
 PORT = 12500
 DELIM = "====================="
 HELLO_LINES = 5
+BASE = 2
+HEIGHT = 8
 
 def ructf_error(status=110, message=None, error=None, exception=None):
     if message:
@@ -46,6 +49,130 @@ def make_err_message(message, request, reply):
 def get_rand_string(l):
     return ''.join(random.choice(string.ascii_lowercase) for _ in range(l))
 
+def deduplicate(program):
+    cur = None
+    cnt = 0
+    result = ''
+    for c in program:
+        if not (c in 'LRUD'):
+            if cur is not None:
+                result += cur
+                result += "{0:02d}".format(cnt)
+            cur = None 
+            cnt = 0
+            result += c
+        elif cur == c:
+            cnt += 1
+        else:
+            if cur is not None:
+                result += cur
+                result += "{0:02d}".format(cnt)
+            cur = c
+            cnt = 1
+    return result
+
+def print_room(room):
+    lines = []
+    for i in range(HEIGHT):
+        line = ""
+        for x in room:
+            line += str(x[i])
+        lines.append(line)
+    lines.reverse()
+    print("\n".join(lines))
+
+def move_near(x, y, i, j):
+    if x + 1 == i and y == j:
+        return "R"
+    elif x - 1 == i and y == j:
+        return "L"
+    elif x == i and y + 1 == j:
+        return "U"
+    elif x == i and y - 1 == j:
+        return "D"
+    else:
+        return None
+
+def move(x, y, i, j, room, path):
+    log = ''
+
+    if x == i and y == j:
+        return log, path
+
+    while path:
+        near = move_near(x, y, i, j)
+        if near is not None:
+            log += near
+            path.append((x, y))
+            break
+        else:
+            new_x, new_y = path[-1]
+            path = path[:-1]
+            if x == new_x and y == new_y:
+                new_x, new_y = path[-1]
+                path = path[:-1]
+
+            log += move_near(x, y, new_x, new_y)
+            x, y = new_x, new_y
+
+    return log, path
+
+def dfs(room, ii, jj):
+    log = ''
+    queue = collections.deque()
+    x, y = None, None
+    path = []
+
+    queue.appendleft((ii,jj))
+
+    while len(queue) != 0:
+        (i, j) = queue.popleft()
+
+        if room[i][j] == 2:
+            continue
+
+        if x is not None:
+            move_log, path = move(x, y, i, j, room, path)
+            log += move_log
+        else:
+            log += "N{0:02d}{1:02d}".format(i, j)
+            path.append((i, j))
+
+        x, y = i, j
+        room[i][j] = 2
+
+        if j < HEIGHT - 1 and not room[i][j + 1]:
+            queue.appendleft((i, j + 1))
+        if i < len(room) - 1 and not room[i + 1][j]:
+            queue.appendleft((i + 1, j))
+        if j > 0 and not room[i][j - 1]:
+            queue.appendleft((i, j - 1))
+        if i > 0 and not room[i - 1][j]:
+            queue.appendleft((i - 1, j))
+    return log, room
+
+def traverse_room(room):
+    log = ''
+    for i in range(len(room)):
+        for j in range(HEIGHT):
+            if not room[i][j]:
+                dfs_log, room = dfs(room, i, j)
+                log += dfs_log
+    return log, room
+
+def generate_program(flag):
+    hex_flag = binascii.hexlify(flag.encode('utf-8'))
+    room = []
+    for x in range(len(hex_flag) // BASE):
+        col = [int(x) for x in list(bin(int(hex_flag[x*BASE:(x+1)*BASE], 16))[2:])]
+        col.reverse()
+        while (len(col) < 8):
+            col.append(0)
+        room.append(col)
+    log, room2 = traverse_room(room)
+    log = deduplicate(log)
+    return log
+
 def send(request, socket):
     try:
         socket.sendall(request.encode('utf-8'))
@@ -64,9 +191,6 @@ def readline(socket_fd):
 def skip_hello(socket_fd):
     for _ in range(HELLO_LINES):
         readline(socket_fd)
-
-def generate_program(flag):
-    return "N0000"
 
 class State:
     def __init__(self, hostname):
@@ -131,6 +255,16 @@ class State:
 
         return room_name, program_name, password 
 
+    def run(self, room, program, password):
+        socket = self.connect_to_service()
+        socket_fd = socket.makefile()
+        skip_hello(socket_fd)
+        send("run", socket)
+        send(password, socket)
+        send(room, socket)
+        send(program, socket)
+        return readline(socket_fd)
+
 def handler_info(*args):
     service_ok(message="vulns: 1")
 
@@ -143,7 +277,7 @@ def handler_check(*args):
 
 def handler_get(args):
     hostname, id, flag, vuln = args
-    room, program, password = id.split()
+    room, program, password = id.split('\t')
 
     state = State(hostname);
 
@@ -155,14 +289,19 @@ def handler_get(args):
     if not program in programs:
         return service_corrupt(message="No such program", error=make_err_message("No such program", program, "\n".join(programs)))
 
-    room = state.get_room(room, password)
-    if room != binascii.hexlify(flag):
-        return service_corrupt(message="Bad flag", error=make_err_message("Bad flag", flag, room))
+    room_conf = state.get_room(room, password).lower().encode('utf-8')
+    enc_flag = binascii.hexlify(flag.encode('utf-8')).lower()
+    if room_conf != enc_flag:
+        return service_corrupt(message="Bad flag", error=make_err_message("Bad flag", enc_flag, room_conf))
 
-#    log = service.run(room, program, password)
+    log = state.run(room, program, password)
 
-#    if 'E' in log:
-#        return service_corrupt(message="Bad run result", error="Bad run result : {} {}".format(room, flag))
+    if 'E' in log:
+        return service_corrupt(message="Bad run result: error", error="Bad run result : {} {}".format(room, flag))
+
+    good_log = generate_program(flag)
+    if good_log != log:
+        return service_corrupt(message="Bad run result", error="Bad run result : {} {}".format(good_log, log))
 
     return service_ok()
 
@@ -171,7 +310,7 @@ def handler_put(args):
     state = State(hostname)
     room, program, password = state.put(flag)
 
-    return service_ok(message="{}\n{}\n{}".format(room, program, password))
+    return service_ok(message="{}\t{}\t{}".format(room, program, password))
 
 HANDLERS = {
     'info' : handler_info,

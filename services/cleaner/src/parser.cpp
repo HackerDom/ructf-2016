@@ -46,10 +46,11 @@ std::unique_ptr<ICommand> TCommandParser::GetNext() {
             case EWaitChar:
                 Idx++;
                 State = EWaitCmd;
-                Listing[Idx];
+                std::cout << "got print" << std::endl;
                 return std::unique_ptr<ICommand>(new TPrintCommand(Listing[Idx]));
             case EError:
                 std::cout << "got error" << std::endl;
+                Idx++;
                 return std::unique_ptr<ICommand>(new TErrorCommand());
         };
         Idx++;

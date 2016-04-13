@@ -26,7 +26,6 @@ implementation
 	var
 		loginTemplate: string;
 		registerTemplate: string;
-		listTemplate, listATemplate: string;
 
 	function TryGetUsernameAndPassword(ARequest: TRequest; AResponse: TResponse; var username, password: string; const template: string): Boolean;
 	begin
