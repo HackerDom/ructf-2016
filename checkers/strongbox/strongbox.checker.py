@@ -41,11 +41,12 @@ class StrongboxChecker(HttpCheckerBase, Randomizer):
     def spost(self, s, addr, suffix_get, suffix_post, data=None):
         soup = BeautifulSoup(s.get(self.url(addr, suffix_get)).content,
                              "html5lib")
-        csrf_data = soup.find("input", {"name": "authenticity_token"}).get(
-            "value")
-        data.update({'authenticity_token': csrf_data})
-        response = s.post(self.url(addr, suffix_post), data, timeout=5)
-        return self.parseresponse(response)
+        auth_token = soup.find("input", {"name": "authenticity_token"})
+        if auth_token:
+            csrf_data = auth_token.get("value")
+            data.update({'authenticity_token': csrf_data})
+            response = s.post(self.url(addr, suffix_post), data, timeout=5)
+            return self.parseresponse(response)
 
     def sget(self, s, addr, suffix):
         response = s.get(self.url(addr, suffix), timeout=5)
@@ -67,7 +68,7 @@ class StrongboxChecker(HttpCheckerBase, Randomizer):
         except (AttributeError, TypeError):
             return True
 
-    #TODO
+    # TODO
     def checkAddThing(self, result, flag):
         try:
             list_things = result["page"].find_all("li")
@@ -90,7 +91,7 @@ class StrongboxChecker(HttpCheckerBase, Randomizer):
             'thing[title]': self.randTitle(),
             'thing[content]': flag
         }
-        result = self.spost(session, addr, '/', '/things',thing)
+        result = self.spost(session, addr, '/', '/things', thing)
         if self.checkAddThing(result, thing['thing[title]']):
             print('put msg failed')
             return EXITCODE_MUMBLE
