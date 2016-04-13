@@ -45,7 +45,6 @@ interface
 				function GetCurrentUserId(const token: string): TUserId;
 				function GetDashboards(const userid: TUserId): TDashboardIds;
 				function HavePermission(const token: string; const dashboard: TDashboardId): string;
-				function GetUser(const userId: TUserId): TUser;
 				function AddPermission(const token: string; const dashboardId: TDashboardId): string;
 				function GetPermittedDashboards(const token: string): TDashboardIds;
 		end;
@@ -287,22 +286,6 @@ implementation
 			end;
 		result := 'You haven''t permission for this dashboard';
 		decoded.free;
-	end;
-
-	function TAccountManager.GetUser(const userId: TUserId): TUser;
-	var
-		i: longint;
-	begin
-		result := defaultUser;
-
-		usersRWSync.beginRead;
-		for i := 0 to users.count - 1 do
-			if users[i].userid = userId then
-			begin
-				result := users[i];
-				break;
-			end;
-		usersRWSync.endread;
 	end;
 
 	procedure TAccountManager.AddDashboard(const userId: TUserId; const dashboardId: TDashboardId);
