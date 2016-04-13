@@ -1,19 +1,174 @@
 import random
+import string
 import uuid
 
 
 class Randomizer(object):
-    def randuser(self):
-        login = uuid.uuid4().hex
+    def randUser(self):
         passlen = random.randrange(8, 14)
         password = uuid.uuid4().hex[:passlen]
-
         return {
-            'user[name]': self.randlogin() + login,
+            'user[name]': self.randlogin() + uuid.uuid4().hex,
             'user[password]': password,
             'user[password_confirmation]': password,
             'user[email]': self.randEmail()
         }
+
+    def randThing(self):
+        return {
+            'thing[title]': self.randTitle(),
+            'thing[content]': self.randphrase()
+        }
+
+    def randword(self):
+        word = ''
+        rnd = random.randrange(2, 10)
+        for i in range(rnd):
+            word += random.choice(string.ascii_lowercase)
+        return word
+
+    def randphrase(self):
+        phrase = ''
+        rnd = random.randrange(5, 10)
+        for i in range(rnd):
+            phrase += ' ' + self.randword()
+        return phrase.lstrip()
+
+    def randfreqengword(self):
+        return random.choice([
+            'the', 'of', 'and', 'to', 'a', 'in', 'is', 'you', 'are', 'for',
+            'that', 'or', 'it', 'as', 'be', 'on', 'your', 'with', 'can',
+            'have', 'this', 'an', 'by', 'not', 'but', 'at', 'from', 'I',
+            'they', 'more', 'will', 'if', 'some', 'there', 'what', 'about',
+            'which', 'when', 'one', 'their', 'all', 'also', 'how', 'many',
+            'do', 'has', 'most', 'people', 'other', 'time', 'so', 'was',
+            'we', 'these', 'may', 'like', 'use', 'into', 'than', 'up', 'out',
+            'who', 'them', 'make', 'because', 'such', 'through', 'get',
+            'work', 'even', 'different', 'its', 'no', 'our', 'new', 'film',
+            'just', 'only', 'see', 'used', 'good', 'water', 'been', 'need',
+            'should', 'very', 'any', 'history', 'often', 'way', 'well', 'art',
+            'know', 'were', 'then', 'my', 'first', 'would', 'money',
+            'each', 'over', 'world', 'information', 'map', 'find', 'where',
+            'much', 'take', 'two', 'want', 'important', 'family',
+            'those', 'example', 'while', 'he', 'look', 'government', 'before',
+            'help', 'between', 'go', 'own', 'however', 'business',
+            'us', 'great', 'his', 'being', 'another', 'health', 'same',
+            'study', 'why', 'few', 'game', 'might', 'think', 'free', 'too',
+            'had', 'hi', 'right', 'still', 'system', 'after', 'computer',
+            'best', 'must', 'her', 'life', 'since', 'could', 'does', 'now',
+            'during', 'learn', 'around', 'usually'
+        ])
+
+    def randengword(self):
+        return random.choice([
+            'form', 'meat', 'air', 'day', 'place', 'become', 'number',
+            'public', 'read', 'keep', 'part', 'start', 'year',
+            'every', 'field', 'large', 'once', 'available', 'down', 'give',
+            'fish', 'human', 'both', 'local', 'sure', 'something', 'without',
+            'come', 'me', 'back', 'better', 'general', 'process', 'she',
+            'heat', 'thanks', 'specific', 'enough', 'long', 'lot', 'hand',
+            'popular', 'small', 'though', 'experience', 'include', 'job',
+            'music', 'person', 'really', 'although', 'thank', 'book', 'early',
+            'reading', 'end', 'method', 'never', 'less', 'play', 'able',
+            'data', 'feel', 'high', 'off', 'point', 'type', 'whether', 'food',
+            'understanding', 'here', 'home', 'certain', 'economy', 'little',
+            'theory', 'tonight', 'law', 'put', 'under', 'value', 'always',
+            'body', 'common', 'market', 'set', 'bird', 'guide', 'provide',
+            'change', 'interest', 'literature', 'sometimes', 'problem', 'say',
+            'next', 'create', 'simple', 'software', 'state', 'together',
+            'control', 'knowledge', 'power', 'radio', 'ability', 'basic',
+            'course',
+            'economics', 'hard', 'add', 'company', 'known', 'love', 'past',
+            'price', 'size', 'away', 'big', 'internet', 'possible',
+            'television',
+            'three', 'understand', 'various', 'yourself', 'card', 'difficult',
+            'including', 'list', 'mind', 'particular', 'real', 'science',
+            'trade', 'consider', 'either', 'library', 'likely', 'nature',
+            'fact', 'line', 'product', 'care', 'group', 'idea', 'risk',
+            'several',
+            'someone', 'temperature', 'united', 'word', 'fat', 'force', 'key',
+            'light', 'simply', 'today', 'training', 'until', 'major', 'name',
+            'personal', 'school', 'top', 'current', 'generally', 'historical',
+            'investment', 'left', 'national', 'amount', 'level', 'order',
+            'practice', 'research', 'sense', 'service', 'area', 'cut', 'hot',
+            'instead', 'least', 'natural', 'physical', 'piece', 'show',
+            'society', 'try', 'check', 'choose', 'develop', 'second', 'useful',
+            'web', 'activity', 'boss', 'short', 'story', 'call', 'industry',
+            'last', 'media', 'mental', 'move', 'pay', 'sport', 'thing',
+            'actually', 'against', 'far', 'fun', 'house', 'let', 'page',
+            'remember',
+            'term', 'test', 'within', 'along', 'answer', 'increase', 'oven',
+            'quite', 'scared', 'single', 'sound', 'again', 'community',
+            'definition', 'focus', 'individual', 'matter', 'safety', 'turn',
+            'everything', 'kind', 'quality', 'soil', 'ask', 'board', 'buy',
+            'development', 'guard', 'hold', 'language', 'later', 'main',
+            'offer', 'oil', 'picture', 'potential', 'professional', 'rather',
+            'access', 'additional', 'almost', 'especially', 'garden',
+            'international', 'lower', 'management', 'open', 'player', 'range',
+            'rate',
+            'reason', 'travel', 'variety', 'video', 'week', 'above',
+            'according', 'cook', 'determine', 'future', 'site', 'alternative',
+            'demand',
+            'ever', 'exercise', 'following', 'image', 'quickly', 'special',
+            'working', 'case', 'cause', 'coast', 'probably', 'security',
+            'true',
+            'whole', 'action', 'age', 'among', 'bad', 'boat', 'country',
+            'dance', 'exam', 'excuse', 'grow', 'movie', 'organization',
+            'record',
+            'result', 'section', 'across', 'already', 'below', 'building',
+            'mouse', 'allow', 'cash', 'class', 'clear', 'dry', 'easy',
+            'emotional',
+            'equipment', 'live', 'nothing', 'period', 'physics', 'plan',
+            'store', 'tax', 'analysis', 'cold', 'commercial', 'directly',
+            'full',
+            'involved', 'itself', 'low', 'old', 'policy', 'political',
+            'purchase', 'series', 'side', 'subject', 'supply', 'therefore',
+            'thought',
+            'basis', 'boyfriend', 'deal', 'direction', 'mean', 'primary',
+            'space', 'strategy', 'technology', 'worth', 'army', 'camera',
+            'fall',
+            'freedom', 'paper', 'rule', 'similar', 'stock', 'weather', 'yet',
+            'bring', 'chance', 'environment', 'everyone', 'figure', 'improve',
+            'man', 'model', 'necessary', 'positive', 'produce', 'search',
+            'source', 'beginning', 'child', 'earth', 'else', 'healthy',
+            'instance',
+            'maintain', 'month', 'present', 'program', 'spend', 'talk',
+            'truth', 'upset', 'begin', 'chicken', 'close', 'creative',
+            'design',
+            'feature', 'financial', 'head', 'marketing', 'material', 'medical',
+            'purpose', 'question', 'rock', 'salt', 'tell', 'themselves',
+            'traditional', 'university', 'writing', 'act', 'article', 'birth',
+            'car', 'cost', 'department', 'difference', 'dog', 'drive', 'exist',
+            'federal', 'goal', 'green', 'late', 'news', 'object', 'scale',
+            'sun', 'support', 'tend', 'thus', 'audience', 'enjoy', 'entire',
+            'fishing',
+            'fit', 'glad', 'growth', 'income', 'marriage', 'note', 'perform',
+            'profit', 'proper', 'related', 'remove', 'rent', 'return', 'run',
+            'speed',
+            'strong', 'style', 'throughout', 'user', 'war', 'actual',
+            'appropriate', 'bank', 'combination', 'complex', 'content',
+            'craft', 'due',
+            'easily', 'effective', 'eventually', 'exactly', 'failure', 'half',
+            'inside', 'meaning', 'medicine', 'middle', 'outside', 'philosophy',
+            'regular', 'reserve', 'standard', 'bus', 'decide', 'exchange',
+            'eye', 'fast', 'fire', 'identify', 'independent', 'leave',
+            'original',
+            'position', 'pressure', 'reach', 'rest', 'serve', 'stress',
+            'teacher', 'watch', 'wide', 'advantage', 'beautiful', 'benefit',
+            'box',
+            'charge', 'communication', 'complete', 'continue', 'frame',
+            'issue', 'limited', 'night', 'protect', 'require', 'significant',
+            'step',
+            'successful', 'unless', 'active', 'break', 'chemistry', 'cycle',
+            'disease', 'disk', 'electrical', 'energy', 'expensive', 'face',
+            'interested', 'item', 'metal', 'nation', 'negative', 'occur',
+            'paint', 'pregnant', 'review', 'road', 'role', 'room', 'safe',
+            'screen',
+            'soup', 'stay', 'structure', 'view', 'visit', 'visual', 'write',
+            'wrong', 'account', 'advertising', 'affect', 'ago', 'anyone',
+            'approach',
+            'avoid', 'ball'
+        ])
 
     def randTitle(self):
         return random.choice([
