@@ -9,7 +9,7 @@
 
 #include <string>
 
-using TRoomConfiguration = std::vector<unsigned long>;
+using TRoomConfiguration = std::vector<unsigned char>;
 using TProgramLogs = std::vector<std::pair<std::string, std::string>>;
 
 class TRoom : public TPassChecker {
