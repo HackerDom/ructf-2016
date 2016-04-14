@@ -53,6 +53,11 @@ namespace frɪdʒ.http
 			}
 		}
 
+		public static void SetCookie(this HttpListenerContext context, string name, string value, bool httpOnly = false)
+		{
+			context.Response.Headers.Add(HttpResponseHeader.SetCookie, $"{name}={value}; path=/{(httpOnly ? "; HttpOnly" : null)}");
+		}
+
 		private static readonly ReusableObjectPool<byte[]> ResponseBuffersPool;
 	}
 }

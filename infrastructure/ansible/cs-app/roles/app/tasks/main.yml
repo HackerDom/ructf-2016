@@ -12,3 +12,11 @@
 - command: cpanm --installdeps . chdir={{cs_dir}}/app
 
 - command: /bin/sh -c 'cp {{cs_dir}}/app/etc/systemd/* /etc/systemd/system/'
+
+- template: src=nginx.conf dest=/etc/nginx/sites-available/cs.conf
+
+- file: src=/etc/nginx/sites-available/cs.conf dest=/etc/nginx/sites-enabled/cs.conf state=link
+
+- file: path=/etc/nginx/sites-enabled/default state=absent
+
+- service: name=nginx state=restarted

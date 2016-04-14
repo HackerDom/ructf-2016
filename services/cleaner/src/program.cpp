@@ -26,20 +26,12 @@ const std::string& TProgram::GetListing() const {
     return Listing;
 }
 
-std::string TProgram::Run(const TRoom& room, TProgramState& state) const {
-    const auto& configuration = room.GetConfiguration();
+void TProgram::Run(TRoom& room, TProgramState& state) const {
+    auto& configuration = room.GetConfiguration();
     std::unique_ptr<ICommand> command;
     TCommandParser parser(Listing);
-    state.Log.resize(Listing.size());
 
-    std::cout << (void *) state.Log.c_str() << std::endl;
-
-    /*
-    for (size_t i = 4096; i < 5096; ++i) {
-        std::cout << state.Log.c_str()[i];
-    }
-    std::cout << std::endl;
-    */
+    std::cout << (void *) &(state) << " " << (void *) &(configuration[0][0]) << " " << (void *) &(room.GetLogs()[0]) << std::endl;
 
     while (true) {
         command = parser.GetNext();
@@ -47,6 +39,4 @@ std::string TProgram::Run(const TRoom& room, TProgramState& state) const {
             break;
         }
     }
-
-    return state.Log;
 }

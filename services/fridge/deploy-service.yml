@@ -1,0 +1,31 @@
+# Ansible >2 deploy playbook
+# use: ansible-playbook -i 192.168.0.1, deploy-service.yml
+# LOOK AT COMMA, IT IS IMPORTANT     ^^^
+# or as usual: ansible-playbook -i hosts.list deploy-service.yml
+
+---
+- hosts: all
+  remote_user: root
+  become_user: root
+  become: yes
+  tasks:
+    - name: install deps for ansible
+      command: dnf install -y python2 python2-dnf libselinux-python
+    - name: install system requiremets
+      dnf: name={{item}} state=latest disable_gpg_check=yes
+      with_items:
+        - yum-utils
+    - name: copy mono repo
+      copy:
+        src=files/download.mono-project.com_repo_centos_.repo
+        dest=/etc/yum.repos.d/download.mono-project.com_repo_centos_.repo
+        force=yes
+    - name: install system requiremets
+      dnf: name={{item}} state=latest disable_gpg_check=yes
+      with_items:
+        - mono-core
+        - mono-extras
+    - name: add user
+      user: name=fridge shell=/sbin/nologin
+    - name: set permissions
+      file: path=/home/fridge owner=fridge group=fridge mode=0700
