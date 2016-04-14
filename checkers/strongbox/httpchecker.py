@@ -36,10 +36,10 @@ class HttpCheckerBase(object):
     def check(self, addr):
         pass
 
-    def get(self, addr, flag_id, flag):
+    def get(self, addr, flag_id, flag, vuln):
         pass
 
-    def put(self, addr, flag_id, flag):
+    def put(self, addr, flag_id, flag, vuln):
         pass
 
     def debug(self, msg):

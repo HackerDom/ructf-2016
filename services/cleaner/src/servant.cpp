@@ -7,7 +7,6 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/range/iterator_range.hpp>
-#include <boost/algorithm/hex.hpp>
 
 const char* HELP = "\
 THIS\n\
@@ -82,10 +81,21 @@ void TCleanerServant::Upload() {
     while (Session.ReadLines(entity)) {
         if (entity == "room") {
             std::string name;
-            std::string configuration_hex;
-            Session.ReadLines(name, configuration_hex);
-            TRoomConfiguration configuration;
-            boost::algorithm::unhex(configuration_hex.begin(), configuration_hex.end(), std::back_inserter(configuration));
+            std::string configuration_str;
+            Session.ReadLines(name, configuration_str);
+            while (configuration_str.size() % 8) {
+                configuration_str += " ";
+            }
+            std::cout << "'" << configuration_str << "'" << std::endl;
+            TRoomConfiguration configuration(configuration_str.size() / 8);
+            std::cout << "conf size: " << configuration.size() << std::endl;
+            for (size_t i = 0; i < configuration_str.size() / 8; ++i) {
+                std::cout << i << std::endl;
+                std::vector<char>& tmp = configuration[i];
+                tmp.resize(8);
+                std::copy(configuration_str.begin() + 8 * i, configuration_str.begin() + 8 * (i + 1), tmp.begin());
+            }
+
             TRoom room(name, pass, configuration);
             if (!SaveRoom(room)) {
                 Session.Write("Can't save room: already exists\n");
@@ -157,9 +167,27 @@ void TCleanerServant::GetRoom() {
     }
 
     const auto& configuration = room.GetConfiguration();
-    std::string configuration_hex;
-    boost::algorithm::hex(configuration.begin(), configuration.end(), std::back_inserter(configuration_hex));
-    Session.Write(configuration_hex, "\n");
+    std::stringstream ss;
+    for (const auto& col: configuration) {
+        for (const auto& chr: col) {
+            ss << chr;
+        }
+    }
+    ss << '\n';
+    std::string result = ss.str();
+
+    Session.Write(result);
+    Session.Write("Program results:\n");
+
+    for (const auto& pair: room.GetLogs()) {
+        TProgram program;
+        if (!LoadProgram(program, pair.first)) {
+            continue;
+        }
+        Session.Write(pair.first, "\n");
+        Session.Write(program.GetListing(), "\n");
+        Session.Write(pair.second, "\n");
+    }
 }
 
 void TCleanerServant::Run() {
@@ -184,7 +212,8 @@ void TCleanerServant::Run() {
     }
 
     program.Run(room, state);
-    room.AddLog(program.GetName(), state.Log);
+    std::string log = state.Log.str();
+    room.AddLog(program.GetName(), log);
     RewriteRoom(room);
-    Session.Write(state.Log, "\n");
+    Session.Write(log, "\n");
 }

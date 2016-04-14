@@ -6,6 +6,7 @@ from os import environ
 from random import choice, randint
 from sys import argv, stderr
 import requests
+import signal
 from scapy.layers.dot11 import RadioTap, Dot11
 from scapy.layers.l2 import LLC
 from Crypto.Util import number
@@ -146,6 +147,10 @@ def put(*args):
     if not addr or not flag_id or not flag:
         close(INTERNAL_ERROR, private="Incorrect parameters")
     pool = Pool(processes=1)
+    def kill_children(signum, stackframe):
+        pool.terminate()
+        close(FAIL, "Got SIGTERM")
+    signal.signal(signal.SIGTERM, kill_children)
     pub_key = []
     try:
         pub_key = [

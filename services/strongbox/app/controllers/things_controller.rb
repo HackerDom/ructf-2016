@@ -18,7 +18,7 @@ class ThingsController < ApplicationController
     @thing = Thing.create(params)
     if @thing.save
       flash[:success] = 'Thing created!'
-      redirect_to root_url
+      redirect_to @thing
     else
       render 'static_pages/home'
     end
@@ -47,7 +47,7 @@ class ThingsController < ApplicationController
   end
 
   def thing_params
-    params.require(:thing).permit(:content, :title, :user_id)
+    params.require(:thing).permit!
   end
 
 end

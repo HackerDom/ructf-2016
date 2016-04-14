@@ -8,8 +8,9 @@
 #include <boost/serialization/utility.hpp>
 
 #include <string>
+#include <array>
 
-using TRoomConfiguration = std::vector<unsigned char>;
+using TRoomConfiguration = std::vector<std::vector<char>>;
 using TProgramLogs = std::vector<std::pair<std::string, std::string>>;
 
 class TRoom : public TPassChecker {
@@ -18,7 +19,7 @@ public:
     TRoom(std::string& name, std::string& pass, TRoomConfiguration& configuration);
 
     const std::string& GetName() const;
-    const TRoomConfiguration& GetConfiguration() const;
+    TRoomConfiguration& GetConfiguration();
     const TProgramLogs& GetLogs() const;
     void AddLog(const std::string& program_name, const std::string& log);
 

@@ -54,17 +54,26 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="http\FoodHandler.cs" />
+    <Compile Include="Db\BinPack.cs" />
+    <Compile Include="Db\DiskStore.cs" />
+    <Compile Include="Db\Foods.cs" />
+    <Compile Include="Db\Users.cs" />
+    <Compile Include="http\handlers\Auth.cs" />
+    <Compile Include="http\handlers\AuthHandler.cs" />
+    <Compile Include="http\handlers\CsrfToken.cs" />
+    <Compile Include="http\handlers\FoodHandler.cs" />
     <Compile Include="http\HttpContextHelper.cs" />
     <Compile Include="http\HttpServer.cs" />
     <Compile Include="http\HttpServerSettings.cs" />
     <Compile Include="http\RequestAsyncHelper.cs" />
     <Compile Include="http\ResponseAsyncHelper.cs" />
     <Compile Include="http\StaticHandler.cs" />
+    <Compile Include="utils\AsyncLockSource.cs" />
     <Compile Include="utils\CollectionUtils.cs" />
     <Compile Include="utils\ReflectionUtils.cs" />
     <Compile Include="utils\ReusableObjectPool.cs" />
     <Compile Include="utils\RuntimeHelper.cs" />
+    <Compile Include="utils\SecurityUtils.cs" />
     <Compile Include="utils\StreamUtils.cs" />
     <Compile Include="utils\StringUtils.cs" />
     <Compile Include="utils\TaskUtils.cs" />

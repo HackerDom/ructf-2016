@@ -63,10 +63,6 @@ def crack_dh(data):
         answer = conn.recv(256)
     except Exception as e:
         logger.error(e)
-        conn.connect((checksystem, 31337))
-        conn.recv(256)
-        conn.send(flag + b'\n')
-        answer = conn.recv(256)
     if b'no such flag' in answer:
         time.sleep(10)
         try:
@@ -74,10 +70,6 @@ def crack_dh(data):
             answer = conn.recv(256)
         except Exception as e:
             logger.error(e)
-            conn.connect((checksystem, 31337))
-            conn.recv(256)
-            conn.send(flag + b'\n')
-            answer = conn.recv(256)
     logger.warning(answer.decode("utf8").strip())
 
 
