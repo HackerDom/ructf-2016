@@ -24,6 +24,11 @@ namespace Node.Connections.Tcp
             return SendInternal(message);
         }
 
+        public SendResult Send(byte[] rawData)
+        {
+            throw new NotImplementedException();
+        }
+
         public SendResult Push(IMessage message)
         {
             // TODO do something with it
@@ -33,6 +38,11 @@ namespace Node.Connections.Tcp
                 result = Send(message);
             } while (result == SendResult.Partial);
             return result;
+        }
+
+        public SendResult Push(byte[] rawData)
+        {
+            throw new NotImplementedException();
         }
 
         public IMessage Receive()

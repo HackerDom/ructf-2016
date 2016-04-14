@@ -83,6 +83,17 @@ namespace Tests
             connectivity.BiconnectedComponents.Should().Be(1);
         }
 
+        [Test]
+        public void CreatePath_should_return_correct_path()
+        {
+            var graph = Graph(Links(0, 2, 4, 1, 3, 0));
+
+            Console.WriteLine(graph.ToDOT());
+
+            var path = graph.CreatePath((FakeAddress) 0, (FakeAddress) 4);
+            path.Should().Equal(new FakeAddress[] { 0, 2, 4 });
+        }
+
         private static List<RoutingMapLink> Graph(params IEnumerable<RoutingMapLink>[] links)
         {
             return links.SelectMany(_ => _).Distinct().ToList();

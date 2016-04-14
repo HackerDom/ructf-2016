@@ -13,8 +13,8 @@ namespace Node.Data
 
         void DispatchData(string key, byte[] data, IAddress destination);
         void RequestData(string key, IAddress destination);
-        event Action<string, byte[]> OnReceivedData;
+        event Action<DataMessage> OnReceivedData;
 
-        IEnumerable<IMessage> GetPendingMessages(IConnection connection);
+        void PullPendingMessage(IConnection connection);
     }
 }

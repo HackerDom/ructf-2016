@@ -48,10 +48,13 @@ namespace Node.Encryption
         {
             var tcpAddress = peer as TcpAddress;
             ulong key;
-            if (tcpAddress == null || !peerKeys.TryGetValue(tcpAddress.Endpoint, out key))
+            lock (peerKeys)
             {
-                Console.WriteLine("No public key for address {0}", peer);
-                return new MessageEncoder(privateKey, 0);
+                if (tcpAddress == null || !peerKeys.TryGetValue(tcpAddress.Endpoint, out key))
+                {
+                    Console.WriteLine("No public key for address {0}", peer);
+                    return new MessageEncoder(privateKey, 0);
+                }
             }
             return new MessageEncoder(privateKey, key);
         }
@@ -66,7 +69,8 @@ namespace Node.Encryption
                 if (listenerSocket.ReceiveFrom(keyBuffer, ref endpoint) == 8)
                 {
                     var key = BitConverter.ToUInt64(keyBuffer, 0);
-                    peerKeys[(IPEndPoint) endpoint] = key;
+                    lock (peerKeys)
+                        peerKeys[(IPEndPoint) endpoint] = key;
                     Console.WriteLine("KeyManager: {0} has {1}", endpoint, key);
                 }
             }
