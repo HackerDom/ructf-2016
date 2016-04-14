@@ -4,6 +4,7 @@
     {
         String = 0,
         Map = 1,
-        Data = 2
+        Data = 2,
+        Redirect = 3
     }
 }

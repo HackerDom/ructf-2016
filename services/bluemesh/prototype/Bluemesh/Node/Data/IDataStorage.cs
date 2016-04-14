@@ -1,9 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using Node.Serialization;
+﻿using Node.Serialization;
 
-namespace Node.Flags
+namespace Node.Data
 {
     internal interface IDataStorage : IBinarySerializable
     {

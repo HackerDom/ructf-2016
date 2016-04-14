@@ -35,10 +35,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="SimpleInjector, Version=3.1.3.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
-      <HintPath>..\packages\SimpleInjector.3.1.3\lib\net40-client\SimpleInjector.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -64,10 +60,11 @@
     <Compile Include="BluemeshNode.cs" />
     <Compile Include="Connections\IConnection.cs" />
     <Compile Include="Connections\IConnectionManager.cs" />
+    <Compile Include="Data\DataManager.cs" />
     <Compile Include="Data\DataStorage.cs" />
     <Compile Include="Encryption\BluemeshEncryptor.cs" />
     <Compile Include="Data\IDataStorage.cs" />
-    <Compile Include="Encryption\IEncryptionConfig.cs" />
+    <Compile Include="Encryption\EncryptionManager.cs" />
     <Compile Include="Encryption\IEncryptionManager.cs" />
     <Compile Include="Encryption\IMessageEncoder.cs" />
     <Compile Include="Encryption\MessageEncoder.cs" />
@@ -77,6 +74,7 @@
     <Compile Include="Messages\MessageHelper.cs" />
     <Compile Include="Messages\MessageContainer.cs" />
     <Compile Include="Messages\MessageType.cs" />
+    <Compile Include="Messages\RedirectMessage.cs" />
     <Compile Include="Routing\GraphHelper.cs" />
     <Compile Include="Data\IDataManager.cs" />
     <Compile Include="Routing\IRoutingConfig.cs" />
@@ -102,7 +100,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Node.Serialization;
 
-namespace Node.Flags
+namespace Node.Data
 {
     internal class DataStorage : IDataStorage
     {
@@ -35,7 +34,8 @@ namespace Node.Flags
 
         public void PutData(string key, byte[] value)
         {
-            data[key] = value;
+            if (!data.ContainsKey(key))
+                data[key] = value;
         }
 
         public byte[] GetData(string key)

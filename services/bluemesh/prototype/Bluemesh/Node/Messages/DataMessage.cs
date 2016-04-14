@@ -1,15 +1,17 @@
-﻿using Node.Encryption;
+﻿using Node.Connections;
+using Node.Encryption;
 using Node.Serialization;
 
 namespace Node.Messages
 {
     internal class DataMessage : IMessage
     {
-        public DataMessage(DataAction action, string key, byte[] data)
+        public DataMessage(DataAction action, string key, byte[] data, IAddress source)
         {
             Action = action;
             Key = key;
             Data = data;
+            Source = source;
         }
 
         public void Serialize(IBinarySerializer serializer)
@@ -17,14 +19,16 @@ namespace Node.Messages
             serializer.Write((int)Action);
             serializer.Write(Key);
             serializer.Write(Data);
+            serializer.Write(Source);
         }
 
-        public DataMessage Deserialize(IBinaryDeserializer deserializer)
+        public DataMessage Deserialize(IBinaryDeserializer deserializer, IConnectionUtility utility)
         {
             return new DataMessage(
                 (DataAction) deserializer.ReadInt(),
                 deserializer.ReadString(),
-                deserializer.ReadBytes());
+                deserializer.ReadBytes(),
+                utility.DeserializeAddress(deserializer));
         }
 
         public MessageType Type => MessageType.Data;
@@ -32,5 +36,6 @@ namespace Node.Messages
         public readonly DataAction Action;
         public readonly string Key;
         public readonly byte[] Data;
+        public readonly IAddress Source;
     }
 }
