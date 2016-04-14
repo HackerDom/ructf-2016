@@ -42,7 +42,7 @@ def make_err_message(message, request, reply):
 	return "{}\n->\n{}\n<-\n{}\n=".format(message, request, reply)
 
 def get_rand_string(l):
-	return ''.join(random.choice(string.ascii_lowercase) for _ in range(l))
+	return ''.join(random.choice(string.ascii_lowercase) for _ in range(l + random.randint(-l//2, l//2)))
 
 def check_status(response):
 	if response.status_code != 200:
@@ -51,10 +51,8 @@ def check_status(response):
 def check_cookie(cookies):
 	if cookies is None:
 		service_mumble(error='no cookies =(')
-	for c in cookies:
-		if c.name == 'auth' and c.value != '':
-			return
-	service_mumble(error="auth cookie not found. '{}'".format('|'.join(map(str, response.cookies))))
+	if (not 'auth' in cookies) or (cookies.get('auth') == ''):
+		service_mumble(error="auth cookie not found. '{}'".format(cookies))
 
 def check_response(response):
 	check_status(response)
@@ -69,11 +67,21 @@ class State:
 		self.base_addr = 'http://{}:{}/'.format(hostname, PORT)
 		self.session = requests.Session()
 	def get(self, url):
-		response = self.session.get(self.base_addr + url)
+		url = self.base_addr + url
+		response = None
+		try:
+			response = self.session.get(url)
+		except Exception as ex:
+			service_down(error=url, exception=ex)
 		check_status(response)
 		return response
 	def post(self, url, d):
-		response = self.session.post(self.base_addr + url, data=d)
+		url = self.base_addr + url
+		response = None
+		try:
+			response = self.session.post(url, data=d)
+		except Exception as ex:
+			service_down(error='{}\n{}'.format(url, d), exception=ex)
 		check_status(response)
 		check_cookie(self.session.cookies)
 		return response

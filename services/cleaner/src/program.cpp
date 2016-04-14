@@ -1,6 +1,5 @@
 #include "program.h"
 
-#include "state.h"
 #include "command.h"
 #include "parser.h"
 
@@ -27,11 +26,12 @@ const std::string& TProgram::GetListing() const {
     return Listing;
 }
 
-std::string TProgram::Run(const TRoom& room) const {
-    TProgramState state;
-    const auto& configuration = room.GetConfiguration();
+void TProgram::Run(TRoom& room, TProgramState& state) const {
+    auto& configuration = room.GetConfiguration();
     std::unique_ptr<ICommand> command;
     TCommandParser parser(Listing);
+
+    std::cout << (void *) &(state) << " " << (void *) &(configuration[0][0]) << " " << (void *) &(room.GetLogs()[0]) << std::endl;
 
     while (true) {
         command = parser.GetNext();
@@ -39,6 +39,4 @@ std::string TProgram::Run(const TRoom& room) const {
             break;
         }
     }
-
-    return state.Log;
 }

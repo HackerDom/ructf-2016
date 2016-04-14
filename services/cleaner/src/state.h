@@ -1,7 +1,9 @@
 #pragma once
 
+#include <sstream>
+
 struct TProgramState {
-    size_t PosX;
-    size_t PosY;
-    std::string Log;
+    size_t PosX = -1;
+    size_t PosY = -1;
+    std::stringstream Log;
 };

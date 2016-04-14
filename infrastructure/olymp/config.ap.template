@@ -1,0 +1,84 @@
+version 15.2
+no service pad
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+hostname olymp-%N%
+!
+logging rate-limit console 9
+enable secret RuCTF-WireLess!
+!
+no aaa new-model
+no ip cef
+!
+dot11 syslog
+!
+dot11 ssid OLYMP-%N%
+   authentication open
+   authentication key-management wpa version 2
+   guest-mode
+   wpa-psk ascii %KEY%
+!
+dot11 guest
+!
+no username Cisco
+username root password RuCTF-WireLess!
+!
+bridge irb
+!
+interface Dot11Radio0
+ no ip address
+ no shutdown
+ encryption mode ciphers aes-ccm tkip
+ ssid OLYMP-%N%
+ antenna gain 0
+ stbc
+ channel %CHAN%
+ station-role root
+ bridge-group 1
+ bridge-group 1 subscriber-loop-control
+ bridge-group 1 spanning-disabled
+ bridge-group 1 port-protected
+ bridge-group 1 block-unknown-source
+ no bridge-group 1 source-learning
+ no bridge-group 1 unicast-flooding
+!
+interface Dot11Radio1
+ no ip address
+ shutdown
+ antenna gain 0
+ station-role root
+ bridge-group 1
+ bridge-group 1 subscriber-loop-control
+ bridge-group 1 spanning-disabled
+ bridge-group 1 block-unknown-source
+ no bridge-group 1 source-learning
+ no bridge-group 1 unicast-flooding
+!
+interface GigabitEthernet0
+ no ip address
+ duplex auto
+ speed auto
+ bridge-group 1
+ bridge-group 1 spanning-disabled
+ no bridge-group 1 source-learning
+!
+interface BVI1
+ ip address 10.77.77.%N% 255.255.255.0
+!
+ip forward-protocol nd
+no ip domain-lookup
+no ip http server
+no ip http secure-server
+ip http help-path http://www.cisco.com/warp/public/779/smbiz/prodconfig/help/eag
+!
+bridge 1 route ip
+!
+line con 0
+line vty 0 4
+ login local
+ transport input all
+!
+end
+

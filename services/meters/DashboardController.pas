@@ -35,7 +35,7 @@ implementation
 		list := '';
 		for i := 0 to dashboards.Count - 1 do
 		begin
-			tmp := StringReplace(listATemplate, '{-dashboardid-}', IntToStr(dashboards[i].Id), []);
+			tmp := StringReplace(listATemplate, '{-dashboardid-}', dashboards[i].Id, []);
 			list := list + StringReplace(tmp, '{-dashboard-}', dashboards[i].Name, []);
 		end;
 
@@ -45,6 +45,8 @@ implementation
 	function GetDashboards(ARequest: TRequest): TDashboards;
 	var
 		dashboards: TDashboardIds;
+		dashboard: TDashboard;
+		pair: TDashboardPair;
 		i: longint;
 	begin
 		dashboards := GetPermittedDashboards(ARequest);
@@ -52,7 +54,13 @@ implementation
 			exit(nil);
 		result := TDashboards.Create;
 		for i := 0 to dashboards.Count - 1 do
-			result.add(DashboardManager.GetDashboard(dashboards[i]));
+		begin
+			dashboard := DashboardManager.GetDashboard(dashboards[i]);
+			pair.id := intTostr(dashboards[i]);
+			pair.Name := dashboard.Name;
+			result.add(pair);
+		end;
+		dashboards.free;
 	end;
 
 	procedure TDashboardModule.OnMy(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
@@ -68,12 +76,17 @@ implementation
 			AResponse.Content := StringReplace(listTemplate, '{-list-}', 'can''t find dashboards for current user', [])
 		else
 			AResponse.Content := GetList(dashboards);
+		dashboards.free;
 	end;
 
 	procedure TDashboardModule.OnAll(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
+	var
+		dashboards: TDashboards;
 	begin
 		Handled := True;
-		AResponse.Content := GetList(DashboardManager.GetDashboards);
+		dashboards := DashboardManager.GetDashboards;
+		AResponse.Content := GetList(dashboards);
+		dashboards.Free;
 	end;
 
 	procedure TDashboardModule.OnView(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);

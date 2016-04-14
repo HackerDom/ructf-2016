@@ -6,20 +6,26 @@ TNewCommand::TNewCommand(size_t x, size_t y)
 {
 }
 
-bool Allow(size_t x, size_t y, const TRoomConfiguration& configuration) {
-    return configuration.size() < x && y < 8 * sizeof(unsigned long) && !(configuration[x] & (1 << y));
-}
-
 bool Error(TProgramState& state) {
-    state.Log += "E";
+    state.Log << 'E';
     return false;
 }
 
-bool TNewCommand::Run(TProgramState& state, const TRoomConfiguration& configuration) const {
-    if (Allow(X, Y, configuration)) {
-        state.Log += "N";
+void PrintfNum(TProgramState& state, size_t num) {
+    char buf[3];
+    snprintf(buf, sizeof(buf), "%02lu", num);
+    state.Log << buf;
+}
+
+bool TNewCommand::Run(TProgramState& state, TRoomConfiguration& configuration) const {
+    std::cout << "run new " << X << " " << Y << " " << ((int) configuration[X][Y]) << std::endl;
+    if (X < configuration.size() && Y < 8 && configuration[X][Y] != 'W') {
+        state.Log << 'N';
+        PrintfNum(state, X);
+        PrintfNum(state, Y);
         state.PosX = X;
         state.PosY = Y;
+        configuration[X][Y] = ' ';
         return true;
     } else {
         return Error(state);
@@ -32,29 +38,40 @@ TMoveCommand::TMoveCommand(char direction, size_t len)
 {
 }
 
-bool TMoveCommand::Run(TProgramState& state, const TRoomConfiguration& configuration) const {
+bool TMoveCommand::Run(TProgramState& state, TRoomConfiguration& configuration) const {
     bool error = false;
     size_t path_len = 0;
 
     for (size_t i = 0; i < Len; ++i) {
+        size_t x = state.PosX;
+        size_t y = state.PosY;
+        std::cout << x << " " << y << " " << ((int) configuration[x][y]) << std::endl;
         switch (Direction) {
             case 'L':
-                if (i > state.PosX || !Allow(state.PosX - i, state.PosY, configuration)) {
+                if (x != 0 && configuration[x - 1][y] != 'W') {
+                    state.PosX--;
+                } else {
                     error = true;
                 }
                 break;
             case 'R':
-                if (i + state.PosX > configuration.size() || !Allow(state.PosX + i, state.PosY, configuration)) {
+                if (x + 1 < configuration.size() && configuration[x + 1][y] != 'W') {
+                    state.PosX++;
+                } else {
                     error = true;
                 }
                 break;
             case 'U':
-                if (state.PosY + i > 8 * sizeof(unsigned long) || !Allow(state.PosX, state.PosY + i, configuration)) {
+                if (y < 7 && configuration[x][y + 1] != 'W') {
+                    state.PosY++;
+                } else {
                     error = true;
                 }
                 break;
             case 'D':
-                if (i > state.PosY || !Allow(state.PosX, state.PosY - i, configuration)) {
+                if (y != 0 && configuration[x][y - 1] != 'W') {
+                    state.PosY--;
+                } else {
                     error = true;
                 }
                 break;
@@ -62,21 +79,43 @@ bool TMoveCommand::Run(TProgramState& state, const TRoomConfiguration& configura
                 error = true;
         }
 
+        std::cout << "Run " << Direction << " "<< Len << " " << path_len << " " << error << std::endl;
+
         if (error) {
             break;
+        } else {
+            configuration[x][y] = ' ';
+            path_len++;
         }
-        path_len++;
     }
+
     if (path_len) {
-        state.Log += std::to_string(Direction);
-        state.Log += std::to_string(path_len);
+        state.Log << Direction;
+        PrintfNum(state, path_len);
     }
+
+    size_t error_len = Len - path_len;
+
     if (error) {
-        return Error(state);
+        for (size_t i = 0; i < error_len; ++i) {
+            state.Log << 'E';
+        }
     }
-    return true;
+
+    return !error;
 }
 
-bool TErrorCommand::Run(TProgramState& state, const TRoomConfiguration& /*configuration*/) const {
+bool TErrorCommand::Run(TProgramState& state, TRoomConfiguration& /*configuration*/) const {
     return Error(state);
+}
+
+TPrintCommand::TPrintCommand(char c)
+    : Char(c)
+{
+}
+
+bool TPrintCommand::Run(TProgramState& state, TRoomConfiguration& configuration) const {
+    configuration[state.PosX][state.PosY] = Char;
+    state.Log << 'P' << Char;
+    return true;
 }

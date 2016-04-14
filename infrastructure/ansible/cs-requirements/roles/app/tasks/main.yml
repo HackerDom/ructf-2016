@@ -1,5 +1,10 @@
 - user: name={{cs_user}} state=present
 
+- apt_repository: repo={{item}}
+  with_items:
+    - 'deb http://mirror.yandex.ru/debian/ jessie-backports main'
+    - 'deb http://mirror.yandex.ru/debian/ jessie-backports non-free'
+
 - apt: name={{item}} state=latest update_cache=yes
   with_items:
     - libssl-dev
@@ -8,5 +13,7 @@
     - git
     - build-essential
     - nginx
+    - firmware-ralink
+    - firmware-realtek
 
 - authorized_key: user=root key=https://urgu.org/and

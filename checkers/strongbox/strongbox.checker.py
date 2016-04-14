@@ -1,4 +1,4 @@
-#!/user/bin/python3
+#!/usr/bin/python3
 # do stuff
 import uuid
 import random
@@ -39,10 +39,12 @@ class StrongboxChecker(HttpCheckerBase, Randomizer):
             raise response.exceptions.HTTPError('failed to parse response')
 
     def spost(self, s, addr, suffix_get, suffix_post, data=None):
-        soup = BeautifulSoup(s.get(self.url(addr, suffix_get)).content,
-                             "html5lib")
-        csrf_data = soup.find("input", {"name": "authenticity_token"}).get(
-            "value")
+        response = s.get(self.url(addr, suffix_get))
+        auth_token_page = self.parseresponse(response)
+        auth_token = auth_token_page["page"].find(
+            "input", {"name": "authenticity_token"}
+        )
+        csrf_data = auth_token.get("value")
         data.update({'authenticity_token': csrf_data})
         response = s.post(self.url(addr, suffix_post), data, timeout=5)
         return self.parseresponse(response)
@@ -67,58 +69,81 @@ class StrongboxChecker(HttpCheckerBase, Randomizer):
         except (AttributeError, TypeError):
             return True
 
-    #TODO
     def checkAddThing(self, result, flag):
         try:
-            list_things = result["page"].find_all("li")
-            for thing in list_things:
-                if thing.text.strip() == flag:
-                    return False
+            thing_content = result["page"].find('p',
+                                                {'class': 'thing__contetn'})
+            if thing_content.text.strip() == flag:
+                return False
+            return True
+        except (AttributeError, TypeError):
+            return True
+
+    def checkAddUser(self, result, flag):
+        try:
+            thing_content = result["page"].find('h1',
+                                                {'class': 'users__name'})
+            if thing_content.text.strip() == flag:
+                return False
             return True
         except (AttributeError, TypeError):
             return True
 
     def put(self, addr, flag_id, flag, vuln):
         session = self.session(addr)
-        user = self.randuser()
+        user = self.randUser()
+        thing = self.randThing()
+        if vuln == 1:
+            user['user[name]'] = flag
+        if vuln == 2:
+            thing['thing[content]'] = flag
         result = self.spost(session, addr, 'signup', 'users', user)
-        if not result or self.checkSignup(result):
+        check_user1 = self.checkSignup(result)
+        check_user2 = self.checkAddUser(result, user['user[name]'])
+        if not result or check_user1 or check_user2:
             print('registration failed')
             return EXITCODE_MUMBLE
-
-        thing = {
-            'thing[title]': self.randTitle(),
-            'thing[content]': flag
-        }
-        result = self.spost(session, addr, '/', '/things',thing)
-        if self.checkAddThing(result, thing['thing[title]']):
+        user_id = result['url'].split('/')[-1]
+        result = self.spost(session, addr, '/', '/things', thing)
+        if self.checkAddThing(result, thing['thing[content]']):
             print('put msg failed')
             return EXITCODE_MUMBLE
-
+        thing_id = result['url'].split('/')[-1]
         print(
-            '{}:{}:{}'.format(
+            '{}:{}:{}:{}'.format(
                 user['user[email]'],
                 user['user[password]'],
-                thing['thing[title]']
+                user_id,
+                thing_id
             )
         )
         return EXITCODE_OK
 
     def get(self, addr, flag_id, flag, vuln):
         s = self.session(addr)
-        parts = flag_id.split(':', 3)
+        parts = flag_id.split(':', 4)
         user = {'session[email]': parts[0], 'session[password]': parts[1]}
 
         result = self.spost(s, addr, '/signin', 'sessions', user)
+
         if self.checkSignup(result):
             print('login failed')
             return EXITCODE_MUMBLE
-        result = self.sget(s, addr, '/')
-        if self.checkAddThing(result, parts[2]):
-            print('flag not found in msg')
-            return EXITCODE_CORRUPT
+
+        if vuln == 1:
+            result['page'].find_all()
+            result = self.sget(s, addr, '/users/' + parts[2])
+            if self.checkAddThing(result, flag):
+                print('flag not found in user name')
+                return EXITCODE_CORRUPT
+        if vuln == 2:
+            result = self.sget(s, addr, '/things/' + parts[3])
+            if self.checkAddThing(result, flag):
+                print('flag not found in thinf content')
+                return EXITCODE_CORRUPT
 
         return EXITCODE_OK
+
 
     def check(self, addr):
         return EXITCODE_OK

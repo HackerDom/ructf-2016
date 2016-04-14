@@ -5,10 +5,13 @@
 #include <boost/serialization/base_object.hpp>
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/vector.hpp>
+#include <boost/serialization/utility.hpp>
 
 #include <string>
+#include <array>
 
-using TRoomConfiguration = std::vector<unsigned long>;
+using TRoomConfiguration = std::vector<std::vector<char>>;
+using TProgramLogs = std::vector<std::pair<std::string, std::string>>;
 
 class TRoom : public TPassChecker {
 public:
@@ -16,8 +19,9 @@ public:
     TRoom(std::string& name, std::string& pass, TRoomConfiguration& configuration);
 
     const std::string& GetName() const;
-    const TRoomConfiguration& GetConfiguration() const;
-    bool CheckHall(const std::string& hall) const;
+    TRoomConfiguration& GetConfiguration();
+    const TProgramLogs& GetLogs() const;
+    void AddLog(const std::string& program_name, const std::string& log);
 
 private:
     friend class boost::serialization::access;
@@ -26,9 +30,11 @@ private:
         archive & boost::serialization::base_object<TPassChecker>(*this);
         archive & Name;
         archive & Configuration;
+        archive & Logs;
     }
 
 private:
     std::string Name;
     TRoomConfiguration Configuration;
+    TProgramLogs Logs;
 };

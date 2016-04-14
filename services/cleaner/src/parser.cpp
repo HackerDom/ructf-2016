@@ -19,25 +19,38 @@ std::unique_ptr<ICommand> TCommandParser::GetNext() {
                 break;
             case EWaitNumber1:
                 if (!GetNum(num)) {
+                    std::cout << "got error" << std::endl;
                     return std::unique_ptr<ICommand>(new TErrorCommand());
                 }
                 if (cmd == 'N') {
                     State = EWaitNumber2; 
+                } else if (cmd == 'P') {
+                    State = EWaitChar; 
                 } else {
                     Idx++;
                     State = EWaitCmd; 
+                    std::cout << "got move" << std::endl;
                     return std::unique_ptr<ICommand>(new TMoveCommand(cmd, num));
                 }
                 break;
             case EWaitNumber2:
                 size_t num2;
                 if (!GetNum(num2)) {
+                    std::cout << "got error" << std::endl;
                     return std::unique_ptr<ICommand>(new TErrorCommand());
                 }
                 Idx++;
                 State = EWaitCmd; 
+                std::cout << "got new" << std::endl;
                 return std::unique_ptr<ICommand>(new TNewCommand(num, num2));
+            case EWaitChar:
+                Idx++;
+                State = EWaitCmd;
+                std::cout << "got print" << std::endl;
+                return std::unique_ptr<ICommand>(new TPrintCommand(Listing[Idx]));
             case EError:
+                std::cout << "got error" << std::endl;
+                Idx++;
                 return std::unique_ptr<ICommand>(new TErrorCommand());
         };
         Idx++;

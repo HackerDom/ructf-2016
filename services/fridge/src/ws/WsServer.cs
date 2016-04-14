@@ -12,11 +12,12 @@ using vtortola.WebSockets.Rfc6455;
 
 namespace frɪdʒ.ws
 {
-	internal class WsServer
+	internal class WsServer<T>
 	{
-		public WsServer(int port)
+		public WsServer(int port, Func<WebSocket, T> auth)
 		{
-			var timeout = TimeSpan.FromSeconds(5);
+			this.auth = auth;
+			var timeout = TimeSpan.FromSeconds(3);
 			var readWriteTimeout = TimeSpan.FromSeconds(1);
 			var options = new WebSocketListenerOptions
 			{
@@ -51,53 +52,84 @@ namespace frɪdʒ.ws
 					var ws = await listener.AcceptWebSocketAsync(token).ConfigureAwait(false);
 					if(ws == null)
 						continue;
-					Console.WriteLine($"[{ws.RemoteEndpoint}] WS connected v{ws.HttpRequest.WebSocketVersion} as '{ws.HttpRequest.Headers["User-Agent"]}' from '{ws.HttpRequest.Headers["Origin"]}'");
+					//Console.WriteLine($"[{ws.RemoteEndpoint}] WS connected v{ws.HttpRequest.WebSocketVersion} as '{ws.HttpRequest.Headers["User-Agent"]}' from '{ws.HttpRequest.Headers["Origin"]}'");
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 					Task.Run(async () =>
 					{
 						await Task.Delay(100, token); //NOTE: ws4py issue workaround =\
-						await TrySendAsync(ws, "hello", token);
-						sockets[ws] = 0;
+						await TrySendHelloAsync(ws, token);
+						sockets[ws] = new State {Item = auth(ws), Lock = new AsyncLockSource()};
 					}, token);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 				} catch {}
 			}
 		}
 
-		public Task BroadcastAsync(string msg, CancellationToken token)
+		public Task BroadcastAsync(Func<T, string> format, CancellationToken token)
 		{
 			return
 				Task.WhenAll(
-					sockets.EnumerateKeys()
-						.Where(ws =>
+					sockets
+						.Where(pair =>
 						{
+							var ws = pair.Key;
 							if(ws.IsConnected)
 								return true;
-							if(sockets.TryRemove(ws))
-							{
-								ws.Dispose();
-								Console.WriteLine($"[{ws.RemoteEndpoint}] WS closed");
-							}
+							Remove(ws);
 							return false;
 						})
-						.Select(ws => TrySendAsync(ws, msg, token)));
+						.Select(pair => TrySendAsync(pair.Key, pair.Value.Lock, format(pair.Value.Item), token)));
 		}
 
-		private static async Task TrySendAsync(WebSocket ws, string msg, CancellationToken token)
+		private async Task TrySendHelloAsync(WebSocket ws, CancellationToken token)
 		{
 			try
 			{
-				await ws.WriteStringAsync(msg, token).ConfigureAwait(false);
-				Console.WriteLine($"[{ws.RemoteEndpoint}] WS sent '{msg}'");
+				await ws.WriteStringAsync(HelloMessage, token).ConfigureAwait(false);
+				//Console.WriteLine($"[{ws.RemoteEndpoint}] WS sent '{HelloMessage}'");
 			}
 			catch
 			{
 				ws.Dispose();
+				//Console.WriteLine($"[{ws.RemoteEndpoint}] WS closed");
 			}
 		}
 
-		private readonly ConcurrentDictionary<WebSocket, int> sockets = new ConcurrentDictionary<WebSocket, int>();
+		private async Task TrySendAsync(WebSocket ws, AsyncLockSource lockSource, string msg, CancellationToken token)
+		{
+			try
+			{
+				using(await lockSource.AcquireAsync(token))
+					await ws.WriteStringAsync(msg, token).ConfigureAwait(false);
+				//Console.WriteLine($"[{ws.RemoteEndpoint}] WS sent '{msg}'");
+			}
+			catch
+			{
+				Remove(ws);
+			}
+		}
+
+		private void Remove(WebSocket ws)
+		{
+			State state;
+			if(sockets.TryRemove(ws, out state))
+			{
+				state.Lock.Dispose();
+				ws.Dispose();
+				//Console.WriteLine($"[{ws.RemoteEndpoint}] WS closed");
+			}
+		}
+
+		private struct State
+		{
+			public T Item;
+			public AsyncLockSource Lock;
+		}
+
+		private const string HelloMessage = "hello";
+		private readonly ConcurrentDictionary<WebSocket, State> sockets = new ConcurrentDictionary<WebSocket, State>();
 		private readonly WebSocketListener listener;
+		private readonly Func<WebSocket, T> auth;
 		private readonly IPEndPoint endpoint;
 	}
 }

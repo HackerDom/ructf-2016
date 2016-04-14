@@ -1,6 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace frɪdʒ.utils
@@ -14,16 +13,18 @@ namespace frɪdʒ.utils
 			return key != null && source.TryGetValue(key, out value) ? value : defaultValue;
 		}
 
-		public static IEnumerable<TKey> EnumerateKeys<TKey, TValue>(this IDictionary<TKey, TValue> source)
+		public static Dictionary<TKey, TValue> ToDict<T, TKey, TValue>(this IEnumerable<T> source, Func<T, TKey> key, Func<T, TValue> val, IEqualityComparer<TKey> comparer = null)
 		{
-			return source.Select(pair => pair.Key);
+			var dict = new Dictionary<TKey, TValue>(comparer);
+			foreach(var item in source)
+				dict[key(item)] = val(item);
+			return dict;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool TryRemove<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> source, TKey key)
+		public static void ForEach<T>(this IEnumerable<T> source, Action<T> action)
 		{
-			TValue value;
-			return source.TryRemove(key, out value);
+			foreach(var item in source)
+				action(item);
 		}
 	}
 }
