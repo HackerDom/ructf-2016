@@ -23,7 +23,7 @@ namespace frɪdʒ.utils
 					continue;
 				var end = start + word.Length;
 				if(end >= value.Length || IsWordBoundary(value[end]))
-					return value.Substring(start, end);
+					return value.Substring(start, word.Length);
 			}
 			return null;
 		}
@@ -36,7 +36,7 @@ namespace frɪdʒ.utils
 
 		public static IEnumerable<string> FindAll(this string source, params string[] values)
 		{
-			return values?.Select(source.FindWord);
+			return values?.Select(source.FindWord).Where(word => word != null);
 		}
 	}
 }
