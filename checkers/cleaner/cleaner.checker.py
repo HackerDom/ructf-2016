@@ -47,7 +47,7 @@ def make_err_message(message, request, reply):
     return "{}\n->\n{}\n<-\n{}\n=".format(message, request, reply)
 
 def get_rand_string(l):
-    return ''.join(random.choice(string.ascii_lowercase) for _ in range(l))
+    return ''.join(random.choice(string.ascii_letters) for _ in range(l))
 
 def deduplicate(program):
     cur = None
@@ -249,8 +249,8 @@ class State:
 
     def put(self, flag):
         password = get_rand_string(32)
-        room_name = get_rand_string(32)
-        program_name = get_rand_string(32)
+        room_name = get_rand_string(15)
+        program_name = get_rand_string(15)
         room = generate_room(flag)
 
         socket = self.connect_to_service()

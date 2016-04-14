@@ -81,19 +81,10 @@ void TCleanerServant::Upload() {
     while (Session.ReadLines(entity)) {
         if (entity == "room") {
             std::string name;
-            std::string configuration_str;
-            Session.ReadLines(name, configuration_str);
-            while (configuration_str.size() % 8) {
-                configuration_str += " ";
-            }
-            std::cout << "'" << configuration_str << "'" << std::endl;
-            TRoomConfiguration configuration(configuration_str.size() / 8);
-            std::cout << "conf size: " << configuration.size() << std::endl;
-            for (size_t i = 0; i < configuration_str.size() / 8; ++i) {
-                std::cout << i << std::endl;
-                std::vector<char>& tmp = configuration[i];
-                tmp.resize(8);
-                std::copy(configuration_str.begin() + 8 * i, configuration_str.begin() + 8 * (i + 1), tmp.begin());
+            std::string configuration;
+            Session.ReadLines(name, configuration);
+            while (configuration.size() % 8) {
+                configuration += " ";
             }
 
             TRoom room(name, pass, configuration);
@@ -167,16 +158,8 @@ void TCleanerServant::GetRoom() {
     }
 
     const auto& configuration = room.GetConfiguration();
-    std::stringstream ss;
-    for (const auto& col: configuration) {
-        for (const auto& chr: col) {
-            ss << chr;
-        }
-    }
-    ss << '\n';
-    std::string result = ss.str();
 
-    Session.Write(result);
+    Session.Write(configuration, "\n");
     Session.Write("Program results:\n");
 
     for (const auto& pair: room.GetLogs()) {
@@ -197,8 +180,8 @@ void TCleanerServant::Run() {
 
     Session.ReadLines(pass, room_name, program_name);
 
-    TProgram program;
     TRoom room;
+    TProgram program;
     TProgramState state;
 
     if (!LoadRoom(room, room_name) || !LoadProgram(program, program_name)) {

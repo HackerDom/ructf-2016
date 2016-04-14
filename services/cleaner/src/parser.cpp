@@ -15,7 +15,11 @@ std::unique_ptr<ICommand> TCommandParser::GetNext() {
         switch (State) {
             case EWaitCmd:
                 cmd = Listing[Idx];
-                State =  EWaitNumber1;
+                if (cmd == 'P') {
+                    State = EWaitChar; 
+                } else {
+                    State =  EWaitNumber1;
+                }
                 break;
             case EWaitNumber1:
                 if (!GetNum(num)) {
@@ -24,8 +28,6 @@ std::unique_ptr<ICommand> TCommandParser::GetNext() {
                 }
                 if (cmd == 'N') {
                     State = EWaitNumber2; 
-                } else if (cmd == 'P') {
-                    State = EWaitChar; 
                 } else {
                     Idx++;
                     State = EWaitCmd; 
@@ -44,10 +46,12 @@ std::unique_ptr<ICommand> TCommandParser::GetNext() {
                 std::cout << "got new" << std::endl;
                 return std::unique_ptr<ICommand>(new TNewCommand(num, num2));
             case EWaitChar:
+                char c;
+                c = Listing[Idx];
                 Idx++;
                 State = EWaitCmd;
                 std::cout << "got print" << std::endl;
-                return std::unique_ptr<ICommand>(new TPrintCommand(Listing[Idx]));
+                return std::unique_ptr<ICommand>(new TPrintCommand(c));
             case EError:
                 std::cout << "got error" << std::endl;
                 Idx++;

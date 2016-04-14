@@ -18,14 +18,13 @@ void PrintfNum(TProgramState& state, size_t num) {
 }
 
 bool TNewCommand::Run(TProgramState& state, TRoomConfiguration& configuration) const {
-    std::cout << "run new " << X << " " << Y << " " << ((int) configuration[X][Y]) << std::endl;
-    if (X < configuration.size() && Y < 8 && configuration[X][Y] != 'W') {
+    std::cout << "run new " << X << " " << Y << " " << ((int) configuration[X * 8 + Y]) << std::endl;
+    if (X * + Y < configuration.size() && configuration[X * 8 + Y] != 'W') {
         state.Log << 'N';
         PrintfNum(state, X);
         PrintfNum(state, Y);
         state.PosX = X;
         state.PosY = Y;
-        configuration[X][Y] = ' ';
         return true;
     } else {
         return Error(state);
@@ -45,31 +44,31 @@ bool TMoveCommand::Run(TProgramState& state, TRoomConfiguration& configuration) 
     for (size_t i = 0; i < Len; ++i) {
         size_t x = state.PosX;
         size_t y = state.PosY;
-        std::cout << x << " " << y << " " << ((int) configuration[x][y]) << std::endl;
+        std::cout << (ssize_t) x << " " << (ssize_t) y << " " << ((int) configuration[x * 8 + y]) << " " << configuration[x * 8 + y] <<std::endl;
         switch (Direction) {
             case 'L':
-                if (x != 0 && configuration[x - 1][y] != 'W') {
+                if (x != 0 && configuration[(x - 1) * 8 + y] != 'W') {
                     state.PosX--;
                 } else {
                     error = true;
                 }
                 break;
             case 'R':
-                if (x + 1 < configuration.size() && configuration[x + 1][y] != 'W') {
+                if (x + 1 < configuration.size() && configuration[(x + 1) * 8 + y] != 'W') {
                     state.PosX++;
                 } else {
                     error = true;
                 }
                 break;
             case 'U':
-                if (y < 7 && configuration[x][y + 1] != 'W') {
+                if (y < 7 && configuration[x * 8 + y + 1] != 'W') {
                     state.PosY++;
                 } else {
                     error = true;
                 }
                 break;
             case 'D':
-                if (y != 0 && configuration[x][y - 1] != 'W') {
+                if (y != 0 && configuration[x * 8 + (y - 1)] != 'W') {
                     state.PosY--;
                 } else {
                     error = true;
@@ -84,7 +83,6 @@ bool TMoveCommand::Run(TProgramState& state, TRoomConfiguration& configuration) 
         if (error) {
             break;
         } else {
-            configuration[x][y] = ' ';
             path_len++;
         }
     }
@@ -115,7 +113,7 @@ TPrintCommand::TPrintCommand(char c)
 }
 
 bool TPrintCommand::Run(TProgramState& state, TRoomConfiguration& configuration) const {
-    configuration[state.PosX][state.PosY] = Char;
+    configuration[state.PosX * 8 + state.PosY] = Char;
     state.Log << 'P' << Char;
     return true;
 }
