@@ -8,7 +8,7 @@ import os
 import os.path
 import random
 
-PORT = 9123
+PORT = 3030
 DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILENAME = os.path.join(DIR, 'db.sqlite3')
 THING_FILENMAME = os.path.join(DIR, 'things.txt')
@@ -57,7 +57,7 @@ def handler_check(*args):
 def handler_get(args, db, things):
     _, _, hostname, id, flag, vuln = args
     thing = db.get_doc(id)
-    request = "http://{0}:3000/search?text={1}&owner={2}".format(hostname, thing, id)
+    request = "http://{0}:{3}/search?text={1}&owner={2}".format(hostname, thing, id, PORT)
     reply = None
     print(request)
     try:
@@ -78,7 +78,7 @@ def handler_get(args, db, things):
 
 def handler_put(args, db, things):
     _, _, hostname, id, flag, vuln = args
-    request = "http://{0}:3000/set?text={1}&owner={2}".format(hostname, flag, id)
+    request = "http://{0}:{3}/set?text={1}&owner={2}".format(hostname, flag, id, PORT)
     reply = None
     try:
         thing = things.random()
