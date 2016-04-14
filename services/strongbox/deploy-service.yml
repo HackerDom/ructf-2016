@@ -9,45 +9,35 @@
   become_user: root
   become: yes
   tasks:
-    - name: curl rvm
-      command: curl  -L https://get.rvm.io | bash -s
-    - name: set rvm
-      command: source /etc/profile.d/rvm.sh
-    - name: umask
-      command: umask u=rwx,g=rwx,o=rx
-    - name: rvm
-      command: command curl -sSL https://rvm.io/mpapis.asc | gpg2 --import -
-    - name: rvm get stable
-      command: rvm get stable
-    - name: rvm requirements
-      command: rvm requirements
-    - name: rvm install ruby
-      command: rvm install 2.2.1  --with-openssl-dir=$HOME/.rvm/usr
-    - name: rvm use
-      command: rvm use 2.2.1@ructf_2016 --create --default
+    - name: install ruby ruby-devel sqlite-devel
+      command: dnf -y install ruby-devel sqlite-devel ruby
+    - name: install libxslt-devel
+      command: dnf -y install libxslt-devel
     - name: gem update
       command: gem update
-    - name: gem install
+    - name: gem install rails
       command: gem install rails --version 4.2.1
     - name: add user
       user: name=strongbox
     - name: copy project
-      copy: src=strongbox dest=/home/ force=yes owner=strongbox
-    - set_fact: socks_path=/home/strongbox/tmp/socks
-      tags: always
+      copy: src=../strongbox dest=/home/ force=yes owner=strongbox
+    - set_fact: socks_path="/home/strongbox/tmp/socks"
+    - set_fact: app_sock="{{ socks_path }}/app.sock"
+    - set_fact: pids_path="/home/strongbox/tmp/pids"
+    - set_fact: app_pid="{{ pids_path }}/passenger.pid"
     - name: Ensure sockets directory exists
       file: path={{ socks_path }} state=directory
-      tags: always
-    - set_fact: app_sock={{ socks_path }}/app.sock
-      tags: always
-    - set_fact: pids_path=/home/strongbox/tmp/pids
-      tags: always
     - name: Ensure pids directory exists
       file: path={{ pids_path }} state=directory
-      tags: always
-    - set_fact: app_pid={{ pids_path }}/passenger.pid
-      tags: always
-#    - set_fact: rvm_wrapper_command="cd {{ current_path }} && RAILS_ENV={{ rails_env_name }} rvm ruby-{{ ruby_version }}@{{ full_gemset_name }} --create do"
-#      tags: always
-#    - include: tasks/app_stop.yml tags=app_stop #эта задача будет запщуена если не указан ни один тег или указан тег app_start
-#    - include: tasks/app_start.yml tags=app_start # поведение аналогично предыдущему, только тег - app_stop
+    - name: bundle update
+      command: su strongbox
+    - name: bundle update
+      shell: "cd /home/strongbox/ && bundle update"
+    - name: bundle install
+      command: bundle install
+    - name: db:migrate
+      command: bin/rake db:migrate RAILS_ENV=production
+    - name: del deploy script
+      command: rm -rf /home/strongbox/deploy-service.yml
+    - name: run
+      shell: "cd /home/strongbox/ && RAILS_ENV=production bundle exec passenger start -d -S {{ app_sock }} --environment production --pid-file {{ app_pid }}"
