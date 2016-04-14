@@ -11,7 +11,11 @@ namespace Node.Connections
 
         SendResult Send(IMessage message);
 
+        SendResult Send(byte[] rawData);
+
         SendResult Push(IMessage message);
+
+        SendResult Push(byte[] rawData);
 
         IMessage Receive();
 

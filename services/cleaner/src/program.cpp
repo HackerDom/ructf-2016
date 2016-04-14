@@ -31,7 +31,9 @@ void TProgram::Run(TRoom& room, TProgramState& state) const {
     std::unique_ptr<ICommand> command;
     TCommandParser parser(Listing);
 
-    std::cout << (void *) &(state) << " " << (void *) &(configuration[0][0]) << " " << (void *) &(room.GetLogs()[0]) << std::endl;
+    std::cout << std::endl;
+
+//    304
 
     while (true) {
         command = parser.GetNext();

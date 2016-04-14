@@ -30,13 +30,13 @@ namespace Node.Routing
 
         public static IEnumerable<IAddress> GetPeers(IAddress source, ICollection<RoutingMapLink> links)
         {
-            return links.Where(link => link.Contains(source)).Select(link => link.OtherEnd(source));
+            return links.Where(link => link.Connected && link.Contains(source)).Select(link => link.OtherEnd(source));
         }
 
         public static HashSet<IAddress> GetNodes(ICollection<RoutingMapLink> links)
         {
             var nodes = new HashSet<IAddress>();
-            foreach (var link in links)
+            foreach (var link in links.Where(l => l.Connected))
             {
                 nodes.Add(link.A);
                 nodes.Add(link.B);
@@ -54,15 +54,59 @@ namespace Node.Routing
             return
                 $@"
 graph {name} {{
-{string.Join(Environment.NewLine, links.Select(link => "\t" + MakeSafeString(link.A) + " -- " + MakeSafeString(link.B) + ";"))}
+{string.Join(Environment.NewLine, links.Where(l => l.Connected).Select(link => "\t" + MakeSafeString(link.A) + " -- " + MakeSafeString(link.B) + "; // v: " + link.Version))}
 }}";
         }
+
+        public static bool AreEquivalent(this ICollection<RoutingMapLink> myLinks, ICollection<RoutingMapLink> otherLinks)
+        {
+            if (myLinks.Count != otherLinks.Count)
+                return false;
+
+            return myLinks.All(myLink => otherLinks.Any(otherLink => Equals(myLink, otherLink) && myLink.Connected == otherLink.Connected));
+        }
+
+        //TODO make random path
+        public static List<IAddress> CreatePath(this ICollection<RoutingMapLink> links, IAddress from, IAddress to)
+        {
+            return CreatePath(to, from, links, new HashSet<IAddress>()).Reverse().ToList();
+        }
+
+        public static List<IAddress> GetPathBody(this IList<IAddress> path)
+        {
+            return path.Skip(1).Take(path.Count - 2).ToList();
+        }  
 
         private static string MakeSafeString(object obj)
         {
             if (obj is TcpAddress)
                 return (((TcpAddress) obj).Endpoint.Port % 100).ToString();
             return obj.ToString().Replace(".", "").Replace(":", "");
+        }
+
+        private static IEnumerable<IAddress> CreatePath(IAddress destination, IAddress source, ICollection<RoutingMapLink> links, HashSet<IAddress> visitedNodes)
+        {
+            if (Equals(source, destination))
+                yield return destination;
+            else
+            {
+                visitedNodes.Add(source);
+
+                foreach (var peer in GetPeers(source, links).Where(peer => !visitedNodes.Contains(peer)))
+                {
+                    var found = false;
+                    foreach (var address in CreatePath(destination, peer, links, visitedNodes))
+                    {
+                        yield return address;
+                        found = true;
+                    }
+                    if (found)
+                    {
+                        yield return source;
+                        break;
+                    }
+                }
+            }
         }
 
         private static bool IsReachable(IAddress destination, IAddress source, ICollection<RoutingMapLink> links, HashSet<IAddress> visitedNodes)

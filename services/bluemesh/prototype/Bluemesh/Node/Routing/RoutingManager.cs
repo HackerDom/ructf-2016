@@ -11,20 +11,17 @@ namespace Node.Routing
         public RoutingManager(IConnectionManager connectionManager, IRoutingConfig config)
         {
             this.connectionManager = connectionManager;
+            this.config = config;
             versionsByPeer = new Dictionary<IAddress, VersionInfo>();
             Map = new RoutingMap(connectionManager.Address, config);
+            random = new Random(connectionManager.Address.GetHashCode());
         }
 
-        public void ProcessMessages(IEnumerable<IConnection> readyConnections)
+        public bool ProcessMessage(IMessage message, IConnection connection)
         {
-            foreach (var connection in readyConnections)
-            {
-                var message = connection.Receive();
-                if (message == null)
-                    continue;
-                ProcessMap(message as MapMessage, connection);
-                ProcessString(message as StringMessage, connection);
-            }
+            if (message == null)
+                return true;
+            return ProcessMap(message as MapMessage, connection);
         }
 
         public void PushMaps(IEnumerable<IConnection> readyConnections)
@@ -34,9 +31,9 @@ namespace Node.Routing
                 VersionInfo existingVersion;
                 if (!versionsByPeer.TryGetValue(connection.RemoteAddress, out existingVersion) ||
                     (existingVersion.Version != Map.Version ||
-                     DateTime.UtcNow - existingVersion.Timestamp > TimeSpan.FromMilliseconds(50)))
+                     DateTime.UtcNow - existingVersion.Timestamp > config.MapUpdateCooldown))
                 {
-                    var message = new MapMessage(Map.Links);
+                    var message = new MapMessage(Map.Links, false);
                     var result = connection.Push(message);
                     //Console.WriteLine("!! {0} -> {1} : {2}", Map.OwnAddress, connection.RemoteAddress, result);
 
@@ -48,7 +45,7 @@ namespace Node.Routing
 
         public void UpdateConnections()
         {
-            Console.WriteLine("!! conns : " + 
+            Console.WriteLine("[{0}] !! conns : {1}", Map.OwnAddress, 
                 string.Join(", ", connectionManager.EstablishedConnections.Select(c => Map.OwnAddress + " <-> " + c.RemoteAddress)));
             foreach (var connection in connectionManager.EstablishedConnections)
             {
@@ -65,7 +62,7 @@ namespace Node.Routing
 
         public void ConnectNewLinks()
         {
-            if (DateTime.UtcNow - lastConnect < TimeSpan.FromSeconds(.1))
+            if (DateTime.UtcNow - lastConnect < config.ConnectCooldown.AdjustForNode(connectionManager.Address))
                 return;
             foreach (var peer in connectionManager.GetAvailablePeers())
             {
@@ -79,7 +76,7 @@ namespace Node.Routing
 
         public void DisconnectExcessLinks()
         {
-            if (DateTime.UtcNow - lastDisconnect < TimeSpan.FromSeconds(.1))
+            if (DateTime.UtcNow - lastDisconnect < config.DisconnectCooldown.AdjustForNode(connectionManager.Address))
                 return;
             var excessPeer = Map.FindExcessPeer();
             if (excessPeer != null)
@@ -87,34 +84,32 @@ namespace Node.Routing
                 lastDisconnect = DateTime.UtcNow;
                 Console.WriteLine("[{0}] suggesting {1} to terminate connection", Map.OwnAddress, excessPeer);
                 var connection = connectionManager.Connections.FirstOrDefault(c => Equals(c.RemoteAddress, excessPeer));
-                connection?.Push(new StringMessage("心中"));
+                connection?.Push(new MapMessage(Map.Links, true));
             }
         }
 
         public IRoutingMap Map { get; }
 
-        private void ProcessMap(MapMessage message, IConnection connection)
+        private bool ProcessMap(MapMessage message, IConnection connection)
         {
             if (message == null)
-                return;
-            Map.Merge(message.Links, connection.RemoteAddress);
-        }
-        private void ProcessString(StringMessage message, IConnection connection)
-        {
-            if (message == null)
-                return;
-            if (message.Text == "心中")
+                return false;
+            if (message.SuggestDisconnect)
             {
-                if (Map.IsLinkExcess(new RoutingMapLink(Map.OwnAddress, connection.RemoteAddress)))
+                if (message.Links.AreEquivalent(Map.Links) && Map.IsLinkExcess(new RoutingMapLink(Map.OwnAddress, connection.RemoteAddress)))
                 {
                     Console.WriteLine("[{0}] closing connection with {1} by agreement", Map.OwnAddress, connection.RemoteAddress);
                     connection.Close();
                 }
             }
+            Map.Merge(message.Links, connection.RemoteAddress);
+            return true;
         }
 
         private readonly IConnectionManager connectionManager;
-        private readonly Dictionary<IAddress, VersionInfo> versionsByPeer; 
+        private readonly IRoutingConfig config;
+        private readonly Dictionary<IAddress, VersionInfo> versionsByPeer;
+        private readonly Random random;
         private DateTime lastDisconnect = DateTime.MinValue;
         private DateTime lastConnect = DateTime.MinValue;
 

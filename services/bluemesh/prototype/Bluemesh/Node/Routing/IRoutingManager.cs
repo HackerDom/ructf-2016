@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using Node.Connections;
+using Node.Messages;
 
 namespace Node.Routing
 {
     internal interface IRoutingManager
     {
-        void ProcessMessages(IEnumerable<IConnection> readyConnections);
+        bool ProcessMessage(IMessage message, IConnection connection);
         void PushMaps(IEnumerable<IConnection> readyConnections);
         void ConnectNewLinks();
         void DisconnectExcessLinks();
