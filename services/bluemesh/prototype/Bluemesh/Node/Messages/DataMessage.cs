@@ -1,21 +1,36 @@
-﻿using Node.Serialization;
+﻿using Node.Encryption;
+using Node.Serialization;
 
 namespace Node.Messages
 {
-    /*internal class DataMessage : IMessage
+    internal class DataMessage : IMessage
     {
-        public void Serialize(IBinarySerializer serializer)
+        public DataMessage(DataAction action, string key, byte[] data)
         {
-            throw new System.NotImplementedException();
+            Action = action;
+            Key = key;
+            Data = data;
         }
 
-        public DataMessage Deserialize(IBinaryDeserializer deserializer, ulong privateKey)
+        public void Serialize(IBinarySerializer serializer)
         {
-            
+            serializer.Write((int)Action);
+            serializer.Write(Key);
+            serializer.Write(Data);
+        }
+
+        public DataMessage Deserialize(IBinaryDeserializer deserializer)
+        {
+            return new DataMessage(
+                (DataAction) deserializer.ReadInt(),
+                deserializer.ReadString(),
+                deserializer.ReadBytes());
         }
 
         public MessageType Type => MessageType.Data;
 
-        private b
-    }*/
+        public readonly DataAction Action;
+        public readonly string Key;
+        public readonly byte[] Data;
+    }
 }

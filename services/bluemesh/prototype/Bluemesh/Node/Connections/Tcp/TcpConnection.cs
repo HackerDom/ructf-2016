@@ -1,18 +1,19 @@
 using System;
 using System.Net.Sockets;
+using Node.Encryption;
 using Node.Messages;
 
 namespace Node.Connections.Tcp
 {
     internal class TcpConnection : IConnection
     {
-        public TcpConnection(TcpAddress localAddress, TcpAddress remoteAddress, Socket socket,  IConnectionUtility connectionUtility)
+        public TcpConnection(TcpAddress localAddress, TcpAddress remoteAddress, Socket socket,  IConnectionUtility connectionUtility, IMessageEncoder encoder)
         {
             RemoteAddress = remoteAddress;
             this.localAddress = localAddress;
             this.socket = socket;
             this.connectionUtility = connectionUtility;
-            stream = new NonblockingSocketStream(socket, connectionUtility);
+            stream = new NonblockingSocketStream(socket, connectionUtility, encoder);
             State = ConnectionState.Connecting;
         }
 
