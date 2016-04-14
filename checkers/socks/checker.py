@@ -13,7 +13,7 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILENAME = os.path.join(DIR, 'db.sqlite3')
 THING_FILENMAME = os.path.join(DIR, 'things.txt')
 
-def ructf_error(status=110, message=None, error=None, exception=None, request=None, reply=None):
+def ructf_error(status=110, message=None, error=None, exception=None, request=None, reply=None, body=None):
     if message:
         sys.stdout.write(message)
         sys.stdout.write("\n")
@@ -25,6 +25,11 @@ def ructf_error(status=110, message=None, error=None, exception=None, request=No
 
     if request or reply:
         sys.stderr.write(make_err_message(message, request, reply))
+        sys.stderr.write("\n")
+
+    if body:
+        sys.stderr.write("BODY:\n")
+        sys.stderr.write(body)
         sys.stderr.write("\n")
 
     if exception:
@@ -67,7 +72,7 @@ def handler_get(args, db, things):
     except requests.exceptions.ConnectionError as e:
         return service_down(message="Cant connect to server", exception=e, request=request, reply=reply)
     except requests.exceptions.HTTPError as e:
-        return service_mumble(message="Cant connect to server", exception=e, request=request, reply=reply)
+        return service_mumble(message="Server error: {}".format(e), exception=e, request=request, reply=reply)
 
     for r in reply.split("\n"):
         if flag in r:
@@ -80,6 +85,7 @@ def handler_put(args, db, things):
     _, _, hostname, id, flag, vuln = args
     request = "http://{0}:{3}/set?text={1}&owner={2}".format(hostname, flag, id, PORT)
     reply = None
+    thing = None
     try:
         thing = things.random()
         db.save_doc(id, thing)
@@ -87,9 +93,9 @@ def handler_put(args, db, things):
         reply = r.text
         r.raise_for_status()
     except requests.exceptions.ConnectionError as e:
-        return service_down(message="Cant connect to server", exception=e, request=request, reply=reply)
+        return service_down(message="Cant connect to server", exception=e, request=request, reply=reply, body=thing)
     except requests.exceptions.HTTPError as e:
-        return service_mumble(message="Cant connect to server", exception=e, request=request, reply=reply)
+        return service_mumble(message="Server error: {}".format(e), exception=e, request=request, reply=reply, body=thing)
 
 
     return service_ok(message=None)
