@@ -19,14 +19,14 @@ namespace Tests
         [Test]
         public void Should_decode_encoded_text()
         {
-            var privateKey = BluemeshEncryptor.GeneratePrivateKey(SerializeAddress(new TcpUtility().ParseAddress("127.0.0.1:16800")));
+            var privateKey = BluemeshEncryptor.GeneratePrivateKey(BitConverter.GetBytes(16742));
             var publicKey = BluemeshEncryptor.GeneratePublicKey(privateKey);
 
             Console.WriteLine("e = {0}, d = {1}", publicKey, privateKey);
 
             var buffer = new byte[32];
 
-            var message = "Hello, World!";
+            var message = "        ";
             Encoding.ASCII.GetBytes(message, 0, message.Length, buffer, 0);
 
             Console.WriteLine(BitConverter.ToString(buffer));

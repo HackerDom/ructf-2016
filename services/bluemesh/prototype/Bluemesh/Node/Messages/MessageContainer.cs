@@ -38,7 +38,18 @@ namespace Node.Messages
                 return new MessageContainer(MessageHelper.GetDeserializeMethod(messageType, utility)(deserializer));
             }
         }
-        
+
+        public static MessageType GetMessageType(byte[] buffer, int offset)
+        {
+            using (var stream = new MemoryStream(buffer, offset, buffer.Length - offset, false))
+            {
+                var deserializer = new StreamDeserializer(stream);
+                deserializer.ReadInt();
+                var messageType = (MessageType)deserializer.ReadInt();
+                return messageType;
+            }
+        }
+
         public static int GetNeededLength(byte[] buffer, int offset)
         {
             using (var stream = new MemoryStream(buffer, offset, buffer.Length - offset, false))

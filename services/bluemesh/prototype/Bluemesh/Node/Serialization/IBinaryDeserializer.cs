@@ -8,6 +8,8 @@ namespace Node.Serialization
 
         int ReadInt();
 
+        string ReadString();
+
         T Read<T>(Func<IBinaryDeserializer, T> readFunc);
     }
 }

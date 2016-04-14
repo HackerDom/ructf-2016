@@ -4,16 +4,18 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using Node.Encryption;
 using Node.Routing;
 
 namespace Node.Connections.Tcp
 {
     internal class TcpConnectionManager : IConnectionManager
     {
-        public TcpConnectionManager(IConnectionConfig connectionConfig, IRoutingConfig routingConfig)
+        public TcpConnectionManager(IConnectionConfig connectionConfig, IRoutingConfig routingConfig, IEncryptionManager encryptionManager)
         {
             this.connectionConfig = connectionConfig;
             this.routingConfig = routingConfig;
+            this.encryptionManager = encryptionManager;
             connections = new List<TcpConnection>();
             connectingSockets = new List<SocketInfo>();
             Utility = new TcpUtility();
@@ -148,7 +150,7 @@ namespace Node.Connections.Tcp
 
         private TcpConnection CreateConnection(TcpAddress address, Socket socket)
         {
-            var connection = new TcpConnection((TcpAddress)Address, address, socket, Utility);
+            var connection = new TcpConnection((TcpAddress)Address, address, socket, Utility, encryptionManager.CreateEncoder(address));
             connection.ValidateConnection += conn =>
                 EstablishedConnections.Count() < routingConfig.MaxConnections &&
                 (StringComparer.OrdinalIgnoreCase.Compare(conn.LocalAddress.ToString(), conn.RemoteAddress.ToString()) >= 0 || 
@@ -190,6 +192,7 @@ namespace Node.Connections.Tcp
         private readonly List<SocketInfo> connectingSockets;
         private readonly IConnectionConfig connectionConfig;
         private readonly IRoutingConfig routingConfig;
+        private readonly IEncryptionManager encryptionManager;
 
         private struct SocketInfo
         {

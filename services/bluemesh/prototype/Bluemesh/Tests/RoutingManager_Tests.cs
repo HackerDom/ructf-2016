@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Node.Connections;
 using Node.Connections.Tcp;
+using Node.Encryption;
 using Node.Messages;
 using Node.Routing;
 using NSubstitute;
@@ -59,7 +60,10 @@ namespace Tests
             connectionConfig.LocalAddress.Returns(address);
             connectionConfig.PreconfiguredNodes.Returns(_ => nodes.Where(n => !Equals(n, address)).ToList());
             nodes.Add(address);
-            var connectionManager = new TcpConnectionManager(connectionConfig, routingConfig);
+            var encryptionManager = Substitute.For<IEncryptionManager>();
+            var encoder = Substitute.For<IMessageEncoder>();
+            encryptionManager.CreateEncoder(Arg.Any<IAddress>()).Returns(encoder);
+            var connectionManager = new TcpConnectionManager(connectionConfig, routingConfig, encryptionManager);
             return new TestNode(new RoutingManager(connectionManager, routingConfig), connectionManager);
         }
 
@@ -90,8 +94,12 @@ namespace Tests
                 var selectResult = connectionManager.Select();
 
                 routingManager.UpdateConnections();
-
-                routingManager.ProcessMessages(selectResult.ReadableConnections.Where(c => c.State == ConnectionState.Connected));
+                
+                foreach (var connection in selectResult.ReadableConnections.Where(c => c.State == ConnectionState.Connected))
+                {
+                    var message = connection.Receive();
+                    routingManager.ProcessMessage(message, connection);
+                }
                 routingManager.PushMaps(selectResult.WritableConnections.Where(c => c.State == ConnectionState.Connected));
 
                 routingManager.DisconnectExcessLinks();

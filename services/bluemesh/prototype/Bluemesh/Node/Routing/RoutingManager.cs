@@ -17,15 +17,11 @@ namespace Node.Routing
             random = new Random(connectionManager.Address.GetHashCode());
         }
 
-        public void ProcessMessages(IEnumerable<IConnection> readyConnections)
+        public bool ProcessMessage(IMessage message, IConnection connection)
         {
-            foreach (var connection in readyConnections)
-            {
-                var message = connection.Receive();
-                if (message == null)
-                    continue;
-                ProcessMap(message as MapMessage, connection);
-            }
+            if (message == null)
+                return true;
+            return ProcessMap(message as MapMessage, connection);
         }
 
         public void PushMaps(IEnumerable<IConnection> readyConnections)
@@ -94,10 +90,10 @@ namespace Node.Routing
 
         public IRoutingMap Map { get; }
 
-        private void ProcessMap(MapMessage message, IConnection connection)
+        private bool ProcessMap(MapMessage message, IConnection connection)
         {
             if (message == null)
-                return;
+                return false;
             if (message.SuggestDisconnect)
             {
                 if (message.Links.AreEquivalent(Map.Links) && Map.IsLinkExcess(new RoutingMapLink(Map.OwnAddress, connection.RemoteAddress)))
@@ -107,6 +103,7 @@ namespace Node.Routing
                 }
             }
             Map.Merge(message.Links, connection.RemoteAddress);
+            return true;
         }
 
         private readonly IConnectionManager connectionManager;
