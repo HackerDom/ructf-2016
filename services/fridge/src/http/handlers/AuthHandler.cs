@@ -15,6 +15,9 @@ namespace frɪdʒ.http.handlers
 			if(data == null)
 				throw new HttpException(400, "Login/pass required");
 
+			if(!context.CheckCsrfToken(data.GetOrDefault("csrf-token")))
+				throw new HttpException(403, "Request is forged");
+
 			var login = data.GetOrDefault("login");
 			var pass = data.GetOrDefault("pass");
 

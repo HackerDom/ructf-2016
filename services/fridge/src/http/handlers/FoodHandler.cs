@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using frɪdʒ.Db;
 using frɪdʒ.utils;
+using Newtonsoft.Json;
 
 namespace frɪdʒ.http.handlers
 {
@@ -43,9 +44,9 @@ namespace frɪdʒ.http.handlers
 			await context.WriteStringAsync(data);
 		}
 
-		public static string FormatInfo(User user, string sender, string msg)
+		public static string FormatUserMessage(User user, string sender, string msg)
 		{
-			return $"YOU: '{user?.Login}', SENDER: '{sender}', ALLERGENS: '{(user == null ? null : string.Join(",", msg.FindAll(user.Allergens)))}'";
+			return JsonConvert.SerializeObject(new {login = sender, allergens = user == null ? null : msg.FindAll(user.Allergens)});
 		}
 
 		private readonly Func<string, string, Task> callback;

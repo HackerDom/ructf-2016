@@ -36,7 +36,7 @@ namespace frɪdʒ.utils
 
 		public static IEnumerable<string> FindAll(this string source, params string[] values)
 		{
-			return values.Select(source.FindWord);
+			return values?.Select(source.FindWord);
 		}
 	}
 }
