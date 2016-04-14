@@ -10,12 +10,13 @@ namespace frɪdʒ.http
 {
 	internal class StaticHandler
 	{
-		public StaticHandler(string root)
+		public StaticHandler(string root, Action<HttpListenerContext> onpage)
 		{
 			this.root = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, root));
+			this.onpage = onpage;
 		}
 
-		public async Task ProcessRequestAsync(HttpListenerContext context)
+		public async Task GetAsync(HttpListenerContext context)
 		{
 			var fullpath = FindFile(context.Request.Url.LocalPath);
 			if(fullpath == null)
@@ -24,6 +25,9 @@ namespace frɪdʒ.http
 			var contentType = ContentTypes.GetOrDefault(Path.GetExtension(fullpath));
 			if(contentType == null)
 				throw new HttpException(404, "Not Found");
+
+			if(contentType == PageContentType)
+				onpage(context);
 
 			try
 			{
@@ -59,11 +63,12 @@ namespace frɪdʒ.http
 			return File.Exists(fullpath) ? fullpath : null;
 		}
 
+		private const string PageContentType = "text/html";
 		private static readonly Dictionary<string, string> ContentTypes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
 		{
 			{".txt", "text/plain"},
-			{".htm", "text/html"},
-			{".html", "text/html"},
+			{".htm", PageContentType},
+			{".html", PageContentType},
 			{".css", "text/css"},
 			{".js", "application/javascript"},
 			{".ico", "image/x-icon"},
@@ -77,6 +82,7 @@ namespace frɪdʒ.http
 
 		private const int MaxAge = 300;
 
+		private readonly Action<HttpListenerContext> onpage;
 		private readonly string root;
 	}
 }
