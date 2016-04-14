@@ -173,6 +173,18 @@ def generate_program(flag):
     log = deduplicate(log)
     return log
 
+def generate_room(flag):
+    trash = string.ascii_lowercase.replace('w', '') + '          '
+    room = ''
+    for c in flag:
+        b = ord(c)
+        for x in range(8):
+            if b & (1 << x):
+                room += 'W'
+            else:
+                room += random.choice(trash)
+    return room
+
 def send(request, socket):
     try:
         socket.sendall(request.encode('utf-8'))
@@ -239,7 +251,7 @@ class State:
         password = get_rand_string(32)
         room_name = get_rand_string(32)
         program_name = get_rand_string(32)
-        room = binascii.hexlify(flag.encode('utf-8')).decode('utf-8')
+        room = generate_room(flag)
 
         socket = self.connect_to_service()
         socket_fd = socket.makefile()
@@ -289,15 +301,17 @@ def handler_get(args):
     if not program in programs:
         return service_corrupt(message="No such program", error=make_err_message("No such program", program, "\n".join(programs)))
 
-    room_conf = state.get_room(room, password).lower().encode('utf-8')
-    enc_flag = binascii.hexlify(flag.encode('utf-8')).lower()
+    room_conf = state.get_room(room, password).lower()
+    enc_flag = generate_room(flag)
+    enc_flag = re.sub('[^W]', ' ', enc_flag.lower())
+    room_conf = re.sub('[^W]', ' ', room_conf)
     if room_conf != enc_flag:
         return service_corrupt(message="Bad flag", error=make_err_message("Bad flag", enc_flag, room_conf))
 
     log = state.run(room, program, password)
 
     if 'E' in log:
-        return service_corrupt(message="Bad run result: error", error="Bad run result : {} {}".format(room, flag))
+        return service_corrupt(message="Bad run result: error", error="Bad run result : {} {}".format(log, flag))
 
     good_log = generate_program(flag)
     if good_log != log:

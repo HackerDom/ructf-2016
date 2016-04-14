@@ -1,12 +1,9 @@
 #pragma once
 
-struct TProgramState {
-    size_t PosX = 0;
-    size_t PosY = 0;
-    size_t LogIdx = 0;
-    std::string Log;
+#include <sstream>
 
-    void Append(char c) {
-        Log[LogIdx++] = c;
-    }
+struct TProgramState {
+    size_t PosX = -1;
+    size_t PosY = -1;
+    std::stringstream Log;
 };

@@ -4,7 +4,6 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
-#include <boost/algorithm/hex.hpp>
 
 #include <algorithm>
 
@@ -22,7 +21,7 @@ const std::string& TRoom::GetName() const {
     return Name;
 }
 
-const TRoomConfiguration& TRoom::GetConfiguration() const {
+TRoomConfiguration& TRoom::GetConfiguration() {
     return Configuration;
 }
 
