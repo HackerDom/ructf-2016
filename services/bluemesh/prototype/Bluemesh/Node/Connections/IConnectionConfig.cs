@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Node.Connections
@@ -6,6 +7,8 @@ namespace Node.Connections
     {
         IAddress LocalAddress { get; }
 
-        List<IAddress> PreconfiguredNodes { get; } 
+        List<IAddress> PreconfiguredNodes { get; }
+
+        TimeSpan KeySendCooldown { get; }
     }
 }
