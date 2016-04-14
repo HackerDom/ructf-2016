@@ -145,8 +145,8 @@ class StrongboxChecker(HttpCheckerBase, Randomizer):
         return EXITCODE_OK
 
 
-def check(self, addr):
-    return EXITCODE_OK
+    def check(self, addr):
+        return EXITCODE_OK
 
 
 StrongboxChecker().run()
