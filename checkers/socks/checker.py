@@ -92,7 +92,7 @@ def handler_put(args, db, things):
         return service_mumble(message="Cant connect to server", exception=e, request=request, reply=reply)
 
 
-    return service_ok()
+    return service_ok(message=None)
 
 
 HANDLERS = {
