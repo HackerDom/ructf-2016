@@ -7,7 +7,6 @@
     - python3
     - python3-pip
     - tcpdump
-    - firmware-ralink
 
 - shell: pip3 install requests PyCrypto scapy-python3 ws4py beautifulsoup4
 
