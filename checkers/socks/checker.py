@@ -118,7 +118,7 @@ class DB:
         if not os.path.exists(filename):
             new_databse = True
 
-        conn = sqlite3.connect(filename)
+        conn = sqlite3.connect(filename, timeout=3)
         self.conn = conn
         c = conn.cursor()
         if new_databse:
@@ -140,6 +140,7 @@ class DB:
     def get_doc(self, id):
         for row in self.conn.execute('''SELECT document FROM documents WHERE id = ?''', (id,)):
             return row[0]
+        raise KeyError("Cant find document id: '{}'".format(id))
 
     def save_doc(self, id, document):
         c = self.conn.cursor()
