@@ -32,6 +32,24 @@ namespace Node.Connections.Tcp
             return false;
         }
 
+        public bool TryWrite(byte[] rawData)
+        {
+            if (writeLength < 0)
+            {
+                Buffer.BlockCopy(rawData, 0, writeBuffer, 0, rawData.Length);
+                writeLength = rawData.Length;
+            }
+            var bytesSent = socket.SendSafe(writeBuffer, writePos, writeLength - writePos);
+            writePos += bytesSent;
+            if (writePos >= writeLength)
+            {
+                writeLength = -1;
+                writePos = 0;
+                return true;
+            }
+            return false;
+        }
+
         public bool TryRead(out IMessage message)
         {
             message = null;

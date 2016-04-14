@@ -26,7 +26,9 @@ namespace Node.Connections.Tcp
 
         public SendResult Send(byte[] rawData)
         {
-            throw new NotImplementedException();
+            if (State != ConnectionState.Connected)
+                return SendResult.Failure;
+            return SendInternal(rawData);
         }
 
         public SendResult Push(IMessage message)
@@ -42,7 +44,13 @@ namespace Node.Connections.Tcp
 
         public SendResult Push(byte[] rawData)
         {
-            throw new NotImplementedException();
+            // TODO do something with it
+            SendResult result;
+            do
+            {
+                result = Send(rawData);
+            } while (result == SendResult.Partial);
+            return result;
         }
 
         public IMessage Receive()
@@ -107,6 +115,21 @@ namespace Node.Connections.Tcp
             try
             {
                 return stream.TryWrite(message) ? SendResult.Success : SendResult.Partial;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Send : " + e.Message);
+                socket.Close();
+                State = ConnectionState.Failed;
+                return SendResult.Failure;
+            }
+        }
+
+        private SendResult SendInternal(byte[] rawData)
+        {
+            try
+            {
+                return stream.TryWrite(rawData) ? SendResult.Success : SendResult.Partial;
             }
             catch (Exception e)
             {
