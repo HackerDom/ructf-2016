@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Node.Connections;
 
 namespace Node.Encryption
@@ -9,6 +10,8 @@ namespace Node.Encryption
         void Start();
 
         void Stop();
+
+        void RetrievePeerKeys(IEnumerable<IAddress> peers);
 
         IMessageEncoder CreateEncoder(IAddress peer);
     }
