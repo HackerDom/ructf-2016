@@ -72,8 +72,7 @@ class State:
 		try:
 			response = self.session.get(url)
 		except Exception as ex:
-			service_mumble(error=url, exception=ex)
-#		print(list(map(lambda r : r.url, response.history)), response.url)
+			service_down(error=url, exception=ex)
 		check_status(response)
 		return response
 	def post(self, url, d):
@@ -82,8 +81,7 @@ class State:
 		try:
 			response = self.session.post(url, data=d)
 		except Exception as ex:
-			service_mumble(error='{}\n{}'.format(url, d), exception=ex)
-#		print(list(map(lambda r : r.url, response.history)), response.url)
+			service_down(error='{}\n{}'.format(url, d), exception=ex)
 		check_status(response)
 		check_cookie(self.session.cookies)
 		return response
