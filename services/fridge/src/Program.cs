@@ -20,7 +20,7 @@ namespace frɪdʒ
 			var token = cancellation.Token;
 
 			var wsServer = new WsServer<User>(9999, ws => Users.Find(ws.HttpRequest.Cookies?.GetAuth()));
-			var foodHandler = new FoodHandler((login, msg) => Task.Run(() => wsServer.BroadcastAsync(user => FoodHandler.FormatUserMessage(user, login, msg), token), token));
+			var foodHandler = new FoodHandler((login, food) => Task.Run(() => wsServer.BroadcastAsync(user => FoodHandler.FormatUserMessage(user, login, food), token), token));
 
 			var staticHandler = new StaticHandler("static", ctx =>
 			{

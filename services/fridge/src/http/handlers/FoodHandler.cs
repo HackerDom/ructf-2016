@@ -10,7 +10,7 @@ namespace frɪdʒ.http.handlers
 {
 	internal class FoodHandler
 	{
-		public FoodHandler(Func<string, string, Task> callback)
+		public FoodHandler(Func<string, Food, Task> callback)
 		{
 			this.callback = callback;
 		}
@@ -21,15 +21,17 @@ namespace frɪdʒ.http.handlers
 			if(data == null)
 				return;
 
-			var food = data.GetOrDefault("food");
-			if(string.IsNullOrEmpty(food))
-				throw new HttpException(400, "Food is empty");
+			var title = data.GetOrDefault("title");
+			var ingredients = data.GetOrDefault("ingredients");
+
+			if(string.IsNullOrEmpty(title))
+				throw new HttpException(400, "Food is invalid");
 
 			if(!context.CheckCsrfToken(data.GetOrDefault("csrf-token")))
 				throw new HttpException(403, "Request is forged");
 
-			var id = await Foods.Add(food);
-			await context.WriteStringAsync(id.ToString("N"));
+			var food = await Foods.Add(title, ingredients);
+			await context.WriteStringAsync(food.Id.ToString("N"));
 
 			await callback(context.Request.Cookies.GetAuth() ?? "FoodBot", food).ConfigureAwait(false);
 		}
@@ -37,18 +39,18 @@ namespace frɪdʒ.http.handlers
 		public async Task GetAsync(HttpListenerContext context)
 		{
 			Guid id;
-			string data;
-			if(!(Guid.TryParse(context.Request.QueryString["id"], out id) && (data = Foods.Find(id)) != null))
+			Food food;
+			if(!Guid.TryParse(context.Request.QueryString["id"], out id) || (food = Foods.Find(id)) == null)
 				throw new HttpException(404, "Food not found");
 
-			await context.WriteStringAsync(data);
+			await context.WriteStringAsync(JsonConvert.SerializeObject(new {title = food.Title, ingredients = food.Ingredients}));
 		}
 
-		public static string FormatUserMessage(User user, string sender, string msg)
+		public static string FormatUserMessage(User user, string sender, Food food)
 		{
-			return JsonConvert.SerializeObject(new {login = sender, allergens = user == null ? null : msg.FindAll(user.Allergens)});
+			return JsonConvert.SerializeObject(new {login = sender, title = food.Title, allergens = user == null ? null : food.Ingredients.FindAll(user.Allergens)});
 		}
 
-		private readonly Func<string, string, Task> callback;
+		private readonly Func<string, Food, Task> callback;
 	}
 }
