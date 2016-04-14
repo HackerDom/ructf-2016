@@ -5,32 +5,17 @@ unit AccountController;
 
 interface
 	uses
-		fgl, RC5, SysUtils, Utils, DashboardContainer;
+		fgl, RC5, SysUtils, Utils, DashboardContainer, avglvltree;
 
 	type
 		TUserId = qword;
-		TUser = record
-			userId: TUserId;
-			username: string;
-			password: string;
-			class operator= (const a, b: TUser): Boolean;
-		end;
-		TUsers = specialize TFPGList<TUser>;
-
-		TUserDashboards = record
-			userid: TUserId;
-			dashboards: TDashboardIds;
-			class operator= (const a, b: TUserDashboards): Boolean;
-		end;
-
-		TUsersDashboards = specialize TFPGList<TUserDashboards>;
 
 		TAccountManager = class(TObject)
 			private
-				users: TUsers;
+				users: TStringToPointerTree;
 				usersFile: text;
 				usersRWSync: TSimpleRWSync;
-				usersDashboards: TUsersDashboards;
+				usersDashboards: TStringToPointerTree;
 				usersDashboardsFile: text;
 				usersDashboardsRWSync: TSimpleRWSync;
 				procedure InitializeUsersList;
@@ -43,7 +28,6 @@ interface
 				function GetUserId(const username: string; const password: string): TUserId;
 				function GetAuthToken(const userid: TUserId): string;
 				function GetCurrentUserId(const token: string): TUserId;
-				function GetDashboards(const userid: TUserId): TDashboardIds;
 				function HavePermission(const token: string; const dashboard: TDashboardId): string;
 				function AddPermission(const token: string; const dashboardId: TDashboardId): string;
 				function GetPermittedDashboards(const token: string): TDashboardIds;
@@ -53,20 +37,30 @@ interface
 		AccountManager: TAccountManager;
 implementation
 
+	type
+		TUser = record
+			userId: TUserId;
+			password: string;
+			class operator= (const a, b: TUser): Boolean;
+		end;
+		PUser = ^TUser;
+		PDashboardIds = ^TDashboardIds;
+
+
 	var
-		defaultUser: TUser;
 		ttl: TDateTime;
 
 
 	procedure TAccountManager.InitializeUsersList;
 	var
 		filename: unicodestring;
-		tmpUser: TUser;
+		tmpUser: PUser;
+		username: string;
 	begin
 		writeln(stderr, 'load users');
 		flush(stderr);
 		usersRWSync := TSimpleRWSync.Create;
-		users := TUsers.Create;
+		users := TStringToPointerTree.Create(false);
 
 		filename := writeDir + 'users';
 		assign(usersFile, filename);
@@ -75,10 +69,11 @@ implementation
 			reset(usersFile);
 			while not seekeof(usersFile) do
 			begin
-				readln(usersFile, tmpUser.userId);
-				readln(usersFile, tmpUser.username);
-				readln(usersFile, tmpUser.password);
-				users.add(tmpUser);
+				new(tmpUser);
+				readln(usersFile, tmpUser^.userId);
+				readln(usersFile, username);
+				readln(usersFile, tmpUser^.password);
+				users[username] := tmpUser;
 			end;
 			append(usersFile)
 		end
@@ -90,15 +85,13 @@ implementation
 	var
 		filename: unicodestring;
 		tmpuserid: TUserId;
+		suserid: string;
 		tmpDashboard: TDashboardId;
-		tmp: TUserDashboards;
-		i: longint;
-		found: boolean;
 	begin
 		writeln(stderr, 'load user''s dashboards');
 		flush(stderr);
 		usersDashboardsRWSync := TSimpleRWSync.Create;
-		usersDashboards := TUsersDashboards.Create;
+		usersDashboards := TStringToPointerTree.Create(true);
 
 		filename := writeDir + 'usersdashboards';
 		assign(usersDashboardsFile, filename);
@@ -108,20 +101,10 @@ implementation
 			while not seekeof(usersDashboardsFile) do
 			begin
 				read(usersDashboardsFile, tmpuserid, tmpDashboard);
-				found := false;
-				for i := 0 to usersDashboards.Count - 1 do
-					if usersDashboards[i].userid = tmpuserid then
-					begin
-						usersDashboards[i].dashboards.add(tmpDashboard);
-						found := true;
-					end;
-				if not found then
-				begin
-					tmp.userid := tmpuserid;
-					tmp.dashboards := TDashboardIds.Create;
-					tmp.dashboards.add(tmpDashboard);
-					usersDashboards.add(tmp);
-				end;
+				suserid := inttostr(tmpuserid);
+				if not usersdashboards.contains(suserid) then
+					usersdashboards[suserid] := TDashboardIds.Create;
+				TDashboardIds(usersDashboards[suserid]).add(tmpDashboard);
 			end;
 			append(usersDashboardsFile);
 		end
@@ -142,39 +125,31 @@ implementation
 		result := a.userId = b.userId;
 	end;
 	
-	class operator TUserDashboards.= (const a, b: TUserDashboards): Boolean;
-	begin
-		result := a.userid = b.userid;
-	end;
-
 	function TAccountManager.CreateUser(const username: string; const password: string): string;
 	var
-		i: longint;
 		was: boolean;
-		user: TUser;
+		user: PUser;
 	begin
 		if HasBadSymbols(username) or HasBadSymbols(password) then
 			exit('username and password must contains symbols with codes from [32 .. 127]');
 
-		was := false;
 		usersRWSync.beginread;
-		for i := 0 to users.Count - 1 do
-			was := was or  (users[i].username = username);
+		was := users.contains(username);
 		usersRWSync.endread;
 
 		if was then
 			exit('username has already used');
 
-		user.userId := GetGuid;
-		user.username := username;
-		user.password := password;
+		new(user);
+		user^.userId := GetGuid;
+		user^.password := password;
 
 		usersRWSync.beginWrite;
-		writeln(usersFile, user.userId);
-		writeln(usersFile, user.username);
-		writeln(usersFile, user.password);
+		writeln(usersFile, user^.userId);
+		writeln(usersFile, username);
+		writeln(usersFile, user^.password);
 		flush(usersFile);
-		users.add(user);
+		users[username] := user;
 		usersRWSync.endWrite;
 	end;
 
@@ -198,43 +173,40 @@ implementation
 
 	function TAccountManager.GetUserId(const username: string; const password: string): TUserId;
 	var
-		i: longint;
+		user: PUser;
 	begin
 		result := 0;
 		usersRWSync.beginread;
-		for i := 0 to users.Count - 1 do
-			if (users[i].username = username) and (users[i].password = password) then
-				result := users[i].userid;
+		user := users[username];
 		usersRWSync.endread;
+		if (user <> nil) and (user^.password = password) then
+			result := user^.userid;
 	end;
 
 	function TAccountManager.GetAuthToken(const userid: TUserId): string;
 	var
 		dashboards: TDashboardIds;
-		i, j: longint;
+		j: longint;
 		dt: double;
 		dashboardId: TDashboardId;
+		suserid: string;
 	begin
 		result := encodeBlock(now);
 		result := appendBlock(result, userId);
+		suserid := inttostr(userid);
+		dashboards := TDashboardIds.Create;
 
 		usersDashboardsRWSync.beginread;
-		for i := 0 to usersDashboards.Count - 1 do
-		begin
-			if usersDashboards[i].userId = userid then
-			begin
-				dashboards := usersDashboards[i].dashboards;
-				for j := 0 to dashboards.Count - 1 do
-				begin
-					dt := now;
-					dashboardId := dashboards[j];
-					result := appendBlock(result, dt);
-					result := appendBlock(result, dashboardId);
-				end;
-				break;
-			end;
-		end;
+		if usersDashboards.contains(suserid) then
+			dashboards.assign(TDashboardIds(usersDashboards[suserid]));
 		usersDashboardsRWSync.endread;
+		for j := 0 to dashboards.Count - 1 do
+		begin
+			dt := now;
+			dashboardId := dashboards[j];
+			result := appendBlock(result, dt);
+			result := appendBlock(result, dashboardId);
+		end;
 	end;
 
 	function TAccountManager.GetCurrentUserId(const token: string): TUserId;
@@ -247,24 +219,6 @@ implementation
 		else
 			result := 0;
 		decoded.free;
-	end;
-
-	function TAccountManager.GetDashboards(const userId: TUserId): TDashboardIds;
-	var
-		i: longint;
-	begin
-		result := nil;
-		usersDashboardsRWSync.beginread;
-		for i := 0 to usersDashboards.count - 1 do
-		begin
-			if usersDashboards[i].userId = userId then
-			begin
-				result := TDashboardIds.Create;
-				result.assign(usersDashboards[i].dashboards);
-				break;
-			end;
-		end;
-		usersDashboardsRWSync.endread;
 	end;
 
 	function TAccountManager.HavePermission(const token: string; const dashboard: TDashboardId): string;
@@ -290,28 +244,15 @@ implementation
 
 	procedure TAccountManager.AddDashboard(const userId: TUserId; const dashboardId: TDashboardId);
 	var
-		userDashboards: TUserDashboards;
-		i: longint;
-		found: Boolean;
+		suserid: string;
 	begin
+		suserid := inttostr(userid);
 		usersDashboardsRWSync.beginWrite;
 		writeln(usersDashboardsFile, userid, ' ', dashboardId);
 		flush(usersDashboardsFile);
-		found := false;
-		for i := 0 to usersDashboards.Count - 1 do
-			if usersDashboards[i].userid = userid then
-			begin
-				usersDashboards[i].dashboards.add(dashboardId);
-				found := true;
-				break;
-			end;
-		if not found then
-		begin
-			userDashboards.userid := userid;
-			userDashboards.dashboards := TDashboardIds.Create;
-			userDashboards.dashboards.add(dashboardId);
-			usersDashboards.Add(userDashboards);
-		end;
+		if not usersDashboards.contains(suserid) then
+			usersDashboards[suserid] := TDashboardIds.Create;
+		TDashboardIds(usersDashboards[suserid]).add(dashboardId);
 		usersDashboardsRWSync.endWrite;
 	end;
 
@@ -339,8 +280,6 @@ implementation
 initialization
 	writeln(stderr, 'initialization AccountController');
 	flush(stderr);
-	defaultUser.userid := 0;
-	defaultUser.username := 'No user';
 	ttl := EncodeTime(23, 59, 59, 999);
 	AccountManager := TAccountManager.Create;
 
