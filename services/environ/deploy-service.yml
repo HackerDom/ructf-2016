@@ -39,6 +39,8 @@
       user: name=environ
     - name: copy project
       copy: src=environ dest=/home/ force=yes owner=environ
+    - name: set permissions
+      file: path=/home/environ owner=environ group=environ mode=0700
     - name: add sensors dir
       file: path=/home/environ/sensors state=directory mode=0755 owner=environ
     - name: copy environ-web.service
