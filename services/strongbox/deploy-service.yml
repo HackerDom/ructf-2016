@@ -30,14 +30,27 @@
     - name: Ensure pids directory exists
       file: path={{ pids_path }} state=directory
     - name: bundle update
-      command: su strongbox
-    - name: bundle update
       shell: "cd /home/strongbox/ && bundle update"
+      become: yes
+      become_user: strongbox
+      become_method: su
     - name: bundle install
       command: bundle install
+      become: yes
+      become_user: strongbox
+      become_method: su
+    - name: db:precompile
+      shell: "cd /home/strongbox/ && RAILS_ENV=production bundle exec rake assets:precompile"
+      become: yes
+      become_user: strongbox
+      become_method: su
     - name: db:migrate
-      command: bin/rake db:migrate RAILS_ENV=production
-    - name: del deploy script
-      command: rm -rf /home/strongbox/deploy-service.yml
+      command: bundle exec rake db:migrate RAILS_ENV=production
+      become: yes
+      become_user: strongbox
+      become_method: su
     - name: run
-      shell: "cd /home/strongbox/ && RAILS_ENV=production bundle exec passenger start -d -S {{ app_sock }} --environment production --pid-file {{ app_pid }}"
+      shell: "cd /home/strongbox/ && RAILS_ENV=production bundle exec passenger start -d --environment production --pid-file {{ app_pid }}"
+      become: yes
+      become_user: strongbox
+      become_method: su
