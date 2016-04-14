@@ -22,7 +22,7 @@ namespace Node.Routing
 
         IAddress OwnAddress { get; }
 
-        HashSet<RoutingMapLink> Links { get; } 
+        List<RoutingMapLink> Links { get; } 
 
         int Version { get; }
     }

@@ -13,12 +13,12 @@ namespace Node.Messages
 
         public void Serialize(IBinarySerializer serializer)
         {
-            serializer.Write(Encoding.UTF8.GetBytes(Text));
+            serializer.Write(Text);
         }
 
         public static StringMessage Deserialize(IBinaryDeserializer deserializer)
         {
-            return new StringMessage(Encoding.UTF8.GetString(deserializer.ReadBytes()));
+            return new StringMessage(deserializer.ReadString());
         }
 
         public override string ToString()

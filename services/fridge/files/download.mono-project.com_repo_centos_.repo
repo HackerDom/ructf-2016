@@ -1,0 +1,3 @@
+[download.mono-project.com_repo_centos_]
+name=added from: http://download.mono-project.com/repo/centos/
+baseurl=http://download.mono-project.com/repo/centos/\nenabled=1

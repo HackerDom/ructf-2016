@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Node.Connections;
 using Node.Serialization;
@@ -11,14 +12,14 @@ namespace Node.Routing
         {
             this.config = config;
             OwnAddress = ownAddress;
-            Links = new HashSet<RoutingMapLink>();
+            Links = new List<RoutingMapLink>();
         }
 
         public RoutingMap(IAddress ownAddress, IEnumerable<RoutingMapLink> links, IRoutingConfig config)
         {
             this.config = config;
             OwnAddress = ownAddress;
-            Links = new HashSet<RoutingMapLink>(links);
+            Links = new List<RoutingMapLink>(links);
         }
 
         public IAddress FindExcessPeer()
@@ -38,11 +39,16 @@ namespace Node.Routing
 
         public bool IsLinkExcess(RoutingMapLink link)
         {
+            if (!link.Connected)
+                return false;
+
+            if (GraphHelper.GetPeers(OwnAddress, Links).Count() <= config.DesiredConnections)
+                return false;
+
             var stateBefore = GraphHelper.CalculateConnectivity(Links);
             var nodesBefore = GraphHelper.GetNodes(Links);
 
-            if (!Links.Remove(link))
-                return false;
+            Links.Remove(link);
 
             var stateAfter = GraphHelper.CalculateConnectivity(Links);
             var nodesAfter = GraphHelper.GetNodes(Links);
@@ -54,28 +60,32 @@ namespace Node.Routing
 
         public void Merge(ICollection<RoutingMapLink> links, IAddress source)
         {
-            var countBefore = Links.Count;
-            var changed = false;
+            var oldLinks = Links.ToList();
 
-            Links.UnionWith(links);
+            var linksToAdd = links.Where(link => !link.Contains(OwnAddress) && 
+                ((link.Contains(source) && link.Connected != Links.FirstOrDefault(l => Equals(l, link)).Connected) ||  
+                link.Version > Links.FirstOrDefault(l => Equals(l, link)).Version)).ToList();
 
-            if (Links.Count > countBefore)
-                changed = true;
-            countBefore = Links.Count;
-
-            Links.RemoveWhere(link => link.Contains(source) && !links.Contains(link));
-
-            if (Links.Count < countBefore)
-                changed = true;
-            if (changed)
+            if (linksToAdd.Count > 0)
                 Version++;
+
+            foreach (var link in linksToAdd)
+                Links.Remove(link);
+            Links.AddRange(linksToAdd);
+
+            Console.WriteLine("[{0}] MERGE {1} with {2} from {3} => {4}", OwnAddress, oldLinks.ToDOT(), links.ToDOT(), source, Links.ToDOT());
         }
 
         public void AddDirectConnection(IAddress other)
         {
             var newLink = new RoutingMapLink(OwnAddress, other);
-            if (Links.Add(newLink))
+            var existingLink = Links.FirstOrDefault(link => Equals(link, newLink));
+            if (!existingLink.Connected)
+            {
+                Links.Remove(existingLink);
+                Links.Add(new RoutingMapLink(OwnAddress, other, existingLink.Version + 1, true));
                 Version++;
+            }
         }
 
         public bool ShouldConnectTo(IAddress other)
@@ -90,10 +100,14 @@ namespace Node.Routing
                 if (peers.Count >= config.DesiredConnections)
                     return false;
 
+                var existingLink = Links.FirstOrDefault(link => Equals(link, newLink));
                 var stateBefore = GraphHelper.CalculateConnectivity(Links);
+                Links.Remove(existingLink);
                 Links.Add(newLink);
                 var stateAfter = GraphHelper.CalculateConnectivity(Links);
                 Links.Remove(newLink);
+                if (existingLink.A != null)
+                    Links.Add(existingLink);
 
                 if (Equals(stateAfter, stateBefore))
                     return false;
@@ -104,8 +118,13 @@ namespace Node.Routing
 
         public void RemoveDirectConnection(IAddress other)
         {
-            if (Links.Remove(new RoutingMapLink(OwnAddress, other)))
+            var existingLink = Links.FirstOrDefault(link => link.Contains(OwnAddress) && link.Contains(other));
+            if (existingLink.Connected)
+            {
+                Links.Remove(existingLink);
+                Links.Add(new RoutingMapLink(existingLink.A, existingLink.B, existingLink.Version + 1, false));
                 Version++;
+            }
         }
 
         public IAddress OwnAddress { get; }
@@ -115,7 +134,7 @@ namespace Node.Routing
             return Links.ToDOT("routes");
         }
 
-        public HashSet<RoutingMapLink> Links { get; }
+        public List<RoutingMapLink> Links { get; }
 
         public int Version { get; private set; }
 

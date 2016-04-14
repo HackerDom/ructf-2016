@@ -5,7 +5,7 @@ unit DashboardContainer;
 
 interface
 	uses
-		fgl, SysUtils, Utils;
+		fgl, SysUtils, Utils, avglvltree;
 
 	type
 		TSensorId = QWord;
@@ -16,20 +16,24 @@ interface
 		TSensorss = specialize TFPGList<TSensors>;
 
 		TDashboard = record
-			ID: TDashboardId;
 			Name: string;
 			Description: string;
 			Sensors: TSensorss;
-			class operator = (const a, b: TDashboard): Boolean;
 		end;
 
-		TDashboards = specialize TFPGList<TDashboard>;
+		TDashboardPair = record
+			ID: string;
+			Name: string;
+			class operator = (const a, b: TDashboardPair): Boolean;
+		end;
+
+		TDashboards = specialize TFPGList<TDashboardPair>;
 
 		TDashboardManager = class(TObject)
 			private
 				rwSync: TSimpleRWSync;
 				saveFile: Text;
-				dashboards: TDashboards;
+				dashboards: TStringToPointerTree;
 			public
 				procedure Initialize;
 				function GetDashBoard(const dashboardId: TDashboardId): TDashboard;
@@ -42,23 +46,27 @@ interface
 		EmpyDashboard: TDashboard;
 
 implementation
+
+	type
+		PDashboard = ^TDashboard;
 	
-	class operator TDashboard.= (const a, b: TDashboard): Boolean;
+	class operator TDashboardPair.= (const a, b: TDashboardPair): Boolean;
 	begin
-		result := a.ID = b.ID;
+		result := a.Id = b.Id;
 	end;
 
 	procedure TDashboardManager.Initialize;
 	var
 		filename: string;
-		dashboard: TDashboard;
+		dashboard: PDashboard;
 		sensor: TSensorId;
 		n, k, i, j: longint;
+		dashboardId: string;
 	begin
 		writeln(stderr, 'Initialize DashboardManager');
 		flush(stderr);
 		rwSync := TSimpleRWSync.Create;
-		dashboards := TDashboards.Create;
+		dashboards := TStringToPointerTree.Create(true);
 
 		filename := writeDir + 'dashboards';
 		assign(saveFile, filename);
@@ -67,23 +75,25 @@ implementation
 			reset(saveFile);
 			while not seekeof(saveFile) do
 			begin
-				readln(saveFile, dashboard.ID);
-				readln(saveFile, dashboard.Name);
-				readln(saveFile, dashboard.Description);
+				new(dashboard);
+				readln(saveFile, dashboardid);
+				readln(saveFile, dashboard^.Name);
+				readln(saveFile, dashboard^.Description);
 				read(saveFile, n);
-				dashboard.Sensors := TSensorss.Create;
+				dashboard^.Sensors := TSensorss.Create;
 				for i := 1 to n do
 				begin
-					dashboard.Sensors.Add(TSensors.Create);
+					dashboard^.Sensors.Add(TSensors.Create);
 					read(saveFile, k);
 					for j := 1 to k do
 					begin
 						read(saveFile, sensor);
-						dashboard.Sensors.last.add(sensor);
+						dashboard^.Sensors.last.add(sensor);
 					end;
 				end;
+				readln(saveFile);
 
-				dashboards.add(dashboard);
+				dashboards[dashboardId] := dashboard;
 			end;
 			append(saveFile);
 		end
@@ -93,50 +103,58 @@ implementation
 
 	function TDashboardManager.GetDashBoard(const dashboardId: TDashboardId): TDashboard;
 	var
-		i: longint;
+		sdashboardid: string;
 	begin
 		result := EmpyDashboard;
+		sdashboardid := inttostr(dashboardId);
 		rwSync.beginRead;
-			for i := 0 to dashboards.Count - 1 do
-				if dashboards[i].Id = dashboardId then
-				begin
-					result := dashboards[i];
-					break;
-				end;
+		if dashboards.contains(sdashboardid) then
+			result := PDashboard(dashboards[sdashboardid])^;
 		rwSync.endRead;
 	end;
 	
 	function TDashboardManager.CreateDashboard(const name, description: string): TDashboardId;
 	var
-		dashboard: TDashboard;
+		dashboard: PDashboard;
+		dashboardid: TDashboardId;
 	begin
-		dashboard.ID := GetGuid;
-		dashboard.name := htmlEncode(name);
-		dashboard.description := htmlEncode(description);
+		new(dashboard);
+		dashboardid := GetGuid;
+		dashboard^.name := htmlEncode(name);
+		dashboard^.description := htmlEncode(description);
 
 		rwSync.beginWrite;
-		writeln(saveFile, dashboard.Id);
-		writeln(saveFile, dashboard.name);
-		writeln(saveFile, dashboard.description);
+		writeln(saveFile, dashboardid);
+		writeln(saveFile, dashboard^.name);
+		writeln(saveFile, dashboard^.description);
 		writeln(saveFile, 0);
 		flush(saveFile);
-		dashboards.Add(dashboard);
+		dashboards[IntToStr(dashboardId)] := dashboard;
 		rwSync.endWrite;
 
-		result := dashboard.ID;
+		result := dashboardid;
 	end;
 
 	function TDashboardManager.GetDashboards(): TDashboards;
+	var
+		s2pitem: PStringToPointerItem;
+		pair: TDashboardPair;
 	begin
 		result := TDashboards.Create;
-		result.assign(dashboards);
+		rwSync.beginRead;
+		for s2pitem in dashboards do
+		begin
+			pair.Id := s2pitem^.Name;
+			pair.Name := PDashboard(s2pitem^.Value)^.Name;
+			result.add(pair);
+		end;
+		rwSync.endRead;
 	end;
 
 initialization
 	writeln(stderr, 'initialization DashboardContainer');
 	flush(stderr);
 	DashboardManager := TDashboardManager.Create;
-	EmpyDashboard.Id := 0;
 	EmpyDashboard.Name := 'undefined';
 
 end.

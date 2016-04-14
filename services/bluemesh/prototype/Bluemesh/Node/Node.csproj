@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Node</RootNamespace>
     <AssemblyName>Node</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -22,6 +23,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -33,10 +35,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="SimpleInjector, Version=3.1.2.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
-      <HintPath>..\packages\SimpleInjector.3.1.2\lib\net45\SimpleInjector.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -62,13 +60,23 @@
     <Compile Include="BluemeshNode.cs" />
     <Compile Include="Connections\IConnection.cs" />
     <Compile Include="Connections\IConnectionManager.cs" />
-    <Compile Include="Flags\FlagStorage.cs" />
-    <Compile Include="Flags\IFlagStorage.cs" />
+    <Compile Include="Data\DataManager.cs" />
+    <Compile Include="Data\DataStorage.cs" />
+    <Compile Include="Encryption\BluemeshEncryptor.cs" />
+    <Compile Include="Data\IDataStorage.cs" />
+    <Compile Include="Encryption\EncryptionManager.cs" />
+    <Compile Include="Encryption\IEncryptionManager.cs" />
+    <Compile Include="Encryption\IMessageEncoder.cs" />
+    <Compile Include="Encryption\MessageEncoder.cs" />
+    <Compile Include="Messages\DataAction.cs" />
+    <Compile Include="Messages\DataMessage.cs" />
     <Compile Include="Messages\MapMessage.cs" />
     <Compile Include="Messages\MessageHelper.cs" />
     <Compile Include="Messages\MessageContainer.cs" />
     <Compile Include="Messages\MessageType.cs" />
+    <Compile Include="Messages\RedirectMessage.cs" />
     <Compile Include="Routing\GraphHelper.cs" />
+    <Compile Include="Data\IDataManager.cs" />
     <Compile Include="Routing\IRoutingConfig.cs" />
     <Compile Include="Routing\IRoutingManager.cs" />
     <Compile Include="Routing\IRoutingMap.cs" />
@@ -76,6 +84,7 @@
     <Compile Include="Routing\RoutingManager.cs" />
     <Compile Include="Routing\RoutingMap.cs" />
     <Compile Include="Routing\RoutingMapLink.cs" />
+    <Compile Include="Routing\TimespanExtensions.cs" />
     <Compile Include="Serialization\BinaryDeserializerExtensions.cs" />
     <Compile Include="Serialization\BinarySerializerExtensions.cs" />
     <Compile Include="Serialization\IBinaryDeserializer.cs" />
@@ -91,7 +100,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
