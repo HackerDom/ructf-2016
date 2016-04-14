@@ -1,12 +1,19 @@
 #!/usr/bin/env python3
 
+import requests
+import sqlite3
 import sys
 import traceback
-import socket
+import os
+import os.path
+import random
 
-PORT = 9123
+PORT = 3030
+DIR = os.path.dirname(os.path.abspath(__file__))
+DB_FILENAME = os.path.join(DIR, 'db.sqlite3')
+THING_FILENMAME = os.path.join(DIR, 'things.txt')
 
-def ructf_error(status=110, message=None, error=None, exception=None):
+def ructf_error(status=110, message=None, error=None, exception=None, request=None, reply=None, body=None):
     if message:
         sys.stdout.write(message)
         sys.stdout.write("\n")
@@ -16,8 +23,16 @@ def ructf_error(status=110, message=None, error=None, exception=None):
         sys.stderr.write(error)
         sys.stderr.write("\n")
 
+    if request or reply:
+        sys.stderr.write(make_err_message(message, request, reply))
+        sys.stderr.write("\n")
+
+    if body:
+        sys.stderr.write("BODY:\n")
+        sys.stderr.write(body)
+        sys.stderr.write("\n")
+
     if exception:
-        print(dir(exception))
         sys.stderr.write("Exception: {}\n".format(exception))
         traceback.print_tb(exception.__traceback__, file=sys.stderr)
 
@@ -38,59 +53,53 @@ def service_down(status=104, *args, **kwargs):
 def make_err_message(message, request, reply):
     return "{}\n->\n{}\n<-\n{}\n=".format(message, request, reply)
 
-
-def connect_to_service(hostname):
-    try:
-        return socket.create_connection((hostname, PORT))
-    except Exception as e:
-        service_down(message=str(e), exception=e)
-
-def check_reply(request, socket, socket_fd):
-    try:
-        socket.sendall(request.encode("utf-8"))
-        socket.sendall(b'\n')
-        reply = socket_fd.readline().strip()
-    except Exception as e:
-        return service_down(message=str(e), exception=e)
-
-    status, value = reply.split(" ", 1)
-    if status not in ("[OK]", "[ERR]"):
-        return service_mumble(message="Bad status", error=make_err_message("Bad status", request, reply))
-
-    if status == "[ERR]":
-        return service_corrupt(message="Service return error on request!", error=make_err_message("Error on request", request, reply))
-
-    return status, value
-
-
 def handler_info(*args):
     service_ok(message="vulns: 1")
 
 def handler_check(*args):
     service_ok()
 
-def handler_get(args):
+def handler_get(args, db, things):
     _, _, hostname, id, flag, vuln = args
-    socket = connect_to_service(hostname)
-    socket_fd = socket.makefile()
+    thing = db.get_doc(id)
+    request = "http://{0}:{3}/search?text={1}&owner={2}".format(hostname, thing, id, PORT)
+    reply = None
+    print(request)
+    try:
+        r = requests.get(request)
+        reply = r.text
+        r.raise_for_status()
+    except requests.exceptions.ConnectionError as e:
+        return service_down(message="Cant connect to server", exception=e, request=request, reply=reply)
+    except requests.exceptions.HTTPError as e:
+        return service_mumble(message="Server error: {}".format(e), exception=e, request=request, reply=reply)
 
-    request = "GET\t{}".format(id)
-    status, value = check_reply(request, socket, socket_fd)
+    for r in reply.split("\n"):
+        if flag in r:
+            return service_ok()
 
-    if value != flag:
-        return service_corrupt(message="Bad flag", error=make_err_message("Bad flag", request, reply))
+    return service_corrupt(message="Bad flag", error=make_err_message("Bad flag", request, reply))
 
-    return service_ok()
 
-def handler_put(args):
+def handler_put(args, db, things):
     _, _, hostname, id, flag, vuln = args
-    socket = connect_to_service(hostname)
-    socket_fd = socket.makefile()
+    request = "http://{0}:{3}/set?text={1}&owner={2}".format(hostname, flag, id, PORT)
+    reply = None
+    thing = None
+    try:
+        thing = things.random()
+        db.save_doc(id, thing)
+        r = requests.post(request, data=thing)
+        reply = r.text
+        r.raise_for_status()
+    except requests.exceptions.ConnectionError as e:
+        return service_down(message="Cant connect to server", exception=e, request=request, reply=reply, body=thing)
+    except requests.exceptions.HTTPError as e:
+        return service_mumble(message="Server error: {}".format(e), exception=e, request=request, reply=reply, body=thing)
 
-    request = "PUT\t{}\t{}".format(id, flag)
-    status, value = check_reply(request, socket, socket_fd)
 
-    return service_ok()
+    return service_ok(message=None)
+
 
 HANDLERS = {
     'info' : handler_info,
@@ -99,9 +108,61 @@ HANDLERS = {
     'put' : handler_put,
 }
 
+class DB:
+    DB_VERSION = 1
+
+    def __init__(self, filename):
+        self.filename = filename
+        new_databse = False
+
+        if not os.path.exists(filename):
+            new_databse = True
+
+        conn = sqlite3.connect(filename)
+        self.conn = conn
+        c = conn.cursor()
+        if new_databse:
+            c.execute('''CREATE TABLE config (key VARCHAR(128) PRIMARY KEY, value VARCHAR(128))''')
+            c.execute('''INSERT INTO config VALUES ("version", ?)''', (self.DB_VERSION,))
+
+            c.execute('''CREATE TABLE documents (id VARCHAR(128) PRIMARY KEY, document TEXT)''')
+        else:
+            version = None
+            for row in c.execute('''SELECT value FROM config WHERE key = ?''', ("version",)):
+                version = int(row[0])
+
+            if version != self.DB_VERSION:
+                print("Version missmatch: {} != {}".format(version, self.DB_VERSION), file=sys.stderr)
+                os.remove(filename)
+                return self.__init__(filename)
+        conn.commit()
+
+    def get_doc(self, id):
+        for row in self.conn.execute('''SELECT document FROM documents WHERE id = ?''', (id,)):
+            return row[0]
+
+    def save_doc(self, id, document):
+        c = self.conn.cursor()
+        c.execute('''INSERT INTO documents VALUES (?, ?)''', (id, document))
+        self.conn.commit()
+
+
+class Things:
+    def __init__(self, filename):
+        self.filename = filename
+        with open(filename) as fn:
+            self.things = list(map(lambda x: x.strip(), fn.readlines()))
+
+    def random(self):
+        return random.choice(self.things)
+
+
 def main():
+    db = DB(DB_FILENAME)
+    things = Things(THING_FILENMAME)
+
     handler = HANDLERS[sys.argv[1]]
-    handler(sys.argv)
+    handler(sys.argv, db, things)
 
 
 if __name__ == "__main__":

@@ -4,11 +4,12 @@ unit Sensor;
 {$modeswitch advancedrecords} 
 
 interface
-	uses fgl, SysUtils, Classes, Utils;
+	uses
+		cthreads, fgl, SysUtils, Classes, Utils;
 
 	type
 		TRawValue = record
-			timestamp: int64;
+			timestamp: longint;
 			value: single;
 			class operator= (const a, b: TRawValue): Boolean;
 		end;
@@ -22,14 +23,13 @@ interface
 				ready: int64;
 				procedure Initialize(const fileName: unicodestring);
 			public
-				procedure Run; virtual; abstract;
 				function GetValues(const start, finish: int64): TRawValues;
 		end;
 
 		TRawTick = class(TRawSensor)
 			public
 				procedure Initialize;
-				procedure Run; override;
+				procedure Run;
 		end;
 
 	var
@@ -41,7 +41,7 @@ implementation
 
 	function DateTimeToUnix(dtDate: TDateTime): Longint;
 	begin
-		result := Round((dtDate - UnixStartDate) * int64(86400000)); // TODO fix fail
+		result := trunc((dtDate - UnixStartDate) * 86400);
 	end;
 
 	class operator TRawValue.= (const a, b: TRawValue): Boolean;
@@ -73,7 +73,6 @@ implementation
 			read(log, tmp.timestamp, tmp.value);
 			values.Add(tmp);
 		end;
-		close(log);
 		append(log);
 	end;
 
@@ -82,10 +81,10 @@ implementation
 		i, attempts: longint;
 	begin
 		attempts := 0;
-		while (finish > ready) and (attempts < 100) do
+		while (finish >= ready) and (attempts < 100) do
 		begin
 			inc(attempts);
-			TThread.Yield;
+			sleep(1);
 		end;
 
 		result := TRawValues.Create;
@@ -110,9 +109,10 @@ implementation
 		while true do
 		begin
 			current := now;
-			tmp.value := current - prev;
+			tmp.value := (current - prev) * 1e6;
 			tmp.timestamp := DateTimeToUnix(current);
-			writeln(log, tmp.timestamp, tmp.value);
+			prev := current;
+			writeln(log, tmp.timestamp, ' ', tmp.value:0:10);
 			flush(log);
 
 			rwSync.BeginWrite;

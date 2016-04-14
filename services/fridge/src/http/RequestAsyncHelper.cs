@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -45,6 +47,12 @@ namespace frɪdʒ.http
 			{
 				context.Request.InputStream.Close();
 			}
+		}
+
+		public static async Task<Dictionary<string, string>> ReadPostDataAsync(this HttpListenerContext context)
+		{
+			var data = await context.ReadStringAsync().ConfigureAwait(false);
+			return string.IsNullOrEmpty(data) ? null : data.Split('&').Select(pair => pair.Split('=')).Where(pair => pair.Length == 2).ToDict(pair => WebUtility.UrlDecode(pair[0]), pair => WebUtility.UrlDecode(pair[1]));
 		}
 
 		private static readonly ReusableObjectPool<byte[]> RequestBuffersPool;

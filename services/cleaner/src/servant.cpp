@@ -1,31 +1,24 @@
 #include "servant.h"
 
 #include "saveloader.h"
+#include "state.h"
 
 #include <string>
 
 #include <boost/filesystem.hpp>
 #include <boost/range/iterator_range.hpp>
-#include <boost/algorithm/hex.hpp>
-
-const char* HELLO = "\
-SOME\n\
-NICE\n\
-ASCII\n\
-ART\n\
-==============\n\
-";
 
 const char* HELP = "\
 THIS\n\
 IS\n\
+COOL\n\
 HELP\n\
+==============\n\
 ";
 
 static const std::string ROOMS_DIR = "rooms";
 static const std::string PROGRAMS_DIR = "programs";
 
-// TODO: write check
 bool LoadRoom(TRoom& room, const std::string& name) {
     boost::filesystem::path file(ROOMS_DIR + "/" + name);
     return NSaveloader::Load(room, file);
@@ -34,6 +27,12 @@ bool LoadRoom(TRoom& room, const std::string& name) {
 bool LoadProgram(TProgram& program, const std::string& name) {
     boost::filesystem::path file(PROGRAMS_DIR + "/" + name);
     return NSaveloader::Load(program, file);
+}
+
+bool RewriteRoom(TRoom& room) {
+    boost::filesystem::path file(ROOMS_DIR + "/" + room.GetName());
+    boost::filesystem::remove(file);
+    return NSaveloader::Save(room, file);
 }
 
 bool SaveRoom(TRoom& room) {
@@ -52,7 +51,7 @@ TCleanerServant::TCleanerServant(TSession& session)
 }
 
 void TCleanerServant::Dispatch() {
-    Session.Write(HELLO);
+    Session.Write(HELP);
     std::string action;
     Session.ReadLines(action);
 
@@ -64,8 +63,6 @@ void TCleanerServant::Dispatch() {
         Run();
     } else if (action == "get_room") {
         GetRoom();
-    } else if (action == "change_pass") {
-        ChangeRoomPass();
     } else {
         Help();
     }
@@ -84,10 +81,21 @@ void TCleanerServant::Upload() {
     while (Session.ReadLines(entity)) {
         if (entity == "room") {
             std::string name;
-            std::string configuration_hex;
-            Session.ReadLines(name, configuration_hex);
-            TRoomConfiguration configuration;
-            boost::algorithm::unhex(configuration_hex.begin(), configuration_hex.end(), std::back_inserter(configuration));
+            std::string configuration_str;
+            Session.ReadLines(name, configuration_str);
+            while (configuration_str.size() % 8) {
+                configuration_str += " ";
+            }
+            std::cout << "'" << configuration_str << "'" << std::endl;
+            TRoomConfiguration configuration(configuration_str.size() / 8);
+            std::cout << "conf size: " << configuration.size() << std::endl;
+            for (size_t i = 0; i < configuration_str.size() / 8; ++i) {
+                std::cout << i << std::endl;
+                std::vector<char>& tmp = configuration[i];
+                tmp.resize(8);
+                std::copy(configuration_str.begin() + 8 * i, configuration_str.begin() + 8 * (i + 1), tmp.begin());
+            }
+
             TRoom room(name, pass, configuration);
             if (!SaveRoom(room)) {
                 Session.Write("Can't save room: already exists\n");
@@ -96,7 +104,7 @@ void TCleanerServant::Upload() {
             std::string name;
             std::string listing;
             Session.ReadLines(name, listing);
-            TProgram program(name, listing, pass);
+            TProgram program(name, pass, listing);
             if (!SaveProgram(program)) {
                 Session.Write("Can't save program: already exists\n");
             }
@@ -111,7 +119,10 @@ void TCleanerServant::List() {
     Session.ReadLines(what);
 
     if (what == "programs" || what == "rooms") {
-        Session.Write(ListDir(what)); 
+        Session.Write("=====================\n"); 
+        std::string result = ListDir(what);
+        Session.Write(result); 
+        Session.Write("=====================\n"); 
     } else {
         Session.Write("Unknown listing entity : ", what, "\n");
     }
@@ -156,40 +167,27 @@ void TCleanerServant::GetRoom() {
     }
 
     const auto& configuration = room.GetConfiguration();
-    std::string configuration_hex;
-    boost::algorithm::hex(configuration.begin(), configuration.end(), std::back_inserter(configuration_hex));
-    Session.Write(configuration_hex, "\n");
-}
-
-void TCleanerServant::ChangeRoomPass() {
-    std::string pass;
-    std::string room_name;
-
-    Session.ReadLines(pass, room_name);
-
-    TRoom room;
-
-    if (!LoadRoom(room, room_name)) {
-        Session.Write("No such room\n");
-        return;
+    std::stringstream ss;
+    for (const auto& col: configuration) {
+        for (const auto& chr: col) {
+            ss << chr;
+        }
     }
+    ss << '\n';
+    std::string result = ss.str();
 
-    Session.Write("Tell me about your hall\n");
+    Session.Write(result);
+    Session.Write("Program results:\n");
 
-    std::string hall;
-    Session.ReadLines(hall);
-
-    if (!room.CheckHall(hall)) {
-        Session.Write("Wrong!\n");
-        return;
+    for (const auto& pair: room.GetLogs()) {
+        TProgram program;
+        if (!LoadProgram(program, pair.first)) {
+            continue;
+        }
+        Session.Write(pair.first, "\n");
+        Session.Write(program.GetListing(), "\n");
+        Session.Write(pair.second, "\n");
     }
-
-    room.SetPass(pass);
-    boost::filesystem::path room_path(ROOMS_DIR + "/" + room_name);
-    boost::filesystem::remove(room_path);
-    SaveRoom(room);
-
-    Session.Write("Ok\n");
 }
 
 void TCleanerServant::Run() {
@@ -199,8 +197,9 @@ void TCleanerServant::Run() {
 
     Session.ReadLines(pass, room_name, program_name);
 
-    TRoom room;
     TProgram program;
+    TRoom room;
+    TProgramState state;
 
     if (!LoadRoom(room, room_name) || !LoadProgram(program, program_name)) {
         Session.Write("Nonexistent entities\n");
@@ -212,5 +211,9 @@ void TCleanerServant::Run() {
         return;
     }
 
-    Session.Write(program.Run(room), "\n");
+    program.Run(room, state);
+    std::string log = state.Log.str();
+    room.AddLog(program.GetName(), log);
+    RewriteRoom(room);
+    Session.Write(log, "\n");
 }

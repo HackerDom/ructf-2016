@@ -1,6 +1,7 @@
 #pragma once
 
 #include "room.h"
+#include "state.h"
 #include "pass_checker.h"
 
 #include <string>
@@ -16,13 +17,12 @@ public:
     const std::string& GetName() const;
     const std::string& GetListing() const;
 
-    std::string Run(const TRoom& room) const;
+    void Run(TRoom& room, TProgramState& state) const;
 
 private:
     friend class boost::serialization::access;
     template<class TArchive>
-    void serialize(TArchive& archive, const unsigned int /*version*/)
-    {
+    void serialize(TArchive& archive, const unsigned int /*version*/) {
         archive & boost::serialization::base_object<TPassChecker>(*this);
         archive & Name;
         archive & Listing;

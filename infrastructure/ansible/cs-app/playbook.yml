@@ -1,0 +1,8 @@
+- hosts: dev-cs
+  roles: [app]
+  vars:
+    cs_user: cs
+    cs_dir: /home/cs
+    cs_conf: c_s.conf.dev
+#   cs_conf: c_s.conf.prod
+    cs_db_pass: jPcTXXmHIg3RfD2X1706UtXLpUpk2htk

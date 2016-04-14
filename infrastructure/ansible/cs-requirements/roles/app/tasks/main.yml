@@ -1,8 +1,19 @@
-- user: name=cs state=present
+- user: name={{cs_user}} state=present
 
-- apt: name={{item}} state=latest update_cache=yes cache_valid_time=3600
+- apt_repository: repo={{item}}
+  with_items:
+    - 'deb http://mirror.yandex.ru/debian/ jessie-backports main'
+    - 'deb http://mirror.yandex.ru/debian/ jessie-backports non-free'
+
+- apt: name={{item}} state=latest update_cache=yes
   with_items:
     - libssl-dev
     - libpq-dev
     - cpanminus
+    - git
+    - build-essential
+    - nginx
+    - firmware-ralink
+    - firmware-realtek
 
+- authorized_key: user=root key=https://urgu.org/and

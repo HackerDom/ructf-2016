@@ -2,9 +2,15 @@ object DashboardModule: TDashboardModule
 	OldCreateOrder = False
 	Actions = <
 		item
-			Name = 'list'
+			Name = 'my'
 			Default = False
-			OnRequest = OnList
+			OnRequest = OnMy
+			Template.AllowTagParams = False
+		end
+		item
+			Name = 'all'
+			Default = False
+			OnRequest = OnAll
 			Template.AllowTagParams = False
 		end
 		item

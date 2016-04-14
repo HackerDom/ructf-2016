@@ -1,1 +1,1 @@
-<a href='/dashboard?view={-dashboardid-}'>{-dashboard-}</a><br>
+<a href='/dashboard/view/?dashboardId={-dashboardid-}'>{-dashboard-}</a><br>
