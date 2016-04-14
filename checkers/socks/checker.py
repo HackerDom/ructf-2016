@@ -118,7 +118,7 @@ class DB:
         if not os.path.exists(filename):
             new_databse = True
 
-        conn = sqlite3.connect(filename, timeout=3)
+        conn = sqlite3.connect(filename, timeout=10)
         self.conn = conn
         c = conn.cursor()
         if new_databse:
