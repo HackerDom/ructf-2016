@@ -126,15 +126,14 @@ class State:
 		password = get_rand_string(16)
 		self.post('user/register/', {'username': username, 'password': password})
 		return username, password
-	def create_dashboard(self, description=None, config=None):
+	def create_dashboard(self, description=None, config=None, pub=None):
 		name = get_rand_string(10)
 		if description is None:
 			description = get_rand_string(50)
 		if config is None:
 			config = get_rand_string(50)
+		if pub is None:
 			pub = random.choice(['', 'on'])
-		else:
-			pub = 'on'
 		response = self.post('dashboard/create/', {'name': name, 'description': description, 'public': pub, 'sensors': config})
 		r = re.compile('dashboardid=(\d+)$', re.IGNORECASE)
 		m = r.search(response.url)
@@ -225,7 +224,7 @@ def handler_put_1(state, flag):
 	username, password = state.register()
 	for i in range(random.randint(0, 5)):
 		state.create_dashboard()
-	dashboard, name = state.create_dashboard(flag)
+	dashboard, name = state.create_dashboard(flag, None, '')
 	for i in range(random.randint(0, 5)):
 		state.create_dashboard()
 	service_ok(message="{}\n{}\n{}\n{}".format(username, password, dashboard, name))
@@ -234,7 +233,7 @@ def handler_put_2(state, flag):
 	username, password = state.register()
 	for i in range(random.randint(0, 5)):
 		state.create_dashboard()
-	dashboard, name = state.create_dashboard(None, flag)
+	dashboard, name = state.create_dashboard(None, flag, 'on')
 	for i in range(random.randint(0, 5)):
 		state.create_dashboard()
 	service_ok(message=str(dashboard))

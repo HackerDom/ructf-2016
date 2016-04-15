@@ -14,6 +14,10 @@ namespace Node.Messages
                     return StringMessage.Deserialize;
                 case MessageType.Map:
                     return d => MapMessage.Deserialize(d, utility);
+                case MessageType.Data:
+                    return d => DataMessage.Deserialize(d, utility);
+                case MessageType.Redirect:
+                    return d => RedirectMessage.Deserialize(d, utility);
                 default:
                     throw new ArgumentOutOfRangeException("Unknown message type: " + type);
             }

@@ -79,8 +79,8 @@ namespace Node.Routing
                     Links.Add(link);
             }
 
-            Console.WriteLine("[{0}] MERGE {1} with {2} from {3} => {4}", OwnAddress, 
-                oldLinks.ToDOT(longNames: config.LongNames), links.ToDOT(longNames: config.LongNames), source, Links.ToDOT(longNames: config.LongNames));
+            //Console.WriteLine("[{0}] MERGE {1} with {2} from {3} => {4}", OwnAddress, 
+            //    oldLinks.ToDOT(longNames: config.LongNames), links.ToDOT(longNames: config.LongNames), source, Links.ToDOT(longNames: config.LongNames));
         }
 
         public void AddDirectConnection(IAddress other)

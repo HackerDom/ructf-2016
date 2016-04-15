@@ -19,7 +19,7 @@ namespace Node.Connections.Tcp
             if (writeLength < 0)
             {
                 writeLength = new MessageContainer(message).WriteToBuffer(writeBuffer, 0);
-                encoder.ProcessBeforeSend(message.Type, writeBuffer, MessageContainer.HeaderSize, writeLength);
+                encoder.ProcessBeforeSend(message.Type, writeBuffer, MessageContainer.HeaderSize, writeLength - MessageContainer.HeaderSize);
             }
             var bytesSent = socket.SendSafe(writeBuffer, writePos, writeLength - writePos);
             writePos += bytesSent;

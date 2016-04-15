@@ -25,7 +25,9 @@ namespace Node.Connections.Tcp
         public List<IAddress> GetAvailablePeers()
         {
             // TODO do real scan
-            return connectionConfig.PreconfiguredNodes.Where(address => !Equals(address, Address)).ToList();
+            var peers = connectionConfig.PreconfiguredNodes.Where(address => !Equals(address, Address)).ToList();
+            encryptionManager.RetrievePeerKeys(peers);
+            return peers;
         }
 
         public bool TryConnect(IAddress address)
@@ -152,7 +154,7 @@ namespace Node.Connections.Tcp
 
         private TcpConnection CreateConnection(TcpAddress address, Socket socket)
         {
-            var connection = new TcpConnection((TcpAddress)Address, address, socket, Utility, encryptionManager.CreateEncoder(address));
+            var connection = new TcpConnection((TcpAddress)Address, address, socket, Utility, encryptionManager);
             connection.ValidateConnection += conn =>
                 EstablishedConnections.Count() < routingConfig.MaxConnections &&
                 (StringComparer.OrdinalIgnoreCase.Compare(conn.LocalAddress.ToString(), conn.RemoteAddress.ToString()) >= 0 || 

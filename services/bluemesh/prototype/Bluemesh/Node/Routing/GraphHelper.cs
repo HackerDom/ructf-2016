@@ -74,7 +74,7 @@ graph {name} {{
 
         public static List<IAddress> GetPathBody(this IList<IAddress> path)
         {
-            return path.Skip(1).Take(path.Count - 2).ToList();
+            return path.Skip(2).Take(path.Count - 2).ToList();
         }  
 
         private static string MakeSafeString(object obj, bool longNames)

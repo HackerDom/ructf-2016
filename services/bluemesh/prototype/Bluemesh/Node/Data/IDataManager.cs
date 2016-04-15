@@ -16,5 +16,7 @@ namespace Node.Data
         event Action<DataMessage> OnReceivedData;
 
         void PullPendingMessage(IConnection connection);
+
+        IDataStorage DataStorage { get; }
     }
 }
