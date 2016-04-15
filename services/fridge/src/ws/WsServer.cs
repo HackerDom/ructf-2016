@@ -99,8 +99,9 @@ namespace frɪdʒ.ws
 		{
 			try
 			{
+				var msg = format.TryOrDefault(state.Item);
 				using(await state.Lock.AcquireAsync(token))
-					await ws.WriteStringAsync(format.TryOrDefault(state.Item), token).ConfigureAwait(false);
+					await ws.WriteStringAsync(msg, token).ConfigureAwait(false);
 				//Console.WriteLine($"[{ws.RemoteEndpoint}] WS sent '{msg}'");
 			}
 			catch
