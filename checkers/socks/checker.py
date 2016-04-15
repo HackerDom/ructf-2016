@@ -76,7 +76,7 @@ def handler_get(args, things):
 
     for r in reply.split("\n"):
         if flag in r:
-            return service_ok()
+            return service_ok(message="OK", request=request, reply=reply)
 
     return service_corrupt(message="Bad flag", error=make_err_message("Bad flag", request, reply))
 
@@ -98,7 +98,7 @@ def handler_put(args, things):
         return service_mumble(message="Server error: {}".format(e), exception=e, request=request, reply=reply, body=thing)
 
 
-    return service_ok(message=base64.b64encode(id_big.encode("utf-8")).decode("utf-8"))
+    return service_ok(message=base64.b64encode(id_big.encode("utf-8")).decode("utf-8"), request=request, reply=reply, body=thing)
 
 
 HANDLERS = {
