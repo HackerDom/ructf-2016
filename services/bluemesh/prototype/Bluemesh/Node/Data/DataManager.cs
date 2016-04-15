@@ -88,10 +88,12 @@ namespace Node.Data
         {
             //TODO send by 3 paths
             var path = routingManager.Map.Links.CreatePath(routingManager.Map.OwnAddress, destination);
+            if (path.Count == 0)
+                return;
             var pathBody = path.GetPathBody();
             var wrapped = WrapMessage(message, pathBody);
-            Console.WriteLine("[{0}] Added pending message : {1} {2} - {3} by path {4}", routingManager.Map.OwnAddress, message, wrapped, message.Key,
-                string.Join(", ", path));
+            Console.WriteLine("[{0}] Added pending message : {1} {2} - {3} by path {4} to {5}", routingManager.Map.OwnAddress, message, wrapped, message.Key,
+                string.Join(", ", path), destination);
             pendingMessages.Add(new QueueEntry(wrapped, message, path[1]));
         }
 
@@ -100,7 +102,7 @@ namespace Node.Data
             while (path.Count > 0)
             {
                 var length = new MessageContainer(message).WriteToBuffer(serializerBuffer, 0);
-                encryptionManager.CreateEncoder(path.Last()).ProcessBeforeSend(MessageType.Data, serializerBuffer, 0, length);
+                encryptionManager.EncryptData(serializerBuffer, MessageContainer.HeaderSize, length - MessageContainer.HeaderSize, path.Last());
                 //TODO optimize
                 var wrapped = new RedirectMessage(path.Last(), serializerBuffer.Take(length).ToArray());
                 message = wrapped;

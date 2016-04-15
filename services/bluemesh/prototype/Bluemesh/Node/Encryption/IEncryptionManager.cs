@@ -13,6 +13,9 @@ namespace Node.Encryption
 
         void RetrievePeerKeys(IEnumerable<IAddress> peers);
 
-        IMessageEncoder CreateEncoder(IAddress peer);
+        IMessageEncoder CreateEncoder(IConnection connection);
+
+        void EncryptData(byte[] data, int offset, int length, IAddress peer);
+        void DecryptData(byte[] data, int offset, int length);
     }
 }

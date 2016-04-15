@@ -54,7 +54,7 @@ namespace Tests
             nodes.Add(address);
             var encryptionManager = Substitute.For<IEncryptionManager>();
             var encoder = Substitute.For<IMessageEncoder>();
-            encryptionManager.CreateEncoder(Arg.Any<IAddress>()).Returns(encoder);
+            encryptionManager.CreateEncoder(Arg.Any<IConnection>()).Returns(encoder);
             return new TestNode(new TcpConnectionManager(connectionConfig, routingConfig, encryptionManager));
         }
 

@@ -64,7 +64,7 @@ namespace Tests
             connectionConfig.ConnectingSocketsToConnectionsMultiplier.Returns(5);
             var encryptionManager = Substitute.For<IEncryptionManager>();
             var encoder = Substitute.For<IMessageEncoder>();
-            encryptionManager.CreateEncoder(Arg.Any<IAddress>()).Returns(encoder);
+            encryptionManager.CreateEncoder(Arg.Any<IConnection>()).Returns(encoder);
             var connectionManager = new TcpConnectionManager(connectionConfig, routingConfig, encryptionManager);
             return new TestNode(new RoutingManager(connectionManager, routingConfig), connectionManager);
         }

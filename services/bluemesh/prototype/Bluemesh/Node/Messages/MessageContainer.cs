@@ -52,6 +52,7 @@ namespace Node.Messages
 
         public static int GetNeededLength(byte[] buffer, int offset)
         {
+            //TODO check all these values, add check label
             using (var stream = new MemoryStream(buffer, offset, buffer.Length - offset, false))
             {
                 var deserializer = new StreamDeserializer(stream);

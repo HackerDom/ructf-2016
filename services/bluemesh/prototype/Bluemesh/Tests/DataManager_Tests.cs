@@ -21,7 +21,7 @@ namespace Tests
     [TestFixture]
     internal class DataManager_Tests
     {
-        [Test, Explicit, Timeout(10000)]
+        [Test, Explicit, Timeout(30000)]
         public void Measure_put_get()
         {
             //Console.SetOut(new StreamWriter("map-negotiation.log"));
@@ -33,7 +33,7 @@ namespace Tests
             config.DisconnectCooldown.Returns(100.Milliseconds());
             config.MapUpdateCooldown.Returns(20.Milliseconds());
             var preconfiguredNodes = new List<IAddress>();
-            var nodes = Enumerable.Range(0, 3).Select(i => CreateNode(config, preconfiguredNodes, i)).ToList();
+            var nodes = Enumerable.Range(0, 15).Select(i => CreateNode(config, preconfiguredNodes, i)).ToList();
 
             ThreadPool.SetMinThreads(nodes.Count * 2, nodes.Count * 2);
 
@@ -56,6 +56,10 @@ namespace Tests
             Console.WriteLine("!!! Flag : " + flag);
 
             flag.Should().Be("hujhujhuj");
+            foreach (var node in nodes)
+                node.Stopped = true;
+
+            Task.WhenAll(tasks).Wait();
 
             Console.WriteLine("Communication took " + watch.Elapsed);
         }
@@ -69,32 +73,35 @@ namespace Tests
             nodes.Add(address);
             connectionConfig.ConnectingSocketMaxTTL.Returns(TimeSpan.FromMilliseconds(50));
             connectionConfig.ConnectingSocketsToConnectionsMultiplier.Returns(5);
-            var encryptionManager = Substitute.For<IEncryptionManager>();
-            var encoder = Substitute.For<IMessageEncoder>();
-            encryptionManager.CreateEncoder(Arg.Any<IAddress>()).Returns(encoder);
+            connectionConfig.KeySendCooldown.Returns(TimeSpan.FromMilliseconds(1000));
+            var encryptionManager = new EncryptionManager(address.Endpoint, connectionConfig.KeySendCooldown);
             var connectionManager = new TcpConnectionManager(connectionConfig, routingConfig, encryptionManager);
             var routingManager = new RoutingManager(connectionManager, routingConfig);
             var dataManager = new DataManager(new DataStorage(), "", routingManager, encryptionManager);
-            return new TestNode(routingManager, connectionManager, dataManager);
+            return new TestNode(routingManager, connectionManager, dataManager, encryptionManager);
         }
 
         private class TestNode
         {
-            public TestNode(RoutingManager routingManager, TcpConnectionManager connectionManager, DataManager dataManager)
+            public TestNode(RoutingManager routingManager, TcpConnectionManager connectionManager, DataManager dataManager, EncryptionManager encryptionManager)
             {
                 this.routingManager = routingManager;
                 this.connectionManager = connectionManager;
                 this.dataManager = dataManager;
+                this.encryptionManager = encryptionManager;
             }
 
             public void Start()
             {
+                encryptionManager.GenerateKeyPair(BitConverter.GetBytes(connectionManager.Address.GetHashCode()));
+                encryptionManager.Start();
                 while (!Stopped)
                 {
                     Tick();
                     Thread.Sleep(10.Milliseconds());
                 }
                 connectionManager.Stop();
+                encryptionManager.Stop();
                 Console.WriteLine("Stopped node {0}", connectionManager.Address);
             }
 
@@ -162,6 +169,7 @@ namespace Tests
             private readonly RoutingManager routingManager;
             private readonly TcpConnectionManager connectionManager;
             private readonly DataManager dataManager;
+            private readonly EncryptionManager encryptionManager;
         }
     }
 }
