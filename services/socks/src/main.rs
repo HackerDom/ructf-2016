@@ -1,6 +1,7 @@
 extern crate hyper;
 extern crate urlparse;
 extern crate stemmer;
+extern crate rustc_serialize as serialize;
 
 use std::sync::{Arc, Mutex};
 
@@ -18,17 +19,43 @@ use urlparse::GetQuery;  // Trait
 
 use stemmer::Stemmer;
 
+use std::fs::File;
+use std::io::BufReader;
+use std::io::BufRead;
+use std::fs::OpenOptions;
+
+use serialize::base64::{self, ToBase64, FromBase64};
+
 
 struct Context {
     docs : Mutex<Vec<String>>,
     index : Mutex<HashMap<String, Vec<usize>>>,
+    logfile : String,
 }
 
 impl Context {
     pub fn new() -> Context {
         let mut context = Context{docs : Mutex::new(Vec::new()),
-                                  index : Mutex::new(HashMap::new())};
+                                  index : Mutex::new(HashMap::new()),
+                                  logfile : "query.log".to_string() };
+        context.read_from_log();
         context
+    }
+
+    pub fn read_from_log(&self) {
+        match File::open(self.logfile.clone()) {
+            Ok(f) => {
+                let mut reader = BufReader::new(f);
+
+                for line in reader.lines() {
+                    let line = line.unwrap();
+                    let parts: Vec<&str> = line.split("\t").collect();
+                    let body = parts[2].from_base64().unwrap();
+                    self.index(String::from_utf8(body).unwrap(), parts[0].to_string(), parts[1].to_string());
+                }
+            },
+            Err(e) => {}
+        }
     }
 
     pub fn index(&self, body: String, id: String, owner: String) {
@@ -42,7 +69,7 @@ impl Context {
         {
             let mut index = self.index.lock().unwrap();
             let mut stemmer = Stemmer::new("english").unwrap();
-            for word in body.split(" ") {
+            for word in body.split_whitespace() {
                 let stem = stemmer.stem(word);
                 if !index.contains_key(&stem) {
                     index.insert(stem.clone(), Vec::new());
@@ -71,7 +98,7 @@ impl Context {
         {
             let mut index = self.index.lock().unwrap();
             let mut stemmer = Stemmer::new("english").unwrap();
-            for word in text.split(" ") {
+            for word in text.split_whitespace() {
                 let stem = stemmer.stem(word);
                 match index.get(&stem) {
                     Some(ids) => {
@@ -133,6 +160,19 @@ impl Handler for Context {
         if url.path == "/set" {
             let mut data = String::new();
             req.read_to_string(&mut data);
+
+            {
+                let mut file =
+                    OpenOptions::new()
+                    .write(true)
+                    .append(true)
+                    .create(true)
+                    .open("query.log")
+                    .unwrap();
+
+                writeln!(file, "{}\t{}\t{}", text.clone(), owner.clone(), data.as_bytes().to_base64(base64::STANDARD));
+            }
+
             self.index(data.clone(), text.clone(), owner);
             return;
         }
