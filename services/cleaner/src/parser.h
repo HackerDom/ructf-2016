@@ -5,7 +5,15 @@
 #include <string>
 #include <memory>
 
-namespace {
+class TCommandParser {
+public:
+    TCommandParser(const std::string& source);
+    std::unique_ptr<ICommand> GetNext();
+
+private:
+    bool GetNum(size_t& num);
+
+private:
     enum EParserState {
         EWaitCmd,
         EWaitChar,
@@ -13,18 +21,8 @@ namespace {
         EWaitNumber2,
         EError
     };
-}
 
-class TCommandParser {
-public:
-    TCommandParser(const std::string& listing);
-    std::unique_ptr<ICommand> GetNext();
-
-private:
-    bool GetNum(size_t& num);
-
-private:
-    const std::string& Listing;
+    const std::string& Source;
     size_t Idx;
     EParserState State;
 };

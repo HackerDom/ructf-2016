@@ -1,0 +1,15 @@
+[Unit]
+Description=CS: Stop/start worker
+
+[Service]
+Type=simple
+User=cs
+WorkingDirectory=/home/cs/app/
+Environment=MOJO_MODE=production
+Environment=LANG=en_US.UTF-8
+ExecStart=/usr/bin/perl script/cs minion worker {{ worker_queues }} -j {{ worker_jobs }}
+Restart=always
+RestartSec=15s
+
+[Install]
+WantedBy=multi-user.target

@@ -6,3 +6,25 @@
     cs_conf: c_s.conf.dev
 #   cs_conf: c_s.conf.prod
     cs_db_pass: jPcTXXmHIg3RfD2X1706UtXLpUpk2htk
+    worker_queues: '-q default -q checker'
+    worker_jobs: 16
+- hosts: dev-cs2
+  roles: [app]
+  vars:
+    cs_user: cs
+    cs_dir: /home/cs
+    cs_conf: c_s.conf.dev
+#   cs_conf: c_s.conf.prod
+    cs_db_pass: jPcTXXmHIg3RfD2X1706UtXLpUpk2htk
+    worker_queues: '-q checker -q checker-1'
+    worker_jobs: 128
+- hosts: dev-cs3
+  roles: [app]
+  vars:
+    cs_user: cs
+    cs_dir: /home/cs
+    cs_conf: c_s.conf.dev
+#   cs_conf: c_s.conf.prod
+    cs_db_pass: jPcTXXmHIg3RfD2X1706UtXLpUpk2htk
+    worker_queues: '-q checker -q checker-2'
+    worker_jobs: 128

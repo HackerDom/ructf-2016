@@ -1,0 +1,45 @@
+##################################################################################################
+*nat                                                                                           ###
+##################################################################################################
+
+:PREROUTING ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+
+-A POSTROUTING -o eth0.40 -j MASQUERADE
+
+COMMIT
+
+##################################################################################################
+*filter                                                                                        ###
+##################################################################################################
+
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT ACCEPT [0:0]
+
+# INPUT
+
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+-A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT
+
+-A INPUT -i eth0.1+ -p tcp --dport 22 -j DROP
+-A INPUT            -p tcp --dport 22 -j ACCEPT
+
+# FORWARD
+
+-A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+# Allow participants to jury
+-A FORWARD -i eth0.1+ -o eth0.30 -j ACCEPT
+
+# !!! TEMP !!! FOR DEBUG PURPOSES !!! ALLOW FULL INTERNET ACCESS !!!
+-A FORWARD -i eth0.1+ -o eth0.40 -j ACCEPT
+
+# Allow well-known DNS servers for everybody
+-A FORWARD -p udp -d 8.8.8.8 --dport 53 -j ACCEPT
+-A FORWARD -p udp -d 8.8.4.4 --dport 53 -j ACCEPT
+
+COMMIT
+

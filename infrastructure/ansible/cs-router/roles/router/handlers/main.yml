@@ -1,0 +1,5 @@
+- name: reload firewall
+  command: /etc/rc.local
+
+- name: restart dhcpd
+  service: name=isc-dhcp-server state=restarted

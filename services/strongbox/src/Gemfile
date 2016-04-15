@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-ruby '2.2.1'
+ruby '2.2.4'
 #ruby-gemset=ructf_2016
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
@@ -9,7 +9,7 @@ gem 'rails', '4.2.6'
 
 gem 'bcrypt-ruby',:require => 'bcrypt'
 
-
+gem 'passenger'
 # Use sqlite3 as the database for Active Record
 gem 'sqlite3'
 # Use SCSS for stylesheets
