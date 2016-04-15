@@ -74,6 +74,7 @@
     <Compile Include="http\StaticHandler.cs" />
     <Compile Include="utils\AsyncLockSource.cs" />
     <Compile Include="utils\CollectionUtils.cs" />
+    <Compile Include="utils\FuncUtils.cs" />
     <Compile Include="utils\ReflectionUtils.cs" />
     <Compile Include="utils\ReusableObjectPool.cs" />
     <Compile Include="utils\RuntimeHelper.cs" />
