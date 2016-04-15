@@ -83,7 +83,7 @@ void TCleanerServant::Upload() {
 
     std::string entity;
 
-    while (Session.ReadLines(entity)) {
+    while (Session.ReadLinesImpl(entity)) {
         if (entity == "room") {
             std::string name;
             std::string configuration;
