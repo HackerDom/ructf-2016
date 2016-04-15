@@ -1,0 +1,16 @@
+[Unit]
+Description=Fridge
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/fridge
+ExecStart=/usr/bin/mono fridge.exe
+User=fridge
+Restart=always
+CPUQuota=100%
+MemoryLimit=2048M
+TasksMax=100
+
+[Install]
+WantedBy=multi-user.target

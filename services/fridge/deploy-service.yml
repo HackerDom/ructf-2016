@@ -9,8 +9,6 @@
   become_user: root
   become: yes
   tasks:
-    - name: install deps for ansible
-      command: dnf install -y python2 python2-dnf libselinux-python
     - name: install system requiremets
       dnf: name={{item}} state=latest disable_gpg_check=yes
       with_items:
@@ -29,3 +27,27 @@
       user: name=fridge shell=/sbin/nologin
     - name: set permissions
       file: path=/home/fridge owner=fridge group=fridge mode=0700
+    - name: copy files 
+      copy: src=files/{{item}} dest=/home/fridge force=yes owner=fridge
+      with_items:
+        - fridge.exe
+        - Newtonsoft.Json.dll
+        - System.Threading.Tasks.Dataflow.dll
+        - vtortola.WebSockets.dll 
+        - vtortola.WebSockets.Rfc6455.dll
+        - static
+    - name: copy fridge.service
+      copy:
+        src=files/fridge.service
+        dest=/usr/lib/systemd/system/fridge.service
+        force=yes
+    - name: reload daemon
+      command: systemctl daemon-reload
+    - name: services enable
+      service: name={{item}} enabled=yes
+      with_items:
+        - fridge
+    - name: services restart
+      service: name={{item}} state=restarted
+      with_items:
+        - fridge
