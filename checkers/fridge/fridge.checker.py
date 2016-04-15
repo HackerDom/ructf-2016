@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import time
 import uuid
 import random
 import string
@@ -37,10 +38,10 @@ class DummyClient(WebSocketClient):
 		self.debug('WebSocket closed, code: "{}", reason: "{}"'.format(code, reason))
 
 	def received_message(self, msg):
-		self.debug('DATA: ' + str(msg))
 		if not msg or not msg.is_text:
 			return
 		data = str(msg)
+		self.debug('WS msg: ' + data)
 		try:
 			if data == 'hello':
 				self.debug('WebSocket hello received')
@@ -53,6 +54,7 @@ class DummyClient(WebSocketClient):
 			if data.find(self.text) >= 0:
 				DONE.set()
 		except ValueError:
+			self.debug(traceback.format_exc())
 			self.debug('WebSocket parse message failed: ' + data)
 
 class Checker(HttpCheckerBase):
@@ -73,6 +75,7 @@ class Checker(HttpCheckerBase):
 				#self.debug(result)
 				return result
 			except ValueError:
+				self.debug(traceback.format_exc())
 				raise r.exceptions.HTTPError('failed to parse response')
 		finally:
 			response.close()
@@ -266,7 +269,7 @@ class Checker(HttpCheckerBase):
 
 	def randuser(self, randlen):
 		login = uuid.uuid4().hex[:randlen]
-		passlen = random.randrange(4,10)
+		passlen = random.randrange(6,10)
 		password = uuid.uuid4().hex[:passlen]
 		return {'login':self.randlogin() + login, 'pass':password}
 
@@ -302,15 +305,35 @@ class Checker(HttpCheckerBase):
 	def put(self, addr, flag_id, flag, vuln):
 		s = self.session(addr)
 
-		msg = self.randphrase() + ', ' + flag
+		result = self.sget(s, addr, '/')
+		if not result or len(result) == 0:
+			print('get / failed')
+			return EXITCODE_MUMBLE
 
-		ws = DummyClient('ws://{}:{}/'.format(addr, WSPORT), headers=[('Origin', 'http://{}:{}'.format(addr, PORT)), ('User-Agent', 'qweqweqwe')])
+		csrf_token = s.cookies.get("csrf-token")
+		cookies_string = "; ".join([str(key) + "=" + str(val) for key, val in s.cookies.items()])
+
+		user = self.randuser(0)
+		result = self.spost(s, addr, '/auth', [('csrf-token', csrf_token), ('login', user['login']), ('pass', user['pass'])])
+		#if not result or len(result) == 0:
+		#	print('register user failed')
+		#	return EXITCODE_MUMBLE
+
+		time.sleep(3)
+
+		msg = [('title', self.randphrase()), ('ingredients', self.randphrase() + ', ' + flag), ('csrf-token', csrf_token)]
+
+		ws = DummyClient('ws://{}:{}/'.format(addr, WSPORT), headers=[
+			('Origin', 'http://{}:{}'.format(addr, PORT)),
+			('User-Agent', 'qweqweqwe'),
+			('Cookie', cookies_string)])
 		try:
 			ws.daemon = True
-			ws.setargs('test', msg)
+			ws.setargs('test', user['login'])
 			ws.connect()
 
 		except WebSocketException:
+			self.debug(traceback.format_exc())
 			print('websocket connect failed')
 			return EXITCODE_MUMBLE
 
@@ -321,7 +344,7 @@ class Checker(HttpCheckerBase):
 
 			self.debug(msg)
 
-			result = self.spost(s, addr, '/put/', msg)
+			result = self.spost(s, addr, '/put', msg)
 			if not result:
 				print('send msg failed')
 				return EXITCODE_MUMBLE

@@ -1,18 +1,19 @@
 using System;
 using System.Net.Sockets;
+using Node.Encryption;
 using Node.Messages;
 
 namespace Node.Connections.Tcp
 {
     internal class TcpConnection : IConnection
     {
-        public TcpConnection(TcpAddress localAddress, TcpAddress remoteAddress, Socket socket,  IConnectionUtility connectionUtility)
+        public TcpConnection(TcpAddress localAddress, TcpAddress remoteAddress, Socket socket,  IConnectionUtility connectionUtility, IMessageEncoder encoder)
         {
             RemoteAddress = remoteAddress;
             this.localAddress = localAddress;
             this.socket = socket;
             this.connectionUtility = connectionUtility;
-            stream = new NonblockingSocketStream(socket, connectionUtility);
+            stream = new NonblockingSocketStream(socket, connectionUtility, encoder);
             State = ConnectionState.Connecting;
         }
 
@@ -23,6 +24,13 @@ namespace Node.Connections.Tcp
             return SendInternal(message);
         }
 
+        public SendResult Send(byte[] rawData)
+        {
+            if (State != ConnectionState.Connected)
+                return SendResult.Failure;
+            return SendInternal(rawData);
+        }
+
         public SendResult Push(IMessage message)
         {
             // TODO do something with it
@@ -30,6 +38,17 @@ namespace Node.Connections.Tcp
             do
             {
                 result = Send(message);
+            } while (result == SendResult.Partial);
+            return result;
+        }
+
+        public SendResult Push(byte[] rawData)
+        {
+            // TODO do something with it
+            SendResult result;
+            do
+            {
+                result = Send(rawData);
             } while (result == SendResult.Partial);
             return result;
         }
@@ -96,6 +115,21 @@ namespace Node.Connections.Tcp
             try
             {
                 return stream.TryWrite(message) ? SendResult.Success : SendResult.Partial;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Send : " + e.Message);
+                socket.Close();
+                State = ConnectionState.Failed;
+                return SendResult.Failure;
+            }
+        }
+
+        private SendResult SendInternal(byte[] rawData)
+        {
+            try
+            {
+                return stream.TryWrite(rawData) ? SendResult.Success : SendResult.Partial;
             }
             catch (Exception e)
             {

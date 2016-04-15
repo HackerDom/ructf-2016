@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text;
 
 namespace Node.Serialization
 {
@@ -16,6 +17,11 @@ namespace Node.Serialization
             var buffer = new byte[length];
             stream.Read(buffer, 0, length);
             return buffer;
+        }
+
+        public string ReadString()
+        {
+            return Encoding.UTF8.GetString(ReadBytes());
         }
 
         public int ReadInt()

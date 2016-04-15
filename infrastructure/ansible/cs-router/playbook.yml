@@ -1,0 +1,5 @@
+- hosts: routers
+  roles: [router]
+  vars:
+    cs_user: cs
+    cs_dir: /home/cs

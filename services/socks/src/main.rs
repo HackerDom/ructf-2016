@@ -112,8 +112,10 @@ impl Handler for Context {
         println!("{}", url.path);
 
         if url.path == "/search" {
-            let owner_word: String = " #owner=".to_string() + &owner;
-            text.push_str(owner_word.as_str());
+            let mut request: String = "#owner=".to_string() + &owner;
+            request.push_str(" ");
+            request.push_str(text.as_str());
+            text = request;
             println!("TEXT:{:?}", text);
 
             let mut data: String;
@@ -141,6 +143,6 @@ impl Handler for Context {
 
 fn main() {
     let mut context = Context::new();
-    Server::http("127.0.0.1:3000").unwrap()
+    Server::http("0.0.0.0:3030").unwrap()
         .handle(context).unwrap();
 }

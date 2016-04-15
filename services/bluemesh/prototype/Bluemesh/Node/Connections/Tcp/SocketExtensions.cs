@@ -18,5 +18,10 @@ namespace Node.Connections.Tcp
         {
             return socket.Send(buffer, offset, count, SocketFlags.None);
         }
+
+        public static bool IsOk(this Socket socket)
+        {
+            return socket.Connected && (!socket.Poll(0, SelectMode.SelectRead) || socket.Available > 0);
+        }
     }
 }

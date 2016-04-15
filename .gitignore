@@ -5,19 +5,19 @@
 #   git config --global core.excludesfile '~/.gitignore_global'
 
 # Ignore bundler config.
-/services/strongbox/.bundle
+/services/strongbox/strongbox/.bundle
 
 # Ignore the default SQLite database.
-/services/strongbox/db/*.sqlite3
-/services/strongbox/db/*.sqlite3-journal
+/services/strongbox/strongbox/db/*.sqlite3
+/services/strongbox/strongbox/db/*.sqlite3-journal
 
 # Ignore all logfiles and tempfiles.
-/services/strongbox/log
-/services/strongbox!/log/.keep
-/services/strongbox/tmp
-/services/strongbox/Gemfile.lock
+/services/strongbox/strongbox/log
+/services/strongbox!/strongbox/log/.keep
+/services/strongbox/strongbox/tmp
+/services/strongbox/strongbox/Gemfile.lock
 .idea
-/services/strongbox/.idea
+/services/strongbox/strongbox/.idea
 
 # Python
 *.pyc
@@ -29,3 +29,6 @@
 
 # Ansible logs
 /infrastructure/ansible/.log/
+packages
+/checkers/discoball/transmitter/FlagsTransmitter/FlagsTransmitter/obj
+/checkers/discoball/transmitter/FlagsTransmitter/FlagsTransmitter/bin

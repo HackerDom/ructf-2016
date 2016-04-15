@@ -36,32 +36,39 @@
         - scapy-python3
         - PyCrypto
     - name: add user
-      user: name=environ
+      user: name=environ shell=/sbin/nologin
     - name: copy project
       copy: src=environ dest=/home/ force=yes owner=environ
     - name: set permissions
       file: path=/home/environ owner=environ group=environ mode=0700
     - name: add sensors dir
       file: path=/home/environ/sensors state=directory mode=0755 owner=environ
+    - name: copy environ-wifi-setup.service
+      copy:
+        src=files/environ-wifi-setup.service
+        dest=/usr/lib/systemd/system/environ-wifi-setup.service
+        force=yes
     - name: copy environ-web.service
       copy:
+        src=files/environ-web.service
         dest=/usr/lib/systemd/system/environ-web.service
-        content="[Unit]\nDescription=Environ\nAfter=network.target\n[Service]\nExecStart=/usr/bin/python3.5 /home/environ/web.py\nUser=environ\nRestart=always\nWorkingDirectory=/home/environ\n[Install]\nWantedBy=multi-user.target"
         force=yes
     - name: copy environ.service
       copy:
+        src=files/environ.service
         dest=/usr/lib/systemd/system/environ.service
-        content="[Unit]\nDescription=Environ\nAfter=network.target environ-web.service\nRequires=environ-web.service\n[Service]\nPermissionsStartOnly=true\nExecStartPre=/bin/bash -c '/usr/bin/systemctl set-environment WIFICARD=$(/usr/sbin/iwconfig 2> /dev/null | grep IEEE | cut -d \" \" -f 1)'\nExecStartPre=/bin/bash -c '/usr/sbin/ifconfig $WIFICARD down'\nExecStartPre=/bin/bash -c '/usr/sbin/iwconfig $WIFICARD mode monitor'\nExecStartPre=-/bin/bash -c '/usr/sbin/iwconfig $WIFICARD channel 1'\nExecStartPre=/bin/bash -c '/usr/sbin/ifconfig $WIFICARD up'\nExecStart=/usr/bin/python3.5 /home/environ/server.py\nUser=environ\nRestart=always\nWorkingDirectory=/home/environ\n[Install]\nWantedBy=multi-user.target"
         force=yes
     - name: reload daemon
       command: systemctl daemon-reload
     - name: services enable
       service: name={{item}} enabled=yes
       with_items:
+        - environ-wifi-setup
         - environ-web
         - environ
     - name: services restart
       service: name={{item}} state=restarted
       with_items:
+        - environ-wifi-setup
         - environ-web
         - environ

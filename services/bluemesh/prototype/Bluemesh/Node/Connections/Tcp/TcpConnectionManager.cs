@@ -4,16 +4,18 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using Node.Encryption;
 using Node.Routing;
 
 namespace Node.Connections.Tcp
 {
     internal class TcpConnectionManager : IConnectionManager
     {
-        public TcpConnectionManager(IConnectionConfig connectionConfig, IRoutingConfig routingConfig)
+        public TcpConnectionManager(IConnectionConfig connectionConfig, IRoutingConfig routingConfig, IEncryptionManager encryptionManager)
         {
             this.connectionConfig = connectionConfig;
             this.routingConfig = routingConfig;
+            this.encryptionManager = encryptionManager;
             connections = new List<TcpConnection>();
             connectingSockets = new List<SocketInfo>();
             Utility = new TcpUtility();
@@ -23,7 +25,7 @@ namespace Node.Connections.Tcp
         public List<IAddress> GetAvailablePeers()
         {
             // TODO do real scan
-            return connectionConfig.PreconfiguredNodes;
+            return connectionConfig.PreconfiguredNodes.Where(address => !Equals(address, Address)).ToList();
         }
 
         public bool TryConnect(IAddress address)
@@ -53,8 +55,8 @@ namespace Node.Connections.Tcp
 
         public void PurgeDeadConnections()
         {
-            connections.RemoveAll(c => c.State > ConnectionState.Connected || !c.Socket.Connected);
-            foreach (var info in connectingSockets.Where(s => DateTime.UtcNow - s.Timestamp > TimeSpan.FromSeconds(1)).ToList())
+            connections.RemoveAll(c => c.State > ConnectionState.Connected || !c.Socket.IsOk());
+            foreach (var info in connectingSockets.Where(s => DateTime.UtcNow - s.Timestamp > connectionConfig.ConnectingSocketMaxTTL).ToList())
             {
                 info.Socket.Close();
                 connectingSockets.Remove(info);
@@ -102,6 +104,8 @@ namespace Node.Connections.Tcp
             }
             foreach (var socket in checkWrite)
             {
+                if (!socket.Connected)
+                    continue;
                 if (connectingSockets.RemoveAll(s => s.Socket == socket) > 0)
                 {
                     var address = new TcpAddress((IPEndPoint) socket.RemoteEndPoint);
@@ -129,6 +133,14 @@ namespace Node.Connections.Tcp
                 connections.Where(c => checkRead.Contains(c.Socket)).ToList(),
                 connections.Where(c => checkWrite.Contains(c.Socket)).ToList());
         }
+        public void Stop()
+        {
+            serverSocket.Close();
+            foreach (var info in connectingSockets)
+                info.Socket.Close();
+            foreach (var connection in Connections)
+                connection.Close();
+        }
 
         public List<IConnection> Connections => new List<IConnection>(connections);
 
@@ -140,7 +152,7 @@ namespace Node.Connections.Tcp
 
         private TcpConnection CreateConnection(TcpAddress address, Socket socket)
         {
-            var connection = new TcpConnection((TcpAddress)Address, address, socket, Utility);
+            var connection = new TcpConnection((TcpAddress)Address, address, socket, Utility, encryptionManager.CreateEncoder(address));
             connection.ValidateConnection += conn =>
                 EstablishedConnections.Count() < routingConfig.MaxConnections &&
                 (StringComparer.OrdinalIgnoreCase.Compare(conn.LocalAddress.ToString(), conn.RemoteAddress.ToString()) >= 0 || 
@@ -150,7 +162,7 @@ namespace Node.Connections.Tcp
 
         private int GetUsedConnectionSlots()
         {
-            return connections.Count + connectingSockets.Count;
+            return connections.Count + connectingSockets.Count / connectionConfig.ConnectingSocketsToConnectionsMultiplier;
         }
 
         private Socket Connect(IPEndPoint endpoint)
@@ -182,6 +194,7 @@ namespace Node.Connections.Tcp
         private readonly List<SocketInfo> connectingSockets;
         private readonly IConnectionConfig connectionConfig;
         private readonly IRoutingConfig routingConfig;
+        private readonly IEncryptionManager encryptionManager;
 
         private struct SocketInfo
         {

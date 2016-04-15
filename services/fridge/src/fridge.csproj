@@ -34,6 +34,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Threading.Tasks.Dataflow, Version=4.5.24.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -54,10 +58,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Db\BinPack.cs" />
-    <Compile Include="Db\DiskStore.cs" />
-    <Compile Include="Db\Foods.cs" />
-    <Compile Include="Db\Users.cs" />
+    <Compile Include="db\BinPack.cs" />
+    <Compile Include="db\DiskStore.cs" />
+    <Compile Include="db\Foods.cs" />
+    <Compile Include="db\Users.cs" />
     <Compile Include="http\handlers\Auth.cs" />
     <Compile Include="http\handlers\AuthHandler.cs" />
     <Compile Include="http\handlers\CsrfToken.cs" />
@@ -70,6 +74,7 @@
     <Compile Include="http\StaticHandler.cs" />
     <Compile Include="utils\AsyncLockSource.cs" />
     <Compile Include="utils\CollectionUtils.cs" />
+    <Compile Include="utils\FuncUtils.cs" />
     <Compile Include="utils\ReflectionUtils.cs" />
     <Compile Include="utils\ReusableObjectPool.cs" />
     <Compile Include="utils\RuntimeHelper.cs" />
@@ -84,5 +89,17 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="static\css\styles.css" />
+    <Content Include="static\js\jquery-2.2.3.min.js" />
+    <Content Include="static\js\js-cookie-2.1.0.min.js" />
+    <Content Include="static\js\scripts.js" />
+    <Content Include="static\js\websocket-1.0.1.min.js" />
+    <Content Include="static\index.html" />
+    <Content Include="static\robots.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy /r /y /e $(SolutionDir)static\*.* $(TargetDir)static\</PostBuildEvent>
+  </PropertyGroup>
 </Project>

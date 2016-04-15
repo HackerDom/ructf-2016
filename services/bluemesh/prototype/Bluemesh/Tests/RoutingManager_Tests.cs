@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Node.Connections;
 using Node.Connections.Tcp;
+using Node.Encryption;
 using Node.Messages;
 using Node.Routing;
 using NSubstitute;
@@ -21,11 +23,16 @@ namespace Tests
         [Test, Explicit, Timeout(3000)]
         public void Measure_map_negotiation()
         {
+            //Console.SetOut(new StreamWriter("map-negotiation.log"));
+
             var config = Substitute.For<IRoutingConfig>();
-            config.DesiredConnections.Returns(1);
-            config.MaxConnections.Returns(5);
+            config.DesiredConnections.Returns(3);
+            config.MaxConnections.Returns(25);
+            config.ConnectCooldown.Returns(100.Milliseconds());
+            config.DisconnectCooldown.Returns(100.Milliseconds());
+            config.MapUpdateCooldown.Returns(20.Milliseconds());
             var preconfiguredNodes = new List<IAddress>();
-            var nodes = Enumerable.Range(0, 5).Select(i => CreateNode(config, preconfiguredNodes, i)).ToList();
+            var nodes = Enumerable.Range(0, 25).Select(i => CreateNode(config, preconfiguredNodes, i)).ToList();
 
             ThreadPool.SetMinThreads(nodes.Count * 2, nodes.Count * 2);
 
@@ -38,6 +45,9 @@ namespace Tests
 
             var watch = Stopwatch.StartNew();
             trigger.Set();
+
+            Task.Delay(10.Seconds()).ContinueWith(task => nodes[0].Stopped = true).Wait();
+
             Task.WhenAll(tasks).Wait();
 
             Console.WriteLine("Communication took " + watch.Elapsed);
@@ -50,7 +60,12 @@ namespace Tests
             connectionConfig.LocalAddress.Returns(address);
             connectionConfig.PreconfiguredNodes.Returns(_ => nodes.Where(n => !Equals(n, address)).ToList());
             nodes.Add(address);
-            var connectionManager = new TcpConnectionManager(connectionConfig, routingConfig);
+            connectionConfig.ConnectingSocketMaxTTL.Returns(TimeSpan.FromMilliseconds(50));
+            connectionConfig.ConnectingSocketsToConnectionsMultiplier.Returns(5);
+            var encryptionManager = Substitute.For<IEncryptionManager>();
+            var encoder = Substitute.For<IMessageEncoder>();
+            encryptionManager.CreateEncoder(Arg.Any<IAddress>()).Returns(encoder);
+            var connectionManager = new TcpConnectionManager(connectionConfig, routingConfig, encryptionManager);
             return new TestNode(new RoutingManager(connectionManager, routingConfig), connectionManager);
         }
 
@@ -64,12 +79,16 @@ namespace Tests
 
             public void Start()
             {
-                while (true)
+                while (!Stopped)
                 {
                     Tick();
                     Thread.Sleep(10.Milliseconds());
                 }
+                connectionManager.Stop();
+                Console.WriteLine("Stopped node {0}", connectionManager.Address);
             }
+
+            public bool Stopped { get; set; }
 
             private void Tick()
             {
@@ -77,8 +96,12 @@ namespace Tests
                 var selectResult = connectionManager.Select();
 
                 routingManager.UpdateConnections();
-
-                routingManager.ProcessMessages(selectResult.ReadableConnections.Where(c => c.State == ConnectionState.Connected));
+                
+                foreach (var connection in selectResult.ReadableConnections.Where(c => c.State == ConnectionState.Connected))
+                {
+                    var message = connection.Receive();
+                    routingManager.ProcessMessage(message, connection);
+                }
                 routingManager.PushMaps(selectResult.WritableConnections.Where(c => c.State == ConnectionState.Connected));
 
                 routingManager.DisconnectExcessLinks();

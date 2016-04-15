@@ -1,0 +1,12 @@
+[Unit]
+Description=Environ
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3.5 /home/environ/web.py
+User=environ
+Restart=always
+WorkingDirectory=/home/environ
+
+[Install]
+WantedBy=multi-user.target

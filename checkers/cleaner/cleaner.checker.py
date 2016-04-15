@@ -8,10 +8,11 @@ import re
 import binascii
 import socket
 import collections
+import time
 
 PORT = 12500
-DELIM = "====================="
-HELLO_LINES = 5
+DELIM = "========================================================="
+HELLO_LINES = 15
 BASE = 2
 HEIGHT = 8
 
@@ -47,7 +48,7 @@ def make_err_message(message, request, reply):
     return "{}\n->\n{}\n<-\n{}\n=".format(message, request, reply)
 
 def get_rand_string(l):
-    return ''.join(random.choice(string.ascii_lowercase) for _ in range(l))
+    return ''.join(random.choice(string.ascii_letters) for _ in range(l))
 
 def deduplicate(program):
     cur = None
@@ -195,7 +196,7 @@ def send(request, socket):
 
 def readline(socket_fd):
     try:
-        return socket_fd.readline().rstrip()
+        return socket_fd.readline().rstrip('\n')
     except Exception as e:
         service_mumble(message=str(e), exception=e)
         raise e
@@ -249,8 +250,8 @@ class State:
 
     def put(self, flag):
         password = get_rand_string(32)
-        room_name = get_rand_string(32)
-        program_name = get_rand_string(32)
+        room_name = get_rand_string(15)
+        program_name = get_rand_string(15)
         room = generate_room(flag)
 
         socket = self.connect_to_service()
@@ -264,6 +265,8 @@ class State:
         send("program", socket)
         send(program_name, socket)
         send(generate_program(flag), socket)
+
+        time.sleep(0.5)
 
         return room_name, program_name, password 
 
@@ -301,12 +304,14 @@ def handler_get(args):
     if not program in programs:
         return service_corrupt(message="No such program", error=make_err_message("No such program", program, "\n".join(programs)))
 
-    room_conf = state.get_room(room, password).lower()
     enc_flag = generate_room(flag)
-    enc_flag = re.sub('[^W]', ' ', enc_flag.lower())
-    room_conf = re.sub('[^W]', ' ', room_conf)
-    if room_conf != enc_flag:
-        return service_corrupt(message="Bad flag", error=make_err_message("Bad flag", enc_flag, room_conf))
+    enc_flag_w = re.sub('[^W]', ' ', enc_flag)
+
+    room_conf = state.get_room(room, password)
+    room_conf_w = re.sub('[^W]', ' ', room_conf)
+
+    if room_conf_w != enc_flag_w:
+        return service_corrupt(message="Bad flag", error=make_err_message("Bad flag", enc_flag_w, room_conf_w))
 
     log = state.run(room, program, password)
 

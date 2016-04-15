@@ -4,7 +4,7 @@
   with_items:
     - flags
     - manager
-    - worker-default
+    - worker
 
 - name: start checksystem
   service: name={{item}} state=started
@@ -12,7 +12,7 @@
   with_items:
     - flags
     - manager
-    - worker-default
+    - worker
 
 - name: stop web
   service: name={{item}} state=stopped
