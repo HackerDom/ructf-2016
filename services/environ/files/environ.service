@@ -1,0 +1,13 @@
+[Unit]
+Description=Environ
+After=network.target environ-web.service
+Requires=environ-web.service
+
+[Service]
+ExecStart=/usr/bin/python3.5 /home/environ/server.py
+User=environ
+Restart=always
+WorkingDirectory=/home/environ
+
+[Install]
+WantedBy=multi-user.target
