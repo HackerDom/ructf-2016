@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using frɪdʒ.Db;
 using frɪdʒ.utils;
+using Newtonsoft.Json;
 
 namespace frɪdʒ.http.handlers
 {
@@ -37,6 +38,19 @@ namespace frɪdʒ.http.handlers
 			context.SetAuthCookies(user.Login);
 		}
 
+		public async Task InfoAsync(HttpListenerContext context)
+		{
+			var login = context.Request.Cookies.GetAuth();
+			if(login == null)
+				throw new HttpException(401, "Unauthorized");
+
+			var user = Users.Find(login);
+			if(user == null)
+				throw new HttpException(403, "Forbidden");
+
+			await context.WriteStringAsync(JsonConvert.SerializeObject(new {login = user.Login, allergens = user.Allergens}));
+		}
+
 		private static User CreateNewUser(string login, string pass, string data)
 		{
 			var allergens = (data ?? string.Empty).Split(AllergenDelim, StringSplitOptions.RemoveEmptyEntries);
@@ -46,8 +60,8 @@ namespace frɪdʒ.http.handlers
 			return new User {Login = login, Pass = pass, Allergens = allergens};
 		}
 
-		private const int MinLength = 4;
-		private const int MaxLength = 32;
-		private static readonly char[] AllergenDelim = {','};
+		private const int MinLength = 5;
+		private const int MaxLength = 20;
+		private static readonly char[] AllergenDelim = {',', ' ', '\t', '\r', '\n', '\v'};
 	}
 }

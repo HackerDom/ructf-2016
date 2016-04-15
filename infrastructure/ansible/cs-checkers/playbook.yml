@@ -1,4 +1,4 @@
-- hosts: dev-cs
+- hosts: [dev-cs,dev-cs2,dev-cs3]
   roles: [checkers]
   vars:
     cs_user: cs
