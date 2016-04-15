@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
+import base64
+import os
+import os.path
+import random
 import requests
 import sqlite3
 import sys
 import traceback
-import os
-import os.path
-import random
 
 PORT = 3030
 DIR = os.path.dirname(os.path.abspath(__file__))
@@ -61,7 +62,7 @@ def handler_check(*args):
 
 def handler_get(args, things):
     _, _, hostname, id_big, flag, vuln = args
-    id, thing = id_big.split("===", 1)
+    id, thing = base64.b64decode(id_big).decode("utf-8").split("===", 1)
     request = "http://{0}:{3}/search?text={1}&owner={2}".format(hostname, thing, id, PORT)
     reply = None
     try:
@@ -97,7 +98,7 @@ def handler_put(args, things):
         return service_mumble(message="Server error: {}".format(e), exception=e, request=request, reply=reply, body=thing)
 
 
-    return service_ok(message=id_big)
+    return service_ok(message=base64.b64encode(id_big.encode("utf-8")).decode("utf-8"))
 
 
 HANDLERS = {
