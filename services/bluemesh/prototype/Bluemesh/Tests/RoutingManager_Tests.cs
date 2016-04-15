@@ -60,6 +60,8 @@ namespace Tests
             connectionConfig.LocalAddress.Returns(address);
             connectionConfig.PreconfiguredNodes.Returns(_ => nodes.Where(n => !Equals(n, address)).ToList());
             nodes.Add(address);
+            connectionConfig.ConnectingSocketMaxTTL.Returns(TimeSpan.FromMilliseconds(50));
+            connectionConfig.ConnectingSocketsToConnectionsMultiplier.Returns(5);
             var encryptionManager = Substitute.For<IEncryptionManager>();
             var encoder = Substitute.For<IMessageEncoder>();
             encryptionManager.CreateEncoder(Arg.Any<IAddress>()).Returns(encoder);
