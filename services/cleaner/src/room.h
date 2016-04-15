@@ -10,7 +10,7 @@
 #include <string>
 #include <array>
 
-using TRoomConfiguration = std::vector<std::vector<char>>;
+using TRoomConfiguration = std::string;
 using TProgramLogs = std::vector<std::pair<std::string, std::string>>;
 
 class TRoom : public TPassChecker {
