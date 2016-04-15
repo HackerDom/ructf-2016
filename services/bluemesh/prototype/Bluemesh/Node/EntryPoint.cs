@@ -32,6 +32,8 @@ namespace Node
                 DisconnectCooldown = TimeSpan.FromMilliseconds(100),
                 MapUpdateCooldown = TimeSpan.FromMilliseconds(50),
                 KeySendCooldown = TimeSpan.FromSeconds(10),
+                ConnectingSocketMaxTTL = TimeSpan.FromMilliseconds(50),
+                ConnectingSocketsToConnectionsMultiplier = 5,
                 PreconfiguredNodes = Enumerable.Range(1, 30).Select(i => new TcpAddress(new IPEndPoint(IPAddress.Parse(string.Format(AddressFormat, i)), 16800)) as IAddress).ToList(),
                 LocalAddress = GetLocalAddress(16800),
                 LongNames = true

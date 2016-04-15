@@ -56,7 +56,7 @@ namespace Node.Connections.Tcp
         public void PurgeDeadConnections()
         {
             connections.RemoveAll(c => c.State > ConnectionState.Connected || !c.Socket.IsOk());
-            foreach (var info in connectingSockets.Where(s => DateTime.UtcNow - s.Timestamp > TimeSpan.FromSeconds(1)).ToList())
+            foreach (var info in connectingSockets.Where(s => DateTime.UtcNow - s.Timestamp > connectionConfig.ConnectingSocketMaxTTL).ToList())
             {
                 info.Socket.Close();
                 connectingSockets.Remove(info);
@@ -162,7 +162,7 @@ namespace Node.Connections.Tcp
 
         private int GetUsedConnectionSlots()
         {
-            return connections.Count + connectingSockets.Count;
+            return connections.Count + connectingSockets.Count / connectionConfig.ConnectingSocketsToConnectionsMultiplier;
         }
 
         private Socket Connect(IPEndPoint endpoint)

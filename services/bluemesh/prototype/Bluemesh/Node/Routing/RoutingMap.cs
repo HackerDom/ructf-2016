@@ -28,7 +28,7 @@ namespace Node.Routing
                 return null;
 
             IAddress excessPeer = null;
-            foreach (var peerLink in Links.Where(link => link.Contains(OwnAddress)).ToList())
+            foreach (var peerLink in Links.Where(link => link.Connected && link.Contains(OwnAddress)).ToList())
             {
                 if (IsLinkExcess(peerLink))
                 {
@@ -63,8 +63,8 @@ namespace Node.Routing
             var oldLinks = Links.ToList();
 
             var linksToAdd = links.Where(link => !link.Contains(OwnAddress) && 
-                ((link.Contains(source) && link.Connected != Links.FirstOrDefault(l => Equals(l, link)).Connected) ||  
-                link.Version > Links.FirstOrDefault(l => Equals(l, link)).Version)).ToList();
+                    ((link.Contains(source) && link.Connected != Links.FirstOrDefault(l => Equals(l, link)).Connected) ||  
+                    link.Version > Links.FirstOrDefault(l => Equals(l, link)).Version)).ToList();
 
             if (linksToAdd.Count > 0)
                 Version++;
@@ -72,6 +72,12 @@ namespace Node.Routing
             foreach (var link in linksToAdd)
                 Links.Remove(link);
             Links.AddRange(linksToAdd);
+
+            foreach (var link in links.Where(l => !l.Connected))
+            {
+                if (!Links.Contains(link))
+                    Links.Add(link);
+            }
 
             Console.WriteLine("[{0}] MERGE {1} with {2} from {3} => {4}", OwnAddress, 
                 oldLinks.ToDOT(longNames: config.LongNames), links.ToDOT(longNames: config.LongNames), source, Links.ToDOT(longNames: config.LongNames));
