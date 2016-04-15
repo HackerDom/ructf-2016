@@ -32,9 +32,13 @@ COMMIT
 # nginx for http
 -A INPUT            -p tcp --dport 80 -j ACCEPT
 
+-A INPUT -j LOG --log-prefix="[blocked] "
+
 # FORWARD
 
 -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+-A FORWARD -j LOG --log-prefix="[iptables] "
 
 # Allow participants to jury
 -A FORWARD -i eth0.1+ -o eth0.30 -j ACCEPT
@@ -102,7 +106,7 @@ COMMIT
 # rubygems.global.ssl.fastly.net
 -A FORWARD -p tcp -m multiport --dports 80,443 -d 185.31.17.249 -j ACCEPT
 
--A FORWARD -j LOG --log-prefix="[iptables] "
+-A FORWARD -j LOG --log-prefix="[blocked] "
 -A FORWARD -j REJECT
 
 COMMIT
