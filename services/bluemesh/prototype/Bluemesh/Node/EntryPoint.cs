@@ -1,16 +1,20 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Node.Connections;
 using Node.Connections.Tcp;
+using Node.Data;
 using Node.Encryption;
+using Node.Messages;
 using Node.Routing;
 
 namespace Node
@@ -40,6 +44,8 @@ namespace Node
             };
             var node = CreateNode(config, config);
             node.Start();
+            var consoleServer = new ConsoleServer(new IPEndPoint(IPAddress.Loopback, 16801), node);
+            consoleServer.Start();
         }
 
         private static TcpAddress GetLocalAddress(int port)
@@ -59,31 +65,60 @@ namespace Node
 
         private static TestNode CreateNode(IConnectionConfig connectionConfig, IRoutingConfig routingConfig)
         {
-            var encryptionManager = new EncryptionManager(((TcpAddress) connectionConfig.LocalAddress).Endpoint, connectionConfig.KeySendCooldown);
+            var encryptionManager = new EncryptionManager(((TcpAddress)connectionConfig.LocalAddress).Endpoint, connectionConfig.KeySendCooldown);
             var connectionManager = new TcpConnectionManager(connectionConfig, routingConfig, encryptionManager);
-            return new TestNode(new RoutingManager(connectionManager, routingConfig), connectionManager);
+            var routingManager = new RoutingManager(connectionManager, routingConfig);
+            var dataManager = new DataManager(new DataStorage(), "", routingManager, encryptionManager);
+            return new TestNode(routingManager, connectionManager, dataManager, encryptionManager);
         }
 
         private class TestNode
         {
-            public TestNode(RoutingManager routingManager, TcpConnectionManager connectionManager)
+            public TestNode(RoutingManager routingManager, TcpConnectionManager connectionManager, DataManager dataManager, EncryptionManager encryptionManager)
             {
                 this.routingManager = routingManager;
                 this.connectionManager = connectionManager;
+                this.dataManager = dataManager;
+                this.encryptionManager = encryptionManager;
             }
 
             public void Start()
             {
+                encryptionManager.GenerateKeyPair(BitConverter.GetBytes(connectionManager.Address.GetHashCode()));
+                encryptionManager.Start();
                 while (!Stopped)
                 {
                     Tick();
                     Thread.Sleep(TimeSpan.FromMilliseconds(10));
                 }
                 connectionManager.Stop();
+                encryptionManager.Stop();
                 Console.WriteLine("Stopped node {0}", connectionManager.Address);
             }
 
             public bool Stopped { get; set; }
+
+            public void PutFlag(string key, string flag, IAddress destination)
+            {
+                dataManager.DispatchData(key, Encoding.UTF8.GetBytes(flag), destination);
+            }
+
+            public string GetFlag(string key, IAddress source)
+            {
+                var trigger = new ManualResetEventSlim();
+                string flag = null;
+                dataManager.OnReceivedData += m =>
+                {
+                    if (m.Action == DataAction.None && m.Key == key)
+                    {
+                        flag = Encoding.UTF8.GetString(m.Data);
+                        trigger.Set();
+                    }
+                };
+                dataManager.RequestData(key, source);
+                trigger.Wait();
+                return flag;
+            }
 
             private void Tick()
             {
@@ -95,9 +130,11 @@ namespace Node
                 foreach (var connection in selectResult.ReadableConnections.Where(c => c.State == ConnectionState.Connected))
                 {
                     var message = connection.Receive();
-                    routingManager.ProcessMessage(message, connection);
+                    if (!routingManager.ProcessMessage(message, connection))
+                        dataManager.ProcessMessage(message, connection);
                 }
                 routingManager.PushMaps(selectResult.WritableConnections.Where(c => c.State == ConnectionState.Connected));
+                dataManager.PushMessages(selectResult.WritableConnections.Where(c => c.State == ConnectionState.Connected));
 
                 routingManager.DisconnectExcessLinks();
                 routingManager.ConnectNewLinks();
@@ -114,10 +151,92 @@ namespace Node
                 }
 
                 Console.WriteLine("[{0}] v: {2} {1}", routingManager.Map.OwnAddress, routingManager.Map, routingManager.Map.Version);
+                if (dataManager.DataStorage.ToString().Length > 0)
+                    Console.WriteLine("[{0}] !! my flags : {1}", routingManager.Map.OwnAddress, dataManager.DataStorage);
             }
 
             private readonly RoutingManager routingManager;
             private readonly TcpConnectionManager connectionManager;
+            private readonly DataManager dataManager;
+            private readonly EncryptionManager encryptionManager;
+        }
+
+        private class ConsoleServer
+        {
+            public ConsoleServer(IPEndPoint endpoint, TestNode node)
+            {
+                this.endpoint = endpoint;
+                this.node = node;
+                utility = new TcpUtility();
+            }
+
+            public void Start()
+            {
+                new Thread(Listen).Start();
+            }
+
+            private void Listen()
+            {
+                listenerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                listenerSocket.Bind(endpoint);
+                listenerSocket.Listen(1);
+                while (true)
+                {
+                    var client = listenerSocket.Accept();
+                    try
+                    {
+                        using (var stream = new NetworkStream(client))
+                        {
+                            var reader = new StreamReader(stream);
+                            var writer = new StreamWriter(stream);
+
+                            var command = reader.ReadLine();
+                            var response = ExecuteCommand(command);
+                            if (response != null)
+                            {
+                                writer.WriteLine(response);
+                                writer.Flush();
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+                }
+            }
+
+            private string ExecuteCommand(string command)
+            {
+                var parts = command.Split(' ');
+                if (parts.Length == 0)
+                    return null;
+                if (parts[0] == "put")
+                {
+                    if (parts.Length != 4)
+                        return null;
+                    var address = utility.ParseAddress(parts[1]);
+                    if (address == null)
+                        return null;
+                    node.PutFlag(parts[2], parts[3], address);
+                    return "done";
+                }
+                if (parts[0] == "get")
+                {
+                    if (parts.Length != 3)
+                        return null;
+                    var address = utility.ParseAddress(parts[1]);
+                    if (address == null)
+                        return null;
+                    return node.GetFlag(parts[2], address);
+                }
+                return null;
+            }
+
+            private Socket listenerSocket;
+            private readonly IPEndPoint endpoint;
+            private readonly TestNode node;
+            private readonly TcpUtility utility;
         }
     }
 }
