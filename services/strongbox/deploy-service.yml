@@ -18,7 +18,7 @@
     - name: gem install rails
       command: gem install rails --version 4.2.1
     - name: add user
-      user: name=strongbox
+      user: name=strongbox shell=/sbin/nologin
     - name: copy project
       copy: src=../strongbox dest=/home/ force=yes owner=strongbox
     - set_fact: socks_path="/home/strongbox/tmp/socks"
