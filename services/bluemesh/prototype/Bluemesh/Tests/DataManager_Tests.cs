@@ -50,11 +50,12 @@ namespace Tests
             Task.Delay(2.Seconds()).Wait();
 
             Console.WriteLine("!!! Put flag");
-            nodes[0].PutFlag("test1", "hujhujhuj", nodes[2].Address);
+            nodes[0].PutFlag("test1", "hujhujhuj", nodes.Last().Address);
             Console.WriteLine("!!! Get flag");
-            Console.WriteLine("!!! Flag : " + nodes[0].GetFlag("test1", nodes[2].Address));
+            var flag = nodes[0].GetFlag("test1", nodes.Last().Address);
+            Console.WriteLine("!!! Flag : " + flag);
 
-            Task.WhenAll(tasks).Wait();
+            flag.Should().Be("hujhujhuj");
 
             Console.WriteLine("Communication took " + watch.Elapsed);
         }
