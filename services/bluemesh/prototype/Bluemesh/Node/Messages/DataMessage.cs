@@ -22,7 +22,7 @@ namespace Node.Messages
             serializer.Write(Source);
         }
 
-        public DataMessage Deserialize(IBinaryDeserializer deserializer, IConnectionUtility utility)
+        public static DataMessage Deserialize(IBinaryDeserializer deserializer, IConnectionUtility utility)
         {
             return new DataMessage(
                 (DataAction) deserializer.ReadInt(),

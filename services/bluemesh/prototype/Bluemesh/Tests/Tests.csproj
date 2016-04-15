@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnectionManager_Tests.cs" />
+    <Compile Include="DataManager_Tests.cs" />
     <Compile Include="Encryption_Tests.cs" />
     <Compile Include="GraphHelper_Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
