@@ -195,7 +195,7 @@ def send(request, socket):
 
 def readline(socket_fd):
     try:
-        return socket_fd.readline().rstrip()
+        return socket_fd.readline().rstrip('\n')
     except Exception as e:
         service_mumble(message=str(e), exception=e)
         raise e
@@ -302,11 +302,11 @@ def handler_get(args):
         return service_corrupt(message="No such program", error=make_err_message("No such program", program, "\n".join(programs)))
 
     room_conf = state.get_room(room, password).lower()
-    enc_flag = generate_room(flag)
-    enc_flag = re.sub('[^W]', ' ', enc_flag.lower())
-    room_conf = re.sub('[^W]', ' ', room_conf)
-    if room_conf != enc_flag:
-        return service_corrupt(message="Bad flag", error=make_err_message("Bad flag", enc_flag, room_conf))
+    enc_flag = generate_room(flag).lower()
+    enc_flag_w = re.sub('[^w]', ' ', enc_flag)
+    room_conf_w = re.sub('[^w]', ' ', room_conf)
+    if room_conf_w != enc_flag_w:
+        return service_corrupt(message="Bad flag", error=make_err_message("Bad flag", enc_flag_w, room_conf_w))
 
     log = state.run(room, program, password)
 
