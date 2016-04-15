@@ -53,6 +53,7 @@ class DummyClient(WebSocketClient):
 			if data.find(self.text) >= 0:
 				DONE.set()
 		except ValueError:
+			self.debug(traceback.format_exc())
 			self.debug('WebSocket parse message failed: ' + data)
 
 class Checker(HttpCheckerBase):
@@ -73,6 +74,7 @@ class Checker(HttpCheckerBase):
 				#self.debug(result)
 				return result
 			except ValueError:
+				self.debug(traceback.format_exc())
 				raise r.exceptions.HTTPError('failed to parse response')
 		finally:
 			response.close()
@@ -310,7 +312,7 @@ class Checker(HttpCheckerBase):
 		csrf_token = s.cookies.get("csrf-token")
 		cookies_string = "; ".join([str(key) + "=" + str(val) for key, val in s.cookies.items()])
 
-		msg = {'food': self.randphrase() + ', ' + flag, 'csrf-token': csrf_token}
+		msg = {'title': self.randphrase(), 'ingredients': self.randphrase() + ', ' + flag, 'csrf-token': csrf_token}
 
 		ws = DummyClient('ws://{}:{}/'.format(addr, WSPORT), headers=[
 			('Origin', 'http://{}:{}'.format(addr, PORT)),
@@ -322,6 +324,7 @@ class Checker(HttpCheckerBase):
 			ws.connect()
 
 		except WebSocketException:
+			self.debug(traceback.format_exc())
 			print('websocket connect failed')
 			return EXITCODE_MUMBLE
 
