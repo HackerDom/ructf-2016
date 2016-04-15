@@ -49,12 +49,12 @@ namespace Node.Routing
             return IsReachable(destination, source, links, new HashSet<IAddress>());
         }
 
-        public static string ToDOT(this IEnumerable<RoutingMapLink> links, string name = "")
+        public static string ToDOT(this IEnumerable<RoutingMapLink> links, string name = "", bool longNames = false)
         {
             return
                 $@"
 graph {name} {{
-{string.Join(Environment.NewLine, links.Where(l => l.Connected).Select(link => "\t" + MakeSafeString(link.A) + " -- " + MakeSafeString(link.B) + "; // v: " + link.Version))}
+{string.Join(Environment.NewLine, links.Where(l => l.Connected).Select(link => "\t" + MakeSafeString(link.A, longNames) + " -- " + MakeSafeString(link.B, longNames) + "; // v: " + link.Version))}
 }}";
         }
 
@@ -77,9 +77,9 @@ graph {name} {{
             return path.Skip(1).Take(path.Count - 2).ToList();
         }  
 
-        private static string MakeSafeString(object obj)
+        private static string MakeSafeString(object obj, bool longNames)
         {
-            if (obj is TcpAddress)
+            if (obj is TcpAddress && !longNames)
                 return (((TcpAddress) obj).Endpoint.Port % 100).ToString();
             return obj.ToString().Replace(".", "").Replace(":", "");
         }

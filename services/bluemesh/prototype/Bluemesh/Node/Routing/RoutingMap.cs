@@ -24,6 +24,9 @@ namespace Node.Routing
 
         public IAddress FindExcessPeer()
         {
+            if (GraphHelper.GetPeers(OwnAddress, Links).Count() <= config.DesiredConnections)
+                return null;
+
             IAddress excessPeer = null;
             foreach (var peerLink in Links.Where(link => link.Contains(OwnAddress)).ToList())
             {
@@ -40,9 +43,6 @@ namespace Node.Routing
         public bool IsLinkExcess(RoutingMapLink link)
         {
             if (!link.Connected)
-                return false;
-
-            if (GraphHelper.GetPeers(OwnAddress, Links).Count() <= config.DesiredConnections)
                 return false;
 
             var stateBefore = GraphHelper.CalculateConnectivity(Links);
@@ -73,7 +73,8 @@ namespace Node.Routing
                 Links.Remove(link);
             Links.AddRange(linksToAdd);
 
-            Console.WriteLine("[{0}] MERGE {1} with {2} from {3} => {4}", OwnAddress, oldLinks.ToDOT(), links.ToDOT(), source, Links.ToDOT());
+            Console.WriteLine("[{0}] MERGE {1} with {2} from {3} => {4}", OwnAddress, 
+                oldLinks.ToDOT(longNames: config.LongNames), links.ToDOT(longNames: config.LongNames), source, Links.ToDOT(longNames: config.LongNames));
         }
 
         public void AddDirectConnection(IAddress other)
@@ -131,7 +132,7 @@ namespace Node.Routing
 
         public override string ToString()
         {
-            return Links.ToDOT("routes");
+            return Links.ToDOT("routes", config.LongNames);
         }
 
         public List<RoutingMapLink> Links { get; }

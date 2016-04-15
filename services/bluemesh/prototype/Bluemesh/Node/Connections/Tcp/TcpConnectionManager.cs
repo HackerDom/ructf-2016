@@ -25,7 +25,7 @@ namespace Node.Connections.Tcp
         public List<IAddress> GetAvailablePeers()
         {
             // TODO do real scan
-            return connectionConfig.PreconfiguredNodes;
+            return connectionConfig.PreconfiguredNodes.Where(address => !Equals(address, Address)).ToList();
         }
 
         public bool TryConnect(IAddress address)
@@ -104,6 +104,8 @@ namespace Node.Connections.Tcp
             }
             foreach (var socket in checkWrite)
             {
+                if (!socket.Connected)
+                    continue;
                 if (connectingSockets.RemoveAll(s => s.Socket == socket) > 0)
                 {
                     var address = new TcpAddress((IPEndPoint) socket.RemoteEndPoint);

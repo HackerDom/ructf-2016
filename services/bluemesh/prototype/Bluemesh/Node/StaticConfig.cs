@@ -15,5 +15,6 @@ namespace Node
         public TimeSpan ConnectCooldown { get; set; }
         public TimeSpan DisconnectCooldown { get; set; }
         public TimeSpan MapUpdateCooldown { get; set; }
+        public bool LongNames { get; set; }
     }
 }
