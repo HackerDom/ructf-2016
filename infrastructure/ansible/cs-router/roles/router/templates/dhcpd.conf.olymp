@@ -1,0 +1,115 @@
+ddns-update-style none;
+
+option domain-name "ructf.org";
+option domain-name-servers 8.8.8.8, 8.8.4.4;
+
+default-lease-time 600;
+max-lease-time 3600;
+
+authoritative;
+
+log-facility local7;
+
+subnet 10.0.11.0 netmask 255.255.255.0 { range 10.0.11.100 10.0.11.199; option routers 10.0.11.1; }
+subnet 10.0.12.0 netmask 255.255.255.0 { range 10.0.12.100 10.0.12.199; option routers 10.0.12.1; }
+subnet 10.0.13.0 netmask 255.255.255.0 { range 10.0.13.100 10.0.13.199; option routers 10.0.13.1; }
+subnet 10.0.14.0 netmask 255.255.255.0 { range 10.0.14.100 10.0.14.199; option routers 10.0.14.1; }
+subnet 10.0.101.0 netmask 255.255.255.0 { range 10.0.101.100 10.0.101.199; option routers 10.0.101.1; }
+subnet 10.0.102.0 netmask 255.255.255.0 { range 10.0.102.100 10.0.102.199; option routers 10.0.102.1; }
+subnet 10.0.103.0 netmask 255.255.255.0 { range 10.0.103.100 10.0.103.199; option routers 10.0.103.1; }
+subnet 10.0.104.0 netmask 255.255.255.0 { range 10.0.104.100 10.0.104.199; option routers 10.0.104.1; }
+subnet 10.0.105.0 netmask 255.255.255.0 { range 10.0.105.100 10.0.105.199; option routers 10.0.105.1; }
+subnet 10.0.106.0 netmask 255.255.255.0 { range 10.0.106.100 10.0.106.199; option routers 10.0.106.1; }
+subnet 10.0.107.0 netmask 255.255.255.0 { range 10.0.107.100 10.0.107.199; option routers 10.0.107.1; }
+subnet 10.0.108.0 netmask 255.255.255.0 { range 10.0.108.100 10.0.108.199; option routers 10.0.108.1; }
+subnet 10.0.109.0 netmask 255.255.255.0 { range 10.0.109.100 10.0.109.199; option routers 10.0.109.1; }
+subnet 10.0.110.0 netmask 255.255.255.0 { range 10.0.110.100 10.0.110.199; option routers 10.0.110.1; }
+subnet 10.0.111.0 netmask 255.255.255.0 { range 10.0.111.100 10.0.111.199; option routers 10.0.111.1; }
+subnet 10.0.112.0 netmask 255.255.255.0 { range 10.0.112.100 10.0.112.199; option routers 10.0.112.1; }
+subnet 10.0.113.0 netmask 255.255.255.0 { range 10.0.113.100 10.0.113.199; option routers 10.0.113.1; }
+subnet 10.0.114.0 netmask 255.255.255.0 { range 10.0.114.100 10.0.114.199; option routers 10.0.114.1; }
+subnet 10.0.115.0 netmask 255.255.255.0 { range 10.0.115.100 10.0.115.199; option routers 10.0.115.1; }
+subnet 10.0.116.0 netmask 255.255.255.0 { range 10.0.116.100 10.0.116.199; option routers 10.0.116.1; }
+subnet 10.0.117.0 netmask 255.255.255.0 { range 10.0.117.100 10.0.117.199; option routers 10.0.117.1; }
+subnet 10.0.118.0 netmask 255.255.255.0 { range 10.0.118.100 10.0.118.199; option routers 10.0.118.1; }
+subnet 10.0.119.0 netmask 255.255.255.0 { range 10.0.119.100 10.0.119.199; option routers 10.0.119.1; }
+subnet 10.0.120.0 netmask 255.255.255.0 { range 10.0.120.100 10.0.120.199; option routers 10.0.120.1; }
+subnet 10.0.121.0 netmask 255.255.255.0 { range 10.0.121.100 10.0.121.199; option routers 10.0.121.1; }
+subnet 10.0.122.0 netmask 255.255.255.0 { range 10.0.122.100 10.0.122.199; option routers 10.0.122.1; }
+subnet 10.0.123.0 netmask 255.255.255.0 { range 10.0.123.100 10.0.123.199; option routers 10.0.123.1; }
+subnet 10.0.124.0 netmask 255.255.255.0 { range 10.0.124.100 10.0.124.199; option routers 10.0.124.1; }
+subnet 10.0.125.0 netmask 255.255.255.0 { range 10.0.125.100 10.0.125.199; option routers 10.0.125.1; }
+subnet 10.0.126.0 netmask 255.255.255.0 { range 10.0.126.100 10.0.126.199; option routers 10.0.126.1; }
+subnet 10.0.127.0 netmask 255.255.255.0 { range 10.0.127.100 10.0.127.199; option routers 10.0.127.1; }
+subnet 10.0.128.0 netmask 255.255.255.0 { range 10.0.128.100 10.0.128.199; option routers 10.0.128.1; }
+subnet 10.0.129.0 netmask 255.255.255.0 { range 10.0.129.100 10.0.129.199; option routers 10.0.129.1; }
+subnet 10.0.130.0 netmask 255.255.255.0 { range 10.0.130.100 10.0.130.199; option routers 10.0.130.1; }
+subnet 10.0.131.0 netmask 255.255.255.0 { range 10.0.131.100 10.0.131.199; option routers 10.0.131.1; }
+subnet 10.0.132.0 netmask 255.255.255.0 { range 10.0.132.100 10.0.132.199; option routers 10.0.132.1; }
+subnet 10.0.133.0 netmask 255.255.255.0 { range 10.0.133.100 10.0.133.199; option routers 10.0.133.1; }
+subnet 10.0.134.0 netmask 255.255.255.0 { range 10.0.134.100 10.0.134.199; option routers 10.0.134.1; }
+subnet 10.0.135.0 netmask 255.255.255.0 { range 10.0.135.100 10.0.135.199; option routers 10.0.135.1; }
+subnet 10.0.136.0 netmask 255.255.255.0 { range 10.0.136.100 10.0.136.199; option routers 10.0.136.1; }
+subnet 10.0.137.0 netmask 255.255.255.0 { range 10.0.137.100 10.0.137.199; option routers 10.0.137.1; }
+subnet 10.0.138.0 netmask 255.255.255.0 { range 10.0.138.100 10.0.138.199; option routers 10.0.138.1; }
+subnet 10.0.139.0 netmask 255.255.255.0 { range 10.0.139.100 10.0.139.199; option routers 10.0.139.1; }
+subnet 10.0.140.0 netmask 255.255.255.0 { range 10.0.140.100 10.0.140.199; option routers 10.0.140.1; }
+subnet 10.0.141.0 netmask 255.255.255.0 { range 10.0.141.100 10.0.141.199; option routers 10.0.141.1; }
+subnet 10.0.142.0 netmask 255.255.255.0 { range 10.0.142.100 10.0.142.199; option routers 10.0.142.1; }
+subnet 10.0.143.0 netmask 255.255.255.0 { range 10.0.143.100 10.0.143.199; option routers 10.0.143.1; }
+subnet 10.0.144.0 netmask 255.255.255.0 { range 10.0.144.100 10.0.144.199; option routers 10.0.144.1; }
+subnet 10.0.145.0 netmask 255.255.255.0 { range 10.0.145.100 10.0.145.199; option routers 10.0.145.1; }
+subnet 10.0.146.0 netmask 255.255.255.0 { range 10.0.146.100 10.0.146.199; option routers 10.0.146.1; }
+subnet 10.0.147.0 netmask 255.255.255.0 { range 10.0.147.100 10.0.147.199; option routers 10.0.147.1; }
+subnet 10.0.148.0 netmask 255.255.255.0 { range 10.0.148.100 10.0.148.199; option routers 10.0.148.1; }
+subnet 10.0.149.0 netmask 255.255.255.0 { range 10.0.149.100 10.0.149.199; option routers 10.0.149.1; }
+subnet 10.0.150.0 netmask 255.255.255.0 { range 10.0.150.100 10.0.150.199; option routers 10.0.150.1; }
+subnet 10.0.151.0 netmask 255.255.255.0 { range 10.0.151.100 10.0.151.199; option routers 10.0.151.1; }
+subnet 10.0.152.0 netmask 255.255.255.0 { range 10.0.152.100 10.0.152.199; option routers 10.0.152.1; }
+subnet 10.0.153.0 netmask 255.255.255.0 { range 10.0.153.100 10.0.153.199; option routers 10.0.153.1; }
+subnet 10.0.154.0 netmask 255.255.255.0 { range 10.0.154.100 10.0.154.199; option routers 10.0.154.1; }
+subnet 10.0.155.0 netmask 255.255.255.0 { range 10.0.155.100 10.0.155.199; option routers 10.0.155.1; }
+subnet 10.0.156.0 netmask 255.255.255.0 { range 10.0.156.100 10.0.156.199; option routers 10.0.156.1; }
+subnet 10.0.157.0 netmask 255.255.255.0 { range 10.0.157.100 10.0.157.199; option routers 10.0.157.1; }
+subnet 10.0.158.0 netmask 255.255.255.0 { range 10.0.158.100 10.0.158.199; option routers 10.0.158.1; }
+subnet 10.0.159.0 netmask 255.255.255.0 { range 10.0.159.100 10.0.159.199; option routers 10.0.159.1; }
+subnet 10.0.160.0 netmask 255.255.255.0 { range 10.0.160.100 10.0.160.199; option routers 10.0.160.1; }
+subnet 10.0.161.0 netmask 255.255.255.0 { range 10.0.161.100 10.0.161.199; option routers 10.0.161.1; }
+subnet 10.0.162.0 netmask 255.255.255.0 { range 10.0.162.100 10.0.162.199; option routers 10.0.162.1; }
+subnet 10.0.163.0 netmask 255.255.255.0 { range 10.0.163.100 10.0.163.199; option routers 10.0.163.1; }
+subnet 10.0.164.0 netmask 255.255.255.0 { range 10.0.164.100 10.0.164.199; option routers 10.0.164.1; }
+subnet 10.0.165.0 netmask 255.255.255.0 { range 10.0.165.100 10.0.165.199; option routers 10.0.165.1; }
+subnet 10.0.166.0 netmask 255.255.255.0 { range 10.0.166.100 10.0.166.199; option routers 10.0.166.1; }
+subnet 10.0.167.0 netmask 255.255.255.0 { range 10.0.167.100 10.0.167.199; option routers 10.0.167.1; }
+subnet 10.0.168.0 netmask 255.255.255.0 { range 10.0.168.100 10.0.168.199; option routers 10.0.168.1; }
+subnet 10.0.169.0 netmask 255.255.255.0 { range 10.0.169.100 10.0.169.199; option routers 10.0.169.1; }
+subnet 10.0.170.0 netmask 255.255.255.0 { range 10.0.170.100 10.0.170.199; option routers 10.0.170.1; }
+subnet 10.0.171.0 netmask 255.255.255.0 { range 10.0.171.100 10.0.171.199; option routers 10.0.171.1; }
+subnet 10.0.172.0 netmask 255.255.255.0 { range 10.0.172.100 10.0.172.199; option routers 10.0.172.1; }
+subnet 10.0.173.0 netmask 255.255.255.0 { range 10.0.173.100 10.0.173.199; option routers 10.0.173.1; }
+subnet 10.0.174.0 netmask 255.255.255.0 { range 10.0.174.100 10.0.174.199; option routers 10.0.174.1; }
+subnet 10.0.175.0 netmask 255.255.255.0 { range 10.0.175.100 10.0.175.199; option routers 10.0.175.1; }
+subnet 10.0.176.0 netmask 255.255.255.0 { range 10.0.176.100 10.0.176.199; option routers 10.0.176.1; }
+subnet 10.0.177.0 netmask 255.255.255.0 { range 10.0.177.100 10.0.177.199; option routers 10.0.177.1; }
+subnet 10.0.178.0 netmask 255.255.255.0 { range 10.0.178.100 10.0.178.199; option routers 10.0.178.1; }
+subnet 10.0.179.0 netmask 255.255.255.0 { range 10.0.179.100 10.0.179.199; option routers 10.0.179.1; }
+subnet 10.0.180.0 netmask 255.255.255.0 { range 10.0.180.100 10.0.180.199; option routers 10.0.180.1; }
+subnet 10.0.181.0 netmask 255.255.255.0 { range 10.0.181.100 10.0.181.199; option routers 10.0.181.1; }
+subnet 10.0.182.0 netmask 255.255.255.0 { range 10.0.182.100 10.0.182.199; option routers 10.0.182.1; }
+subnet 10.0.183.0 netmask 255.255.255.0 { range 10.0.183.100 10.0.183.199; option routers 10.0.183.1; }
+subnet 10.0.184.0 netmask 255.255.255.0 { range 10.0.184.100 10.0.184.199; option routers 10.0.184.1; }
+subnet 10.0.185.0 netmask 255.255.255.0 { range 10.0.185.100 10.0.185.199; option routers 10.0.185.1; }
+subnet 10.0.186.0 netmask 255.255.255.0 { range 10.0.186.100 10.0.186.199; option routers 10.0.186.1; }
+subnet 10.0.187.0 netmask 255.255.255.0 { range 10.0.187.100 10.0.187.199; option routers 10.0.187.1; }
+subnet 10.0.188.0 netmask 255.255.255.0 { range 10.0.188.100 10.0.188.199; option routers 10.0.188.1; }
+subnet 10.0.189.0 netmask 255.255.255.0 { range 10.0.189.100 10.0.189.199; option routers 10.0.189.1; }
+subnet 10.0.190.0 netmask 255.255.255.0 { range 10.0.190.100 10.0.190.199; option routers 10.0.190.1; }
+subnet 10.0.191.0 netmask 255.255.255.0 { range 10.0.191.100 10.0.191.199; option routers 10.0.191.1; }
+subnet 10.0.192.0 netmask 255.255.255.0 { range 10.0.192.100 10.0.192.199; option routers 10.0.192.1; }
+subnet 10.0.193.0 netmask 255.255.255.0 { range 10.0.193.100 10.0.193.199; option routers 10.0.193.1; }
+subnet 10.0.194.0 netmask 255.255.255.0 { range 10.0.194.100 10.0.194.199; option routers 10.0.194.1; }
+subnet 10.0.195.0 netmask 255.255.255.0 { range 10.0.195.100 10.0.195.199; option routers 10.0.195.1; }
+subnet 10.0.196.0 netmask 255.255.255.0 { range 10.0.196.100 10.0.196.199; option routers 10.0.196.1; }
+subnet 10.0.197.0 netmask 255.255.255.0 { range 10.0.197.100 10.0.197.199; option routers 10.0.197.1; }
+subnet 10.0.198.0 netmask 255.255.255.0 { range 10.0.198.100 10.0.198.199; option routers 10.0.198.1; }
+subnet 10.0.199.0 netmask 255.255.255.0 { range 10.0.199.100 10.0.199.199; option routers 10.0.199.1; }

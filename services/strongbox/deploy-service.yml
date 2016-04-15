@@ -1,0 +1,56 @@
+# Ansible >2 deploy playbook
+# use: ansible-playbook -i 192.168.0.1, deploy-service.yml
+# LOOK AT COMMA, IT IS IMPORTANT     ^^^
+# or as usual: ansible-playbook -i hosts.list deploy-service.yml
+
+---
+- hosts: all
+  remote_user: root
+  become_user: root
+  become: yes
+  tasks:
+    - name: install ruby ruby-devel sqlite-devel
+      command: dnf -y install ruby-devel sqlite-devel ruby
+    - name: install libxslt-devel
+      command: dnf -y install libxslt-devel
+    - name: gem update
+      command: gem update
+    - name: gem install rails
+      command: gem install rails --version 4.2.1
+    - name: add user
+      user: name=strongbox shell=/sbin/nologin
+    - name: copy project
+      copy: src=../strongbox dest=/home/ force=yes owner=strongbox
+    - set_fact: socks_path="/home/strongbox/tmp/socks"
+    - set_fact: app_sock="{{ socks_path }}/app.sock"
+    - set_fact: pids_path="/home/strongbox/tmp/pids"
+    - set_fact: app_pid="{{ pids_path }}/passenger.pid"
+    - name: Ensure sockets directory exists
+      file: path={{ socks_path }} state=directory
+    - name: Ensure pids directory exists
+      file: path={{ pids_path }} state=directory
+    - name: bundle update
+      shell: "cd /home/strongbox/ && bundle update"
+      become: yes
+      become_user: strongbox
+      become_method: su
+    - name: bundle install
+      command: bundle install
+      become: yes
+      become_user: strongbox
+      become_method: su
+    - name: db:precompile
+      shell: "cd /home/strongbox/ && RAILS_ENV=production bundle exec rake assets:precompile"
+      become: yes
+      become_user: strongbox
+      become_method: su
+    - name: db:migrate
+      command: bundle exec rake db:migrate RAILS_ENV=production
+      become: yes
+      become_user: strongbox
+      become_method: su
+    - name: run
+      shell: "cd /home/strongbox/ && RAILS_ENV=production bundle exec passenger start -d --environment production --pid-file {{ app_pid }}"
+      become: yes
+      become_user: strongbox
+      become_method: su

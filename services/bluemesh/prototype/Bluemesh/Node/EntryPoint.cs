@@ -1,68 +1,57 @@
-using System;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentAssertions;
 using Node.Connections;
 using Node.Connections.Tcp;
 using Node.Encryption;
-using Node.Messages;
 using Node.Routing;
-using NSubstitute;
-using NUnit.Framework;
 
-namespace Tests
+namespace Node
 {
-    [TestFixture]
-    internal class RoutingManager_Tests
+    internal class EntryPoint
     {
-        [Test, Explicit, Timeout(60000)]
-        public void Measure_map_negotiation()
+        private static void Main(string[] args)
         {
-            Console.SetOut(new StreamWriter("map-negotiation.log"));
-
-            var config = Substitute.For<IRoutingConfig>();
-            config.DesiredConnections.Returns(3);
-            config.MaxConnections.Returns(25);
-            config.ConnectCooldown.Returns(100.Milliseconds());
-            config.DisconnectCooldown.Returns(100.Milliseconds());
-            config.MapUpdateCooldown.Returns(20.Milliseconds());
-            var preconfiguredNodes = new List<IAddress>();
-            var nodes = Enumerable.Range(0, 25).Select(i => CreateNode(config, preconfiguredNodes, i)).ToList();
-
-            ThreadPool.SetMinThreads(nodes.Count * 2, nodes.Count * 2);
-
-            var trigger = new ManualResetEventSlim();
-            var tasks = nodes.Select(n => Task.Run(() =>
+            var config = new StaticConfig
             {
-                trigger.Wait();
-                n.Start();
-            })).ToList();
-
-            var watch = Stopwatch.StartNew();
-            trigger.Set();
-
-            Task.Delay(10.Seconds()).ContinueWith(task => nodes[0].Stopped = true).Wait();
-
-            Task.WhenAll(tasks).Wait();
-
-            Console.WriteLine("Communication took " + watch.Elapsed);
+                DesiredConnections = 3,
+                MaxConnections = 20,
+                ConnectCooldown = TimeSpan.FromMilliseconds(100),
+                DisconnectCooldown = TimeSpan.FromMilliseconds(100),
+                MapUpdateCooldown = TimeSpan.FromMilliseconds(50),
+                KeySendCooldown = TimeSpan.FromSeconds(10),
+                PreconfiguredNodes = Enumerable.Range(1, 30).Select(i => new TcpAddress(new IPEndPoint(IPAddress.Parse("10.23." + i + ".3"), 16800)) as IAddress).ToList(),
+                LocalAddress = GetLocalAddress(16800)
+            };
+            var node = CreateNode(config, config);
+            node.Start();
         }
 
-        private static TestNode CreateNode(IRoutingConfig routingConfig, List<IAddress> nodes, int id)
+        private static TcpAddress GetLocalAddress(int port)
         {
-            var connectionConfig = Substitute.For<IConnectionConfig>();
-            var address = new TcpAddress(new IPEndPoint(IPAddress.Loopback, 16800 + id));
-            connectionConfig.LocalAddress.Returns(address);
-            connectionConfig.PreconfiguredNodes.Returns(_ => nodes.Where(n => !Equals(n, address)).ToList());
-            nodes.Add(address);
-            var encryptionManager = Substitute.For<IEncryptionManager>();
-            var encoder = Substitute.For<IMessageEncoder>();
-            encryptionManager.CreateEncoder(Arg.Any<IAddress>()).Returns(encoder);
+            foreach (var @interface in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                Console.WriteLine(@interface.Name);
+                var info = @interface.GetIPProperties().UnicastAddresses
+                    .Where(i => i.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                    .FirstOrDefault(i => Regex.IsMatch(i.Address.ToString(), @"^10\.23\.\d+\.3$"));
+                if (info == null)
+                    continue;
+                return new TcpAddress(new IPEndPoint(info.Address, port));
+            }
+            throw new Exception("Could not find interface 10.23.*.3 to listen on!");
+        }
+
+        private static TestNode CreateNode(IConnectionConfig connectionConfig, IRoutingConfig routingConfig)
+        {
+            var encryptionManager = new EncryptionManager(((TcpAddress) connectionConfig.LocalAddress).Endpoint, connectionConfig.KeySendCooldown);
             var connectionManager = new TcpConnectionManager(connectionConfig, routingConfig, encryptionManager);
             return new TestNode(new RoutingManager(connectionManager, routingConfig), connectionManager);
         }
@@ -80,7 +69,7 @@ namespace Tests
                 while (!Stopped)
                 {
                     Tick();
-                    Thread.Sleep(10.Milliseconds());
+                    Thread.Sleep(TimeSpan.FromMilliseconds(10));
                 }
                 connectionManager.Stop();
                 Console.WriteLine("Stopped node {0}", connectionManager.Address);
@@ -94,7 +83,7 @@ namespace Tests
                 var selectResult = connectionManager.Select();
 
                 routingManager.UpdateConnections();
-                
+
                 foreach (var connection in selectResult.ReadableConnections.Where(c => c.State == ConnectionState.Connected))
                 {
                     var message = connection.Receive();
@@ -104,7 +93,7 @@ namespace Tests
 
                 routingManager.DisconnectExcessLinks();
                 routingManager.ConnectNewLinks();
-                
+
                 foreach (var connection in selectResult.ReadableConnections)
                 {
                     //Console.WriteLine("[{0}] tick: {1} -> {2}", connectionManager.Address, connectionManager.Address, connection.RemoteAddress);

@@ -37,10 +37,10 @@ class DummyClient(WebSocketClient):
 		self.debug('WebSocket closed, code: "{}", reason: "{}"'.format(code, reason))
 
 	def received_message(self, msg):
-		self.debug('DATA: ' + str(msg))
 		if not msg or not msg.is_text:
 			return
 		data = str(msg)
+		self.debug('WS msg: ' + data)
 		try:
 			if data == 'hello':
 				self.debug('WebSocket hello received')
@@ -53,6 +53,7 @@ class DummyClient(WebSocketClient):
 			if data.find(self.text) >= 0:
 				DONE.set()
 		except ValueError:
+			self.debug(traceback.format_exc())
 			self.debug('WebSocket parse message failed: ' + data)
 
 class Checker(HttpCheckerBase):
@@ -73,6 +74,7 @@ class Checker(HttpCheckerBase):
 				#self.debug(result)
 				return result
 			except ValueError:
+				self.debug(traceback.format_exc())
 				raise r.exceptions.HTTPError('failed to parse response')
 		finally:
 			response.close()
@@ -302,15 +304,27 @@ class Checker(HttpCheckerBase):
 	def put(self, addr, flag_id, flag, vuln):
 		s = self.session(addr)
 
-		msg = self.randphrase() + ', ' + flag
+		result = self.sget(s, addr, '/')
+		if not result or len(result) == 0:
+			print('get / failed')
+			return EXITCODE_MUMBLE
 
-		ws = DummyClient('ws://{}:{}/'.format(addr, WSPORT), headers=[('Origin', 'http://{}:{}'.format(addr, PORT)), ('User-Agent', 'qweqweqwe')])
+		csrf_token = s.cookies.get("csrf-token")
+		cookies_string = "; ".join([str(key) + "=" + str(val) for key, val in s.cookies.items()])
+
+		msg = {'title': self.randphrase(), 'ingredients': self.randphrase() + ', ' + flag, 'csrf-token': csrf_token}
+
+		ws = DummyClient('ws://{}:{}/'.format(addr, WSPORT), headers=[
+			('Origin', 'http://{}:{}'.format(addr, PORT)),
+			('User-Agent', 'qweqweqwe'),
+			('Cookie', cookies_string)])
 		try:
 			ws.daemon = True
-			ws.setargs('test', msg)
+			ws.setargs('test', 'FoodBot')
 			ws.connect()
 
 		except WebSocketException:
+			self.debug(traceback.format_exc())
 			print('websocket connect failed')
 			return EXITCODE_MUMBLE
 
@@ -321,7 +335,7 @@ class Checker(HttpCheckerBase):
 
 			self.debug(msg)
 
-			result = self.spost(s, addr, '/put/', msg)
+			result = self.spost(s, addr, '/put', msg)
 			if not result:
 				print('send msg failed')
 				return EXITCODE_MUMBLE
