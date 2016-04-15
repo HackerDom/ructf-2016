@@ -24,6 +24,8 @@ COMMIT
 -A INPUT -i lo -j ACCEPT
 -A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT
 
+-A INPUT -j LOG --log-prefix="[iptables] "
+
 -A INPUT -i eth0.1+ -p tcp --dport 22 -j DROP
 -A INPUT            -p tcp --dport 22 -j ACCEPT
 
@@ -100,6 +102,7 @@ COMMIT
 # rubygems.global.ssl.fastly.net
 -A FORWARD -p tcp -m multiport --dports 80,443 -d 185.31.17.249 -j ACCEPT
 
+-A FORWARD -j LOG --log-prefix="[iptables] "
 -A FORWARD -j REJECT
 
 COMMIT
