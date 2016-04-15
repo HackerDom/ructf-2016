@@ -20,10 +20,10 @@ namespace Tests
     [TestFixture]
     internal class RoutingManager_Tests
     {
-        [Test, Explicit, Timeout(60000)]
+        [Test, Explicit, Timeout(3000)]
         public void Measure_map_negotiation()
         {
-            Console.SetOut(new StreamWriter("map-negotiation.log"));
+            //Console.SetOut(new StreamWriter("map-negotiation.log"));
 
             var config = Substitute.For<IRoutingConfig>();
             config.DesiredConnections.Returns(3);

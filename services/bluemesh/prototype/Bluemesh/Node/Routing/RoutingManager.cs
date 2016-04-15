@@ -101,6 +101,8 @@ namespace Node.Routing
                     Console.WriteLine("[{0}] closing connection with {1} by agreement", Map.OwnAddress, connection.RemoteAddress);
                     connection.Close();
                 }
+                else
+                    Console.WriteLine("[{0}] won't close connection with {1}", Map.OwnAddress, connection.RemoteAddress);
             }
             Map.Merge(message.Links, connection.RemoteAddress);
             return true;
