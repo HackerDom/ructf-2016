@@ -15,7 +15,7 @@ namespace Tests
     internal class RoutingMap_Tests
     {
         [Test]
-        public void Merge_should_correctly_comapre_maps_from_real_case()
+        public void Merge_should_correctly_compare_maps_from_real_case()
         {
             var g1 = ParseDOT(@"
 graph  {
