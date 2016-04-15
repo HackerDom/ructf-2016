@@ -1,11 +1,5 @@
 #include "command.h"
 
-TNewCommand::TNewCommand(size_t x, size_t y)
-    : X(x)
-    , Y(y)
-{
-}
-
 bool Error(TProgramState& state) {
     state.Log << 'E';
     return false;
@@ -17,58 +11,62 @@ void PrintfNum(TProgramState& state, size_t num) {
     state.Log << buf;
 }
 
-bool TNewCommand::Run(TProgramState& state, TRoomConfiguration& configuration) const {
-    std::cout << "run new " << X << " " << Y << " " << ((int) configuration[X * 8 + Y]) << std::endl;
-    if (X * + Y < configuration.size() && configuration[X * 8 + Y] != 'W') {
+TNewCommand::TNewCommand(size_t x, size_t y)
+    : X(x)
+    , Y(y)
+{
+}
+
+bool TNewCommand::Run(TProgramState& state, TRoomPlan& plan) const {
+    if (X * + Y < plan.size() && plan[X * 8 + Y] != 'W') {
         state.Log << 'N';
         PrintfNum(state, X);
         PrintfNum(state, Y);
         state.PosX = X;
         state.PosY = Y;
         return true;
-    } else {
-        return Error(state);
-    }
+    } 
+
+    return Error(state);
 }
 
-TMoveCommand::TMoveCommand(char direction, size_t len) 
+TMoveCommand::TMoveCommand(char direction, size_t len)
     : Direction(direction)
     , Len(len)
 {
 }
 
-bool TMoveCommand::Run(TProgramState& state, TRoomConfiguration& configuration) const {
+bool TMoveCommand::Run(TProgramState& state, TRoomPlan& plan) const {
     bool error = false;
     size_t path_len = 0;
 
     for (size_t i = 0; i < Len; ++i) {
         size_t x = state.PosX;
         size_t y = state.PosY;
-        std::cout << (ssize_t) x << " " << (ssize_t) y << " " << ((int) configuration[x * 8 + y]) << " " << configuration[x * 8 + y] <<std::endl;
         switch (Direction) {
             case 'L':
-                if (x != 0 && configuration[(x - 1) * 8 + y] != 'W') {
+                if (x != 0 && plan[(x - 1) * 8 + y] != 'W') {
                     state.PosX--;
                 } else {
                     error = true;
                 }
                 break;
             case 'R':
-                if (x + 1 < configuration.size() && configuration[(x + 1) * 8 + y] != 'W') {
+                if (x + 1 < plan.size() && plan[(x + 1) * 8 + y] != 'W') {
                     state.PosX++;
                 } else {
                     error = true;
                 }
                 break;
             case 'U':
-                if (y < 7 && configuration[x * 8 + y + 1] != 'W') {
+                if (y < 7 && plan[x * 8 + y + 1] != 'W') {
                     state.PosY++;
                 } else {
                     error = true;
                 }
                 break;
             case 'D':
-                if (y != 0 && configuration[x * 8 + (y - 1)] != 'W') {
+                if (y != 0 && plan[x * 8 + (y - 1)] != 'W') {
                     state.PosY--;
                 } else {
                     error = true;
@@ -77,8 +75,6 @@ bool TMoveCommand::Run(TProgramState& state, TRoomConfiguration& configuration) 
             default:
                 error = true;
         }
-
-        std::cout << "Run " << Direction << " "<< Len << " " << path_len << " " << error << std::endl;
 
         if (error) {
             break;
@@ -103,7 +99,7 @@ bool TMoveCommand::Run(TProgramState& state, TRoomConfiguration& configuration) 
     return !error;
 }
 
-bool TErrorCommand::Run(TProgramState& state, TRoomConfiguration& /*configuration*/) const {
+bool TErrorCommand::Run(TProgramState& state, TRoomPlan& /*plan*/) const {
     return Error(state);
 }
 
@@ -112,8 +108,8 @@ TPrintCommand::TPrintCommand(char c)
 {
 }
 
-bool TPrintCommand::Run(TProgramState& state, TRoomConfiguration& configuration) const {
-    configuration[state.PosX * 8 + state.PosY] = Char;
+bool TPrintCommand::Run(TProgramState& state, TRoomPlan& plan) const {
+    plan[state.PosX * 8 + state.PosY] = Char;
     state.Log << 'P' << Char;
     return true;
 }

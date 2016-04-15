@@ -4,16 +4,27 @@
 #include "state.h"
 
 #include <string>
+#include <regex>
 
 #include <boost/filesystem.hpp>
 #include <boost/range/iterator_range.hpp>
 
 const char* HELP = "\
-THIS\n\
-IS\n\
-COOL\n\
-HELP\n\
-==============\n\
+=========================================================\n\
+Hi, this is CLEANER - cleaner robot hivemind\n\
+\n\
+You can:\n\
+1. upload your room plan and cleaner robot program\n\
+   [upload - password - (room - plan | program - source))\n\
+2. run program for your room\n\
+   [run - password - room - program]\n\
+3. get your room\n\
+   [get_room - password - room]\n\
+4. list existing rooms and programs\n\
+   [list - (rooms | programs)]\n\
+\n\
+Pass each command or argument on a seperate line!\n\
+=========================================================\n\
 ";
 
 static const std::string ROOMS_DIR = "rooms";
@@ -43,6 +54,10 @@ bool SaveRoom(TRoom& room) {
 bool SaveProgram(TProgram& program) {
     boost::filesystem::path file(PROGRAMS_DIR + "/" + program.GetName());
     return NSaveloader::Save(program, file);
+}
+
+bool ContainsNotAlphaNum(const std::string& str) {
+    return !std::regex_match(str, std::regex("^[A-Za-z0-9]+$"));
 }
 
 TCleanerServant::TCleanerServant(TSession& session)
@@ -78,29 +93,44 @@ void TCleanerServant::Upload() {
 
     std::string entity;
 
-    while (Session.ReadLines(entity)) {
+    while (Session.ReadLinesImpl(entity)) {
         if (entity == "room") {
             std::string name;
-            std::string configuration;
-            Session.ReadLines(name, configuration);
-            while (configuration.size() % 8) {
-                configuration += " ";
+            std::string plan;
+            Session.ReadLines(name, plan);
+
+            if (ContainsNotAlphaNum(name)) {
+                Session.Write("Only alnum names allowed\n");
+                return;
             }
 
-            TRoom room(name, pass, configuration);
+            while (plan.size() % 8) {
+                plan += " ";
+            }
+
+            TRoom room(name, pass, plan);
             if (!SaveRoom(room)) {
                 Session.Write("Can't save room: already exists\n");
+                return;
             }
         } else if (entity == "program") {
             std::string name;
-            std::string listing;
-            Session.ReadLines(name, listing);
-            TProgram program(name, pass, listing);
+            std::string source;
+            Session.ReadLines(name, source);
+
+            if (ContainsNotAlphaNum(name)) {
+                Session.Write("Only alnum names allowed\n");
+                return;
+            }
+
+            TProgram program(name, pass, source);
             if (!SaveProgram(program)) {
                 Session.Write("Can't save program: already exists\n");
+                return;
             }
         } else {
             Session.Write("Unknown entity : ", entity,  "\n");
+            return;
         }
     }
 }
@@ -110,10 +140,10 @@ void TCleanerServant::List() {
     Session.ReadLines(what);
 
     if (what == "programs" || what == "rooms") {
-        Session.Write("=====================\n"); 
+        Session.Write("=========================================================\n");
         std::string result = ListDir(what);
         Session.Write(result); 
-        Session.Write("=====================\n"); 
+        Session.Write("=========================================================\n");
     } else {
         Session.Write("Unknown listing entity : ", what, "\n");
     }
@@ -145,6 +175,11 @@ void TCleanerServant::GetRoom() {
 
     Session.ReadLines(pass, room_name);
 
+    if (ContainsNotAlphaNum(room_name)) {
+        Session.Write("Only alnum names allowed\n");
+        return;
+    }
+
     TRoom room;
 
     if (!LoadRoom(room, room_name)) {
@@ -157,10 +192,11 @@ void TCleanerServant::GetRoom() {
         return;
     }
 
-    const auto& configuration = room.GetConfiguration();
+    const auto& plan = room.GetPlan();
 
-    Session.Write(configuration, "\n");
+    Session.Write(plan, "\n");
     Session.Write("Program results:\n");
+    Session.Write("=========================================================\n");
 
     for (const auto& pair: room.GetLogs()) {
         TProgram program;
@@ -168,9 +204,11 @@ void TCleanerServant::GetRoom() {
             continue;
         }
         Session.Write(pair.first, "\n");
-        Session.Write(program.GetListing(), "\n");
+        Session.Write(program.GetSource(), "\n");
         Session.Write(pair.second, "\n");
     }
+
+    Session.Write("=========================================================\n");
 }
 
 void TCleanerServant::Run() {
@@ -183,6 +221,11 @@ void TCleanerServant::Run() {
     TRoom room;
     TProgram program;
     TProgramState state;
+
+    if (ContainsNotAlphaNum(room_name) || ContainsNotAlphaNum(program_name)) {
+        Session.Write("Only alnum names allowed\n");
+        return;
+    }
 
     if (!LoadRoom(room, room_name) || !LoadProgram(program, program_name)) {
         Session.Write("Nonexistent entities\n");

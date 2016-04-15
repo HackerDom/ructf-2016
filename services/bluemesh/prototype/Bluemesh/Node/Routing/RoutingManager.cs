@@ -64,8 +64,11 @@ namespace Node.Routing
         {
             if (DateTime.UtcNow - lastConnect < config.ConnectCooldown.AdjustForNode(connectionManager.Address))
                 return;
-            foreach (var peer in connectionManager.GetAvailablePeers())
+            var peers = connectionManager.GetAvailablePeers();
+            var firstIndex = random.Next(peers.Count);
+            for (int i = 0; i < peers.Count; i++)
             {
+                var peer = peers[(i + firstIndex) % peers.Count];
                 if (Map.ShouldConnectTo(peer) && connectionManager.TryConnect(peer))
                 {
                     lastConnect = DateTime.UtcNow;
@@ -101,6 +104,8 @@ namespace Node.Routing
                     Console.WriteLine("[{0}] closing connection with {1} by agreement", Map.OwnAddress, connection.RemoteAddress);
                     connection.Close();
                 }
+                else
+                    Console.WriteLine("[{0}] won't close connection with {1}", Map.OwnAddress, connection.RemoteAddress);
             }
             Map.Merge(message.Links, connection.RemoteAddress);
             return true;

@@ -20,7 +20,6 @@ def ructf_error(status=110, message=None, error=None, exception=None):
 		sys.stderr.write("\n")
 
 	if exception:
-		print(dir(exception))
 		sys.stderr.write("Exception: {}\n".format(exception))
 		traceback.print_tb(exception.__traceback__, file=sys.stderr)
 

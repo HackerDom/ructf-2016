@@ -29,3 +29,6 @@
 
 # Ansible logs
 /infrastructure/ansible/.log/
+packages
+/checkers/discoball/transmitter/FlagsTransmitter/FlagsTransmitter/obj
+/checkers/discoball/transmitter/FlagsTransmitter/FlagsTransmitter/bin

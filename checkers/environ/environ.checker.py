@@ -84,7 +84,7 @@ def receive_packet(team_id, pub_key, cmd_type, cmd, stream, secret=1):
         except:
             return None
 
-    captured = sniff(iface=IFACE, lfilter=is_env, stop_filter=success)
+    captured = sniff(iface=IFACE, lfilter=is_env, stop_filter=success, timeout=10)
     for capt in captured[::-1]:
         try:
             data_bytes = int(int(capt.data) // secret).to_bytes(300, byteorder='big').strip(b'\0')

@@ -25,7 +25,7 @@ namespace Node.Connections.Tcp
         public List<IAddress> GetAvailablePeers()
         {
             // TODO do real scan
-            return connectionConfig.PreconfiguredNodes;
+            return connectionConfig.PreconfiguredNodes.Where(address => !Equals(address, Address)).ToList();
         }
 
         public bool TryConnect(IAddress address)
@@ -56,7 +56,7 @@ namespace Node.Connections.Tcp
         public void PurgeDeadConnections()
         {
             connections.RemoveAll(c => c.State > ConnectionState.Connected || !c.Socket.IsOk());
-            foreach (var info in connectingSockets.Where(s => DateTime.UtcNow - s.Timestamp > TimeSpan.FromSeconds(1)).ToList())
+            foreach (var info in connectingSockets.Where(s => DateTime.UtcNow - s.Timestamp > connectionConfig.ConnectingSocketMaxTTL).ToList())
             {
                 info.Socket.Close();
                 connectingSockets.Remove(info);
@@ -104,6 +104,8 @@ namespace Node.Connections.Tcp
             }
             foreach (var socket in checkWrite)
             {
+                if (!socket.Connected)
+                    continue;
                 if (connectingSockets.RemoveAll(s => s.Socket == socket) > 0)
                 {
                     var address = new TcpAddress((IPEndPoint) socket.RemoteEndPoint);
@@ -160,7 +162,7 @@ namespace Node.Connections.Tcp
 
         private int GetUsedConnectionSlots()
         {
-            return connections.Count + connectingSockets.Count;
+            return connections.Count + connectingSockets.Count / connectionConfig.ConnectingSocketsToConnectionsMultiplier;
         }
 
         private Socket Connect(IPEndPoint endpoint)

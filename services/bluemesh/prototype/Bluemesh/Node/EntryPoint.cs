@@ -17,6 +17,11 @@ namespace Node
 {
     internal class EntryPoint
     {
+        //private const string AddressFormat = "10.23.{0}.3";
+        //private const string AddressRegex = @"^10\.23\.\d+\.3$";
+        private const string AddressFormat = "172.16.16.1{0:00}";
+        private const string AddressRegex = @"^172\.16\.16\.1\d+$";
+
         private static void Main(string[] args)
         {
             var config = new StaticConfig
@@ -27,8 +32,11 @@ namespace Node
                 DisconnectCooldown = TimeSpan.FromMilliseconds(100),
                 MapUpdateCooldown = TimeSpan.FromMilliseconds(50),
                 KeySendCooldown = TimeSpan.FromSeconds(10),
-                PreconfiguredNodes = Enumerable.Range(1, 30).Select(i => new TcpAddress(new IPEndPoint(IPAddress.Parse("10.23." + i + ".3"), 16800)) as IAddress).ToList(),
-                LocalAddress = GetLocalAddress(16800)
+                ConnectingSocketMaxTTL = TimeSpan.FromMilliseconds(50),
+                ConnectingSocketsToConnectionsMultiplier = 5,
+                PreconfiguredNodes = Enumerable.Range(1, 30).Select(i => new TcpAddress(new IPEndPoint(IPAddress.Parse(string.Format(AddressFormat, i)), 16800)) as IAddress).ToList(),
+                LocalAddress = GetLocalAddress(16800),
+                LongNames = true
             };
             var node = CreateNode(config, config);
             node.Start();
@@ -41,7 +49,7 @@ namespace Node
                 Console.WriteLine(@interface.Name);
                 var info = @interface.GetIPProperties().UnicastAddresses
                     .Where(i => i.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                    .FirstOrDefault(i => Regex.IsMatch(i.Address.ToString(), @"^10\.23\.\d+\.3$"));
+                    .FirstOrDefault(i => Regex.IsMatch(i.Address.ToString(), AddressRegex));
                 if (info == null)
                     continue;
                 return new TcpAddress(new IPEndPoint(info.Address, port));

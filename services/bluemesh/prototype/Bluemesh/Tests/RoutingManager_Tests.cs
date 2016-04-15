@@ -20,10 +20,10 @@ namespace Tests
     [TestFixture]
     internal class RoutingManager_Tests
     {
-        [Test, Explicit, Timeout(60000)]
+        [Test, Explicit, Timeout(3000)]
         public void Measure_map_negotiation()
         {
-            Console.SetOut(new StreamWriter("map-negotiation.log"));
+            //Console.SetOut(new StreamWriter("map-negotiation.log"));
 
             var config = Substitute.For<IRoutingConfig>();
             config.DesiredConnections.Returns(3);
@@ -60,6 +60,8 @@ namespace Tests
             connectionConfig.LocalAddress.Returns(address);
             connectionConfig.PreconfiguredNodes.Returns(_ => nodes.Where(n => !Equals(n, address)).ToList());
             nodes.Add(address);
+            connectionConfig.ConnectingSocketMaxTTL.Returns(TimeSpan.FromMilliseconds(50));
+            connectionConfig.ConnectingSocketsToConnectionsMultiplier.Returns(5);
             var encryptionManager = Substitute.For<IEncryptionManager>();
             var encoder = Substitute.For<IMessageEncoder>();
             encryptionManager.CreateEncoder(Arg.Any<IAddress>()).Returns(encoder);

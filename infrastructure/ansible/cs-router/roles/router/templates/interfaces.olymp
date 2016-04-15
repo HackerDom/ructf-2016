@@ -1,0 +1,73 @@
+# REQUIRES MANUAL APLLY
+
+source /etc/network/interfaces.d/*
+
+auto lo
+iface lo inet loopback
+
+#allow-hotplug eth0
+#iface eth0 inet dhcp
+#iface eth0 inet static
+#    address 172.16.16.202
+#    netmask 255.255.255.0
+#    gateway 172.16.16.254
+#    dns-nameservers 8.8.8.8
+
+auto eth0.11            # OLYMP-1
+iface eth0.11 inet static
+    address 10.0.11.1
+    netmask 255.255.255.0
+
+auto eth0.11:1
+iface eth0.11:1 inet static
+    address 10.1.11.1
+    netmask 255.255.255.0
+
+auto eth0.12            # OLYMP-2
+iface eth0.12 inet static
+    address 10.0.12.1
+    netmask 255.255.255.0
+
+auto eth0.12:1
+iface eth0.12:1 inet static
+    address 10.1.12.1
+    netmask 255.255.255.0
+
+auto eth0.13            # OLYMP-3
+iface eth0.13 inet static
+    address 10.0.13.1
+    netmask 255.255.255.0
+
+auto eth0.13:1
+iface eth0.13:1 inet static
+    address 10.1.13.1
+    netmask 255.255.255.0
+
+auto eth0.14            # OLYMP-4
+iface eth0.14 inet static
+    address 10.0.14.1
+    netmask 255.255.255.0
+
+auto eth0.14:1
+iface eth0.14:1 inet static
+    address 10.1.14.1
+    netmask 255.255.255.0
+
+auto eth0.20            # Management
+iface eth0.20 inet static
+    address 10.0.20.1
+    netmask 255.255.255.0
+
+auto eth0.30            # JURY
+iface eth0.30 inet static
+    address 10.0.30.1
+    netmask 255.255.255.0
+
+auto eth0.40            # UPLINK
+#iface eth0.40 inet dhcp
+iface eth0.40 inet static
+    address 172.16.16.202
+    netmask 255.255.255.0
+    gateway 172.16.16.254
+    dns-nameservers 8.8.8.8
+

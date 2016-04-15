@@ -1,7 +1,7 @@
 #include "parser.h"
 
-TCommandParser::TCommandParser(const std::string& listing)
-    : Listing(listing)
+TCommandParser::TCommandParser(const std::string& source)
+    : Source(source)
     , Idx(0)
     , State(EWaitCmd)
 {
@@ -11,10 +11,10 @@ std::unique_ptr<ICommand> TCommandParser::GetNext() {
     char cmd;
     size_t num = 0;
 
-    while (Idx < Listing.size()) {
+    while (Idx < Source.size()) {
         switch (State) {
             case EWaitCmd:
-                cmd = Listing[Idx];
+                cmd = Source[Idx];
                 if (cmd == 'P') {
                     State = EWaitChar; 
                 } else {
@@ -23,7 +23,6 @@ std::unique_ptr<ICommand> TCommandParser::GetNext() {
                 break;
             case EWaitNumber1:
                 if (!GetNum(num)) {
-                    std::cout << "got error" << std::endl;
                     return std::unique_ptr<ICommand>(new TErrorCommand());
                 }
                 if (cmd == 'N') {
@@ -31,29 +30,24 @@ std::unique_ptr<ICommand> TCommandParser::GetNext() {
                 } else {
                     Idx++;
                     State = EWaitCmd; 
-                    std::cout << "got move" << std::endl;
                     return std::unique_ptr<ICommand>(new TMoveCommand(cmd, num));
                 }
                 break;
             case EWaitNumber2:
                 size_t num2;
                 if (!GetNum(num2)) {
-                    std::cout << "got error" << std::endl;
                     return std::unique_ptr<ICommand>(new TErrorCommand());
                 }
                 Idx++;
                 State = EWaitCmd; 
-                std::cout << "got new" << std::endl;
                 return std::unique_ptr<ICommand>(new TNewCommand(num, num2));
             case EWaitChar:
                 char c;
-                c = Listing[Idx];
+                c = Source[Idx];
                 Idx++;
                 State = EWaitCmd;
-                std::cout << "got print" << std::endl;
                 return std::unique_ptr<ICommand>(new TPrintCommand(c));
             case EError:
-                std::cout << "got error" << std::endl;
                 Idx++;
                 return std::unique_ptr<ICommand>(new TErrorCommand());
         };
@@ -63,13 +57,13 @@ std::unique_ptr<ICommand> TCommandParser::GetNext() {
 }
 
 bool TCommandParser::GetNum(size_t& num) {
-    char buf = Listing[Idx]; 
+    char buf = Source[Idx]; 
     if (buf < '0' || buf > '9') {
         return false;
     }
     num = 10 * (buf - '0');
     Idx++;
-    buf = Listing[Idx]; 
+    buf = Source[Idx]; 
     if (buf < '0' || buf > '9') {
         return false;
     }

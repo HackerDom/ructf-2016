@@ -24,8 +24,11 @@ namespace Node.Routing
 
         public IAddress FindExcessPeer()
         {
+            if (GraphHelper.GetPeers(OwnAddress, Links).Count() <= config.DesiredConnections)
+                return null;
+
             IAddress excessPeer = null;
-            foreach (var peerLink in Links.Where(link => link.Contains(OwnAddress)).ToList())
+            foreach (var peerLink in Links.Where(link => link.Connected && link.Contains(OwnAddress)).ToList())
             {
                 if (IsLinkExcess(peerLink))
                 {
@@ -40,9 +43,6 @@ namespace Node.Routing
         public bool IsLinkExcess(RoutingMapLink link)
         {
             if (!link.Connected)
-                return false;
-
-            if (GraphHelper.GetPeers(OwnAddress, Links).Count() <= config.DesiredConnections)
                 return false;
 
             var stateBefore = GraphHelper.CalculateConnectivity(Links);
@@ -63,8 +63,8 @@ namespace Node.Routing
             var oldLinks = Links.ToList();
 
             var linksToAdd = links.Where(link => !link.Contains(OwnAddress) && 
-                ((link.Contains(source) && link.Connected != Links.FirstOrDefault(l => Equals(l, link)).Connected) ||  
-                link.Version > Links.FirstOrDefault(l => Equals(l, link)).Version)).ToList();
+                    ((link.Contains(source) && link.Connected != Links.FirstOrDefault(l => Equals(l, link)).Connected) ||  
+                    link.Version > Links.FirstOrDefault(l => Equals(l, link)).Version)).ToList();
 
             if (linksToAdd.Count > 0)
                 Version++;
@@ -73,7 +73,14 @@ namespace Node.Routing
                 Links.Remove(link);
             Links.AddRange(linksToAdd);
 
-            Console.WriteLine("[{0}] MERGE {1} with {2} from {3} => {4}", OwnAddress, oldLinks.ToDOT(), links.ToDOT(), source, Links.ToDOT());
+            foreach (var link in links.Where(l => !l.Connected))
+            {
+                if (!Links.Contains(link))
+                    Links.Add(link);
+            }
+
+            Console.WriteLine("[{0}] MERGE {1} with {2} from {3} => {4}", OwnAddress, 
+                oldLinks.ToDOT(longNames: config.LongNames), links.ToDOT(longNames: config.LongNames), source, Links.ToDOT(longNames: config.LongNames));
         }
 
         public void AddDirectConnection(IAddress other)
@@ -131,7 +138,7 @@ namespace Node.Routing
 
         public override string ToString()
         {
-            return Links.ToDOT("routes");
+            return Links.ToDOT("routes", config.LongNames);
         }
 
         public List<RoutingMapLink> Links { get; }

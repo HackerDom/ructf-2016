@@ -1,0 +1,53 @@
+# Ansible >2 deploy playbook
+# use: ansible-playbook -i 192.168.0.1, deploy-service.yml
+# LOOK AT COMMA, IT IS IMPORTANT     ^^^
+# or as usual: ansible-playbook -i hosts.list deploy-service.yml
+
+---
+- hosts: all
+  remote_user: root
+  become_user: root
+  become: yes
+  tasks:
+    - name: install system requiremets
+      dnf: name={{item}} state=latest disable_gpg_check=yes
+      with_items:
+        - boost-devel
+        - openssl-devel
+        - cmake
+        - gcc
+        - gcc-c++
+    - name: add user
+      user: name=cleaner shell=/sbin/nologin
+    - name: set permissions
+      file: path=/home/cleaner owner=cleaner group=cleaner mode=0700
+    - name: copy files 
+      copy: src={{item}} dest=/home/cleaner force=yes owner=cleaner
+      with_items:
+        - CMakeLists.txt 
+        - src
+    - name: create build directory
+      file: path=/home/cleaner/build state=directory owner=cleaner
+    - name: create bin directory
+      file: path=/home/cleaner/bin state=directory owner=cleaner
+    - name: build cleaner
+      command: chdir=/home/cleaner/build sudo -u cleaner {{item}}
+      with_items:
+        - cmake ..
+        - make -j 8
+        - cp bin/cleaner /home/cleaner/bin/
+    - name: copy cleaner.service
+      copy:
+        src=files/cleaner.service
+        dest=/usr/lib/systemd/system/cleaner.service
+        force=yes
+    - name: reload daemon
+      command: systemctl daemon-reload
+    - name: services enable
+      service: name={{item}} enabled=yes
+      with_items:
+        - cleaner
+    - name: services restart
+      service: name={{item}} state=restarted
+      with_items:
+        - cleaner
