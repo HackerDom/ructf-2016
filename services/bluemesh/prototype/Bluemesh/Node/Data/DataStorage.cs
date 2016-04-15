@@ -44,6 +44,11 @@ namespace Node.Data
             return data.TryGetValue(key, out value) ? value : null;
         }
 
+        public override string ToString()
+        {
+            return string.Join(", ", data.Keys);
+        }
+
         private readonly Dictionary<string, byte[]> data;
     }
 }

@@ -6,3 +6,6 @@
 
 - name: reload squid
   service: name=squid3 state=reloaded
+
+- name: restart rsyslog
+  service: name=rsyslog state=restarted

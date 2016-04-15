@@ -7,13 +7,13 @@ namespace Node.Connections.Tcp
 {
     internal class TcpConnection : IConnection
     {
-        public TcpConnection(TcpAddress localAddress, TcpAddress remoteAddress, Socket socket,  IConnectionUtility connectionUtility, IMessageEncoder encoder)
+        public TcpConnection(TcpAddress localAddress, TcpAddress remoteAddress, Socket socket,  IConnectionUtility connectionUtility, IEncryptionManager encryptionManager)
         {
             RemoteAddress = remoteAddress;
             this.localAddress = localAddress;
             this.socket = socket;
             this.connectionUtility = connectionUtility;
-            stream = new NonblockingSocketStream(socket, connectionUtility, encoder);
+            stream = new NonblockingSocketStream(socket, connectionUtility, encryptionManager.CreateEncoder(this));
             State = ConnectionState.Connecting;
         }
 

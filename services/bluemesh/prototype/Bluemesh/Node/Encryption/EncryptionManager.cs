@@ -34,6 +34,7 @@ namespace Node.Encryption
         public void Stop()
         {
             stopped = true;
+            listenerThread.Abort();
         }
 
         public void RetrievePeerKeys(IEnumerable<IAddress> peers)
@@ -44,34 +45,51 @@ namespace Node.Encryption
             }
         }
 
-        public IMessageEncoder CreateEncoder(IAddress peer)
+        public IMessageEncoder CreateEncoder(IConnection connection)
         {
-            var tcpAddress = peer as TcpAddress;
-            ulong key;
+            return new MessageEncoder(privateKey, () => GetPublicKey(connection.RemoteAddress));
+        }
+
+        private ulong GetPublicKey(IAddress address)
+        {
             lock (peerKeys)
             {
+                ulong key;
+                var tcpAddress = address as TcpAddress;
                 if (tcpAddress == null || !peerKeys.TryGetValue(tcpAddress.Endpoint, out key))
                 {
-                    Console.WriteLine("No public key for address {0}", peer);
-                    return new MessageEncoder(privateKey, 0);
+                    Console.WriteLine("No public key for address {0}", tcpAddress);
+                    return 0UL;
                 }
+                return key;
             }
-            return new MessageEncoder(privateKey, key);
+        }
+
+        public void EncryptData(byte[] data, int offset, int length, IAddress peer)
+        {
+            BluemeshEncryptor.EncryptBytes(data, offset, length % 8 == 0 ? length : length + (8 - length % 8), GetPublicKey(peer));
+        }
+
+        public void DecryptData(byte[] data, int offset, int length)
+        {
+            BluemeshEncryptor.EncryptBytes(data, offset, length % 8 == 0 ? length : length + (8 - length % 8), privateKey);
         }
 
         private void Listen()
         {
+            //Console.WriteLine("Listening on {0}", serverEndpoint);
             listenerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            listenerSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             listenerSocket.Bind(serverEndpoint);
             while (!stopped)
             {
-                EndPoint endpoint = null;
+                EndPoint endpoint = new IPEndPoint(IPAddress.Any, 0);
                 if (listenerSocket.ReceiveFrom(keyBuffer, ref endpoint) == 8)
                 {
                     var key = BitConverter.ToUInt64(keyBuffer, 0);
                     lock (peerKeys)
                         peerKeys[(IPEndPoint) endpoint] = key;
-                    Console.WriteLine("KeyManager: {0} has {1}", endpoint, key);
+                    //Console.WriteLine("KeyManager: {0} has {1}", endpoint, key);
                 }
             }
             listenerSocket.Close();
@@ -83,10 +101,21 @@ namespace Node.Encryption
             if (lastSend.TryGetValue(endpoint, out lastSendTime) && DateTime.UtcNow - lastSendTime <= sendCooldown)
                 return;
 
-            var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            socket.SendTo(BitConverter.GetBytes(publicKey), endpoint);
-
-            lastSend[endpoint] = DateTime.UtcNow;
+            try
+            {
+                var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp)
+                {
+                    Blocking = false
+                };
+                socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                socket.Bind(serverEndpoint);
+                socket.SendTo(BitConverter.GetBytes(publicKey), endpoint);
+                lastSend[endpoint] = DateTime.UtcNow;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("TryDownloadKey : " + e.Message);
+            }
         }
 
         private bool stopped;

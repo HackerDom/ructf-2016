@@ -53,3 +53,6 @@
 
 #- service: name=squid3 state=started
 
+- template: src=iptables_log.conf dest=/etc/rsyslog.d/iptables_log.conf
+  notify: restart rsyslog
+

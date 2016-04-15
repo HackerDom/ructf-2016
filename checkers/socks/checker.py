@@ -37,6 +37,7 @@ def ructf_error(status=110, message=None, error=None, exception=None, request=No
         sys.stderr.write("Exception: {}\n".format(exception))
         traceback.print_tb(exception.__traceback__, file=sys.stderr)
 
+    sys.stderr.flush()
     sys.exit(status)
 
 def service_ok(status=101, message="Service OK", *args, **kwargs):
@@ -76,7 +77,7 @@ def handler_get(args, things):
 
     for r in reply.split("\n"):
         if flag in r:
-            return service_ok(message="OK", request=request, reply=reply)
+            return service_ok(request=request, reply=reply)
 
     return service_corrupt(message="Bad flag", error=make_err_message("Bad flag", request, reply))
 
@@ -87,7 +88,6 @@ def handler_put(args, things):
     id_big = "{}==={}".format(id, thing)
     request = "http://{0}:{3}/set?text={1}&owner={2}".format(hostname, flag, id, PORT)
     reply = None
-    thing = None
     try:
         r = requests.post(request, data=thing)
         reply = r.text
