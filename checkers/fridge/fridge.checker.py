@@ -324,7 +324,7 @@ class Checker(HttpCheckerBase):
 		msg = [('title', self.randphrase()), ('ingredients', self.randphrase() + ', ' + flag), ('csrf-token', csrf_token)]
 
 		ws = DummyClient('ws://{}:{}/'.format(addr, WSPORT), headers=[
-			('Origin', 'http://{}:{}'.format(addr, PORT)),
+			#('Origin', 'http://{}:{}'.format(addr, PORT)),
 			('User-Agent', 'qweqweqwe'),
 			('Cookie', cookies_string)])
 		try:
