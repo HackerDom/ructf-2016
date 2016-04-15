@@ -301,10 +301,12 @@ def handler_get(args):
     if not program in programs:
         return service_corrupt(message="No such program", error=make_err_message("No such program", program, "\n".join(programs)))
 
-    room_conf = state.get_room(room, password).lower()
-    enc_flag = generate_room(flag).lower()
-    enc_flag_w = re.sub('[^w]', ' ', enc_flag)
-    room_conf_w = re.sub('[^w]', ' ', room_conf)
+    enc_flag = generate_room(flag)
+    enc_flag_w = re.sub('[^W]', ' ', enc_flag)
+
+    room_conf = state.get_room(room, password)
+    room_conf_w = re.sub('[^W]', ' ', room_conf)
+
     if room_conf_w != enc_flag_w:
         return service_corrupt(message="Bad flag", error=make_err_message("Bad flag", enc_flag_w, room_conf_w))
 

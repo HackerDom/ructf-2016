@@ -11,7 +11,7 @@
 
 const char* HELP = "\
 =========================================================\n\
-HI this is CLEANER - cleaner robot hivemind\n\
+Hi, this is CLEANER - cleaner robot hivemind\n\
 \n\
 You can:\n\
 1. upload your room plan and cleaner robot program\n\
@@ -196,6 +196,7 @@ void TCleanerServant::GetRoom() {
 
     Session.Write(plan, "\n");
     Session.Write("Program results:\n");
+    Session.Write("=========================================================\n");
 
     for (const auto& pair: room.GetLogs()) {
         TProgram program;
@@ -206,6 +207,8 @@ void TCleanerServant::GetRoom() {
         Session.Write(program.GetSource(), "\n");
         Session.Write(pair.second, "\n");
     }
+
+    Session.Write("=========================================================\n");
 }
 
 void TCleanerServant::Run() {
