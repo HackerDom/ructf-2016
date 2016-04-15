@@ -98,7 +98,7 @@ implementation
 		message: string;
 		page: string;
 		list, line, tmp: string;
-		sensors: TValuess;
+		values: TValuess;
 		i: longint;
 	begin
 		Handled := True;
@@ -119,22 +119,24 @@ implementation
 		end;
 
 		page := StringReplace(page, '{-description-}', dashboard.Description, []);
-	
-		sensors := GetSensorsValues(dashboard.sensors);
+
+
+		values := GetSensorsValues(dashboard.sensors);
 		line := '';
 		list := '';
-		for i := 0 to sensors.Count - 1 do
+		for i := 0 to values.Count - 1 do
 		begin
-			tmp := StringReplace(viewSensorTemplate, '{-data-}', ValuesToString(sensors[i]), []);
+			tmp := StringReplace(viewSensorTemplate, '{-data-}', ValuesToString(values[i]), []);
 			line := line + StringReplace(tmp, '{-id-}', intToStr(i), [rfReplaceAll]);
 			if (i + 1) mod 4 = 0 then
 			begin
 				list := list + StringReplace(viewLineTemplate, '{-line-}', line, []);
 				line := '';
 			end;
+			values[i].free;
 		end;
 
-		sensors.free;
+		values.free;
 
 		if line <> '' then
 			list := list + StringReplace(viewLineTemplate, '{-line-}', line, []);
@@ -184,7 +186,7 @@ implementation
 		end;
 
 		userId := GetCurrentUserId(ARequest);
-		dashboardId := DashboardManager.CreateDashboard(dname, description, isPublic <> 'on', ParseSensors(ssensors));
+		dashboardId := DashboardManager.CreateDashboard(dname, description, isPublic <> '', ParseSensors(ssensors));
 		AccountManager.AddDashboard(userId, dashboardid);
 		AddPermission(ARequest, AResponse, dashboardid);
 

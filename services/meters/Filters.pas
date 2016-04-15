@@ -73,6 +73,7 @@ implementation
 				if curData.Count <> 0 then
 					values[curSecond - startTime] := HandleSecond(curData);
 			
+				data.free;
 				lastUpdate := finish;
 			end;
 			rwSync.EndWrite;

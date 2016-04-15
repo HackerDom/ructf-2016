@@ -59,8 +59,6 @@ implementation
 	var
 		filename: string;
 		dashboard: PDashboard;
-		sensor: TSensor;
-		n, k, i, j: longint;
 		dashboardId: string;
 		ispub: byte;
 	begin
@@ -82,20 +80,7 @@ implementation
 				readln(saveFile, dashboard^.Description);
 				readln(saveFile, ispub);
 				dashboard^.IsPublic := ispub = 1;
-				read(saveFile, n);
-				dashboard^.Sensors := TSensors.Create;
-				for i := 1 to n do
-				begin
-					sensor := TSensor.Create;
-					for j := 1 to FactorsCount do
-					begin
-						read(saveFile, k);
-						sensor.add(k);
-					end;
-					dashboard^.Sensors.add(sensor);
-				end;
-				readln(saveFile);
-
+				readln(saveFile, dashboard^.sensors);
 				dashboards[dashboardId] := dashboard;
 			end;
 			append(saveFile);
@@ -121,7 +106,6 @@ implementation
 		dashboard: PDashboard;
 		dashboardid: TDashboardId;
 		oisPub: byte;
-		i, j: longint;
 	begin
 		new(dashboard);
 		dashboardid := GetGuid;
@@ -139,13 +123,7 @@ implementation
 		else
 			oisPub := 0;
 		writeln(saveFile, oisPub);
-		writeln(saveFile, sensors.count);
-		for i := 0 to sensors.count - 1 do
-		begin
-			for j := 0 to FactorsCount - 1 do
-				write(saveFile, sensors[i][j], ' ');
-			writeln(saveFile);
-		end;
+		writeln(saveFile, sensors);
 		flush(saveFile);
 		dashboards[IntToStr(dashboardId)] := dashboard;
 		rwSync.endWrite;
