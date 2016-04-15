@@ -24,22 +24,90 @@ COMMIT
 -A INPUT -i lo -j ACCEPT
 -A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT
 
+-A INPUT -j LOG --log-prefix="[iptables] "
+
 -A INPUT -i eth0.1+ -p tcp --dport 22 -j DROP
 -A INPUT            -p tcp --dport 22 -j ACCEPT
+
+# nginx for http
+-A INPUT            -p tcp --dport 80 -j ACCEPT
+
+-A INPUT -j LOG --log-prefix="[blocked] "
 
 # FORWARD
 
 -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 
+-A FORWARD -j LOG --log-prefix="[iptables] "
+
 # Allow participants to jury
 -A FORWARD -i eth0.1+ -o eth0.30 -j ACCEPT
 
-# !!! TEMP !!! FOR DEBUG PURPOSES !!! ALLOW FULL INTERNET ACCESS !!!
--A FORWARD -i eth0.1+ -o eth0.40 -j ACCEPT
+# Allow jury go everywhere
+-A FORWARD -i eth0.30 -j ACCEPT
 
 # Allow well-known DNS servers for everybody
--A FORWARD -p udp -d 8.8.8.8 --dport 53 -j ACCEPT
--A FORWARD -p udp -d 8.8.4.4 --dport 53 -j ACCEPT
+-A FORWARD -p udp -d 8.8.8.8 --dport 53 -o eth0.40 -j ACCEPT
+-A FORWARD -p udp -d 8.8.4.4 --dport 53 -o eth0.40 -j ACCEPT
+
+# Allow NTP
+-A FORWARD -p udp --dport 123 -j ACCEPT
+
+### Sites white-list
+
+# ructf.org
+-A FORWARD -p tcp -m multiport --dports 80,443 -d 194.226.244.126 -j ACCEPT
+
+# google.ru, fonts.gstatic.com
+-A FORWARD -p tcp -m multiport --dports 80,443 -d 90.150.4.0/24 -j ACCEPT
+
+# webcache.googleusercontent.com
+-A FORWARD -p tcp -m multiport --dports 80,443 -d 173.194.220.132 -j ACCEPT
+-A FORWARD -p tcp -m multiport --dports 80,443 -d 173.194.222.132 -j ACCEPT
+-A FORWARD -p tcp -m multiport --dports 80,443 -d 209.85.233.132 -j ACCEPT
+-A FORWARD -p tcp -m multiport --dports 80,443 -d 64.233.162.132 -j ACCEPT
+-A FORWARD -p tcp -m multiport --dports 80,443 -d 64.233.163.132 -j ACCEPT
+-A FORWARD -p tcp -m multiport --dports 80,443 -d 64.233.164.132 -j ACCEPT
+-A FORWARD -p tcp -m multiport --dports 80,443 -d 64.233.165.132 -j ACCEPT
+-A FORWARD -p tcp -m multiport --dports 80,443 -d 74.125.205.132 -j ACCEPT
+
+# web archive
+-A FORWARD -p tcp -m multiport --dports 80,443 -d 207.241.224.2 -j ACCEPT
+-A FORWARD -p tcp -m multiport --dports 80,443 -d 207.241.225.186 -j ACCEPT
+
+# mirror.yandex.ru
+-A FORWARD -p tcp -m multiport --dports 80,443 -d 213.180.204.183 -j ACCEPT
+
+# www.rfc-editor.org
+-A FORWARD -p tcp -m multiport --dports 80,443 -d 4.31.198.49 -j ACCEPT
+
+# python.org
+-A FORWARD -p tcp -m multiport --dports 80,443 -d 104.130.43.121 -j ACCEPT
+
+# www.python.org
+-A FORWARD -p tcp -m multiport --dports 80,443 -d 185.31.17.223 -j ACCEPT
+
+# www.cpan.org
+-A FORWARD -p tcp -m multiport --dports 80,443 -d 94.242.223.198 -j ACCEPT
+
+# search.cpan.org
+-A FORWARD -p tcp -m multiport --dports 80,443 -d 194.106.223.155 -j ACCEPT
+
+# metacpan.org
+-A FORWARD -p tcp -m multiport --dports 80,443 -d 23.235.33.143 -j ACCEPT
+-A FORWARD -p tcp -m multiport --dports 80,443 -d 23.235.37.143 -j ACCEPT
+
+# packagist.org
+-A FORWARD -p tcp -m multiport --dports 80,443 -d 87.98.253.214 -j ACCEPT
+
+# rubygems.org
+-A FORWARD -p tcp -m multiport --dports 80,443 -d 54.186.104.15 -j ACCEPT
+
+# rubygems.global.ssl.fastly.net
+-A FORWARD -p tcp -m multiport --dports 80,443 -d 185.31.17.249 -j ACCEPT
+
+-A FORWARD -j LOG --log-prefix="[blocked] "
+-A FORWARD -j REJECT
 
 COMMIT
 

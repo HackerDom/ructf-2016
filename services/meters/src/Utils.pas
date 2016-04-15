@@ -17,10 +17,25 @@ interface
 	function GetSubTemplate(const module, name: string): string;
 	function StrToQWord(const s: string): QWord;
 	function htmlEncode(const str: string): string;
+	function DateTimeToUnix(dtDate: TDateTime): dword;
+	function TSNow: dword;
 
 implementation
 	uses
 		SysUtils, baseunix;
+
+	const
+		UnixStartDate: TDateTime = 25569.0;
+
+	function DateTimeToUnix(dtDate: TDateTime): dword;
+	begin
+		result := trunc((dtDate - UnixStartDate) * 86400);
+	end;
+
+	function TSNow: dword;
+	begin
+		result := DateTimeToUnix(now);
+	end;
 
 	var 
 		getGuidLock: TRTLCriticalSection;
@@ -50,16 +65,14 @@ implementation
 	begin
 		EnterCriticalSection(getGuidLock);
 
-		result := random(65536);
-		result := (result shl 8) xor random(65536);
-		result := (result shl 8) xor random(65536);
-		result := (result shl 8) xor random(65536);
-		result := (result shl 8) xor random(65536);
-		result := (result shl 8) xor random(65536);
-		result := (result shl 8) xor random(65536);
-		result := (result shl 8) xor random(65536);
-
-		LeaveCriticalSection(getGuidLock);
+		try
+			result := random(65536);
+			result := (result shl 16) xor random(65536);
+			result := (result shl 16) xor random(65536);
+			result := (result shl 16) xor random(65536);
+		finally
+			LeaveCriticalSection(getGuidLock);
+		end;
 	end;
 
 	function HasBadSymbols(const s: string): boolean;

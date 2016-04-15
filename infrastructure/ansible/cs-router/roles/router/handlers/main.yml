@@ -3,3 +3,9 @@
 
 - name: restart dhcpd
   service: name=isc-dhcp-server state=restarted
+
+- name: reload squid
+  service: name=squid3 state=reloaded
+
+- name: restart rsyslog
+  service: name=rsyslog state=restarted

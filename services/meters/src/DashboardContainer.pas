@@ -5,25 +5,25 @@ unit DashboardContainer;
 
 interface
 	uses
-		fgl, SysUtils, Utils, avglvltree;
+		fgl, SysUtils, Utils, avglvltree, Sensors;
 
 	type
 		TSensorId = QWord;
 		TDashboardId = QWord;
 
 		TDashboardIds = specialize TFPGList<TDashboardId>;
-		TSensors = specialize TFPGList<TSensorId>;
-		TSensorss = specialize TFPGList<TSensors>;
 
 		TDashboard = record
 			Name: string;
 			Description: string;
-			Sensors: TSensorss;
+			IsPublic: boolean;
+			Sensors: TSensors;
 		end;
 
 		TDashboardPair = record
 			ID: string;
 			Name: string;
+			IsPublic: boolean;
 			class operator = (const a, b: TDashboardPair): Boolean;
 		end;
 
@@ -37,7 +37,7 @@ interface
 			public
 				procedure Initialize;
 				function GetDashBoard(const dashboardId: TDashboardId): TDashboard;
-				function CreateDashboard(const name, description: string): TDashboardId;
+				function CreateDashboard(const name, description: string; const ispub: boolean; const sensors: TSensors): TDashboardId;
 				function GetDashboards(): TDashboards;
 		end;
 
@@ -59,9 +59,8 @@ implementation
 	var
 		filename: string;
 		dashboard: PDashboard;
-		sensor: TSensorId;
-		n, k, i, j: longint;
 		dashboardId: string;
+		ispub: byte;
 	begin
 		writeln(stderr, 'Initialize DashboardManager');
 		flush(stderr);
@@ -79,20 +78,9 @@ implementation
 				readln(saveFile, dashboardid);
 				readln(saveFile, dashboard^.Name);
 				readln(saveFile, dashboard^.Description);
-				read(saveFile, n);
-				dashboard^.Sensors := TSensorss.Create;
-				for i := 1 to n do
-				begin
-					dashboard^.Sensors.Add(TSensors.Create);
-					read(saveFile, k);
-					for j := 1 to k do
-					begin
-						read(saveFile, sensor);
-						dashboard^.Sensors.last.add(sensor);
-					end;
-				end;
-				readln(saveFile);
-
+				readln(saveFile, ispub);
+				dashboard^.IsPublic := ispub = 1;
+				readln(saveFile, dashboard^.sensors);
 				dashboards[dashboardId] := dashboard;
 			end;
 			append(saveFile);
@@ -108,29 +96,43 @@ implementation
 		result := EmpyDashboard;
 		sdashboardid := inttostr(dashboardId);
 		rwSync.beginRead;
-		if dashboards.contains(sdashboardid) then
-			result := PDashboard(dashboards[sdashboardid])^;
-		rwSync.endRead;
+		try
+			if dashboards.contains(sdashboardid) then
+				result := PDashboard(dashboards[sdashboardid])^;
+		finally
+			rwSync.endRead;
+		end;
 	end;
 	
-	function TDashboardManager.CreateDashboard(const name, description: string): TDashboardId;
+	function TDashboardManager.CreateDashboard(const name, description: string; const ispub: boolean; const sensors: TSensors): TDashboardId;
 	var
 		dashboard: PDashboard;
 		dashboardid: TDashboardId;
+		oisPub: byte;
 	begin
 		new(dashboard);
 		dashboardid := GetGuid;
 		dashboard^.name := htmlEncode(name);
 		dashboard^.description := htmlEncode(description);
+		dashboard^.isPublic := ispub;
+		dashboard^.sensors := sensors;
 
 		rwSync.beginWrite;
-		writeln(saveFile, dashboardid);
-		writeln(saveFile, dashboard^.name);
-		writeln(saveFile, dashboard^.description);
-		writeln(saveFile, 0);
-		flush(saveFile);
-		dashboards[IntToStr(dashboardId)] := dashboard;
-		rwSync.endWrite;
+		try
+			writeln(saveFile, dashboardid);
+			writeln(saveFile, dashboard^.name);
+			writeln(saveFile, dashboard^.description);
+			if dashboard^.IsPublic then
+				oisPub := 1
+			else
+				oisPub := 0;
+			writeln(saveFile, oisPub);
+			writeln(saveFile, sensors);
+			flush(saveFile);
+			dashboards[IntToStr(dashboardId)] := dashboard;
+		finally
+			rwSync.endWrite;
+		end;
 
 		result := dashboardid;
 	end;
@@ -142,13 +144,17 @@ implementation
 	begin
 		result := TDashboards.Create;
 		rwSync.beginRead;
-		for s2pitem in dashboards do
-		begin
-			pair.Id := s2pitem^.Name;
-			pair.Name := PDashboard(s2pitem^.Value)^.Name;
-			result.add(pair);
+		try
+			for s2pitem in dashboards do
+			begin
+				pair.Id := s2pitem^.Name;
+				pair.Name := PDashboard(s2pitem^.Value)^.Name;
+				pair.IsPublic := PDashboard(s2pitem^.Value)^.IsPublic;
+				result.add(pair);
+			end;
+		finally
+			rwSync.endRead;
 		end;
-		rwSync.endRead;
 	end;
 
 initialization

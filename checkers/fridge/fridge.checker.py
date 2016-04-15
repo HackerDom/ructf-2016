@@ -313,13 +313,13 @@ class Checker(HttpCheckerBase):
 		csrf_token = s.cookies.get("csrf-token")
 		cookies_string = "; ".join([str(key) + "=" + str(val) for key, val in s.cookies.items()])
 
-		user = self.randuser(0)
+		user = self.randuser(4)
 		result = self.spost(s, addr, '/auth', [('csrf-token', csrf_token), ('login', user['login']), ('pass', user['pass'])])
 		#if not result or len(result) == 0:
 		#	print('register user failed')
 		#	return EXITCODE_MUMBLE
 
-		time.sleep(3)
+		time.sleep(0.2)
 
 		msg = [('title', self.randphrase()), ('ingredients', self.randphrase() + ', ' + flag), ('csrf-token', csrf_token)]
 

@@ -8,6 +8,7 @@ import re
 import binascii
 import socket
 import collections
+import time
 
 PORT = 12500
 DELIM = "========================================================="
@@ -264,6 +265,8 @@ class State:
         send("program", socket)
         send(program_name, socket)
         send(generate_program(flag), socket)
+
+        time.sleep(0.5)
 
         return room_name, program_name, password 
 

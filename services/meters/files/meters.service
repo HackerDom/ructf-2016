@@ -1,0 +1,16 @@
+[Unit]
+Description=Meters
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/meters
+ExecStart=/home/meters/meters
+User=meters
+Restart=always
+CPUQuota=100%
+MemoryLimit=1024M
+TasksMax=100
+
+[Install]
+WantedBy=multi-user.target
