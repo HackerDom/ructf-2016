@@ -3,6 +3,7 @@ project (CLEANER)
 
 find_package(Boost COMPONENTS system filesystem serialization REQUIRED)
 find_package(OpenSSL REQUIRED)
+find_package(Threads REQUIRED)
 
 set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wno-unknown-pragmas -Wno-sign-compare -Woverloaded-virtual -Wwrite-strings -Wno-unused -Wno-deprecated")
 set(CMAKE_CXX_FLAGS_DEBUG   "-O0 -g3")
@@ -15,6 +16,7 @@ target_link_libraries(cleaner
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_SERIALIZATION_LIBRARY}
   ${OPENSSL_LIBRARIES}
+  ${CMAKE_THREAD_LIBS_INIT}
 )
 
 set_target_properties( cleaner
