@@ -269,7 +269,7 @@ class Checker(HttpCheckerBase):
 
 	def randuser(self, randlen):
 		login = uuid.uuid4().hex[:randlen]
-		passlen = random.randrange(4,10)
+		passlen = random.randrange(6,10)
 		password = uuid.uuid4().hex[:passlen]
 		return {'login':self.randlogin() + login, 'pass':password}
 
