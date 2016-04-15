@@ -9,7 +9,6 @@ interface
 
 	type
 		TSensors = string;
-		TValues = specialize TFPGList<double>;
 		TValuess = specialize TFPGList<TValues>;
 
 	const

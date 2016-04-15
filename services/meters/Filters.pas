@@ -51,42 +51,48 @@ implementation
 		if lastUpdate < finish then
 		begin
 			rwSync.beginWrite;
-			if lastUpdate < finish then
-			begin
-				for i := lastUpdate to finish + 1 do
-					values.add(0);
-			
-				data := sensor.GetValues(lastUpdate, finish);
-				curSecond := -1;
-				curData := TRawValues.Create;
-				for i := 0 to data.count - 1 do
+			try
+				if lastUpdate < finish then
 				begin
-					timestamp := data[i].timestamp;
-					if (timestamp <> curSecond) and (curSecond <> -1) then
+					for i := lastUpdate to finish + 1 do
+						values.add(0);
+
+					data := sensor.GetValues(lastUpdate, finish);
+					curSecond := -1;
+					curData := TRawValues.Create;
+					for i := 0 to data.count - 1 do
 					begin
-						values[curSecond - startTime] := HandleSecond(curData);
-						curData.Clear;
+						timestamp := data[i].timestamp;
+						if (timestamp <> curSecond) and (curSecond <> -1) then
+						begin
+							values[curSecond - startTime] := HandleSecond(curData);
+							curData.Clear;
+						end;
+						curData.Add(data[i]);
+						curSecond := timestamp;
 					end;
-					curData.Add(data[i]);
-					curSecond := timestamp;
-				end;
-				if curData.Count <> 0 then
-					values[curSecond - startTime] := HandleSecond(curData);
+					if curData.Count <> 0 then
+						values[curSecond - startTime] := HandleSecond(curData);
 			
-				data.free;
-				lastUpdate := finish;
+					data.free;
+					lastUpdate := finish;
+				end;
+			finally
+				rwSync.EndWrite;
 			end;
-			rwSync.EndWrite;
 		end;
 
 		result := TValues.Create;
 		rwSync.BeginRead;
-		for i := start to finish do
-			if i < startTime then
-				result.add(0)
-			else
-				result.add(values[i - startTime]);
-		rwSync.EndWrite;
+		try
+			for i := start to finish do
+				if i < startTime then
+					result.add(0)
+				else
+					result.add(values[i - startTime]);
+		finally
+			rwSync.EndWrite;
+		end;
 	end;
 
 	function TCountFilter.HandleSecond(const rawValues: TRawValues): double;

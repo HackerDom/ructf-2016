@@ -65,12 +65,14 @@ implementation
 	begin
 		EnterCriticalSection(getGuidLock);
 
-		result := random(65536);
-		result := (result shl 16) xor random(65536);
-		result := (result shl 16) xor random(65536);
-		result := (result shl 16) xor random(65536);
-
-		LeaveCriticalSection(getGuidLock);
+		try
+			result := random(65536);
+			result := (result shl 16) xor random(65536);
+			result := (result shl 16) xor random(65536);
+			result := (result shl 16) xor random(65536);
+		finally
+			LeaveCriticalSection(getGuidLock);
+		end;
 	end;
 
 	function HasBadSymbols(const s: string): boolean;

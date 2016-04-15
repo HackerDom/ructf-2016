@@ -66,10 +66,13 @@ implementation
 
 		result := TRawValues.Create;
 		rwSync.BeginRead;
-		for i := 0 to values.Count - 1 do
-			if (start <= values[i].timestamp) and (values[i].timestamp < finish) then
-				result.add(values[i]);
-		rwSync.EndRead;
+		try
+			for i := 0 to values.Count - 1 do
+				if (start <= values[i].timestamp) and (values[i].timestamp < finish) then
+					result.add(values[i]);
+		finally
+			rwSync.EndRead;
+		end;
 	end;
 
 	procedure TRawTick.Run;
@@ -86,10 +89,13 @@ implementation
 			prev := current;
 
 			rwSync.BeginWrite;
-			values.Add(tmp);
-			if ready < tmp.timestamp then
-				ready := tmp.timestamp;
-			rwSync.EndWrite;
+			try
+				values.Add(tmp);
+				if ready < tmp.timestamp then
+					ready := tmp.timestamp;
+			finally
+				rwSync.EndWrite;
+			end;
 
 			sleep(100);
 		end;
@@ -105,10 +111,13 @@ implementation
 			tmp.timestamp := tsnow;
 
 			rwSync.BeginWrite;
-			values.Add(tmp);
-			if ready < tmp.timestamp then
-				ready := tmp.timestamp;
-			rwSync.EndWrite;
+			try
+				values.Add(tmp);
+				if ready < tmp.timestamp then
+					ready := tmp.timestamp;
+			finally
+				rwSync.EndWrite;
+			end;
 
 			sleep(trunc(GetGuid mod 65536 / 655.36));
 		end;
