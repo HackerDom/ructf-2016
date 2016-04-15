@@ -6,6 +6,7 @@ authors = ["Nikolay Zhuravlev <znick@znick.ru>"]
 [dependencies]
 hyper = "0.8"
 stemmer = "*"
+rustc-serialize = "*"
 
 [dependencies.urlparse]
 version = "0.7.2"
