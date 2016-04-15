@@ -5,7 +5,7 @@ unit DashboardController;
 interface
 
 	uses
-		httpdefs, fpHTTP, fpWeb, AccountController, WebUtils, DashboardContainer, Utils, SysUtils;
+		httpdefs, fpHTTP, fpWeb, AccountController, WebUtils, DashboardContainer, Utils, SysUtils, Sensors;
 	
 	type
 		TDashboardModule = class(TFPWebModule)
@@ -24,7 +24,7 @@ implementation
 
 	var
 		listTemplate, listATemplate: string;
-		viewTemplate: string;
+		viewTemplate, viewSensorTemplate, viewLineTemplate: string;
 		createTemplate: string;
 
 	function GetList(const dashboards: TDashboards): string;
@@ -36,6 +36,7 @@ implementation
 		for i := 0 to dashboards.Count - 1 do
 		begin
 			tmp := StringReplace(listATemplate, '{-dashboardid-}', dashboards[i].Id, []);
+			tmp := StringReplace(tmp, '{-class-}', BoolToStr(dashboards[i].IsPublic, 'public', ''), []);
 			list := list + StringReplace(tmp, '{-dashboard-}', dashboards[i].Name, []);
 		end;
 
@@ -58,6 +59,7 @@ implementation
 			dashboard := DashboardManager.GetDashboard(dashboards[i]);
 			pair.id := intTostr(dashboards[i]);
 			pair.Name := dashboard.Name;
+			pair.IsPublic := dashboard.isPublic;
 			result.add(pair);
 		end;
 		dashboards.free;
@@ -95,33 +97,58 @@ implementation
 		dashboard: TDashboard;
 		message: string;
 		page: string;
+		list, line, tmp: string;
+		sensors: TValuess;
+		i: longint;
 	begin
+		Handled := True;
 		dashboardid := GetQueryDashboardId(ARequest);
 		dashboard := DashboardManager.GetDashboard(dashboardid);
 
 		page := StringReplace(viewTemplate, '{-name-}', dashboard.Name, []);
 
-		message := HavePermission(ARequest, dashboardid);
+		if dashboard.IsPublic then
+			message := ''
+		else
+			message := HavePermission(ARequest, dashboardid);
 		if message <> '' then
 		begin
 			page := StringReplace(page, '{-description-}', message, []);
 			AResponse.Content := StringReplace(page, '{-sensors-}', '', []);
-			Handled := True;
 			exit;
 		end;
 
 		page := StringReplace(page, '{-description-}', dashboard.Description, []);
 	
-		AResponse.Content := StringReplace(page, '{-sensors-}', 'not implemented', []);
-		Handled := True;
+		sensors := GetSensorsValues(dashboard.sensors);
+		line := '';
+		list := '';
+		for i := 0 to sensors.Count - 1 do
+		begin
+			tmp := StringReplace(viewSensorTemplate, '{-data-}', ValuesToString(sensors[i]), []);
+			line := line + StringReplace(tmp, '{-id-}', intToStr(i), [rfReplaceAll]);
+			if (i + 1) mod 4 = 0 then
+			begin
+				list := list + StringReplace(viewLineTemplate, '{-line-}', line, []);
+				line := '';
+			end;
+		end;
+
+		sensors.free;
+
+		if line <> '' then
+			list := list + StringReplace(viewLineTemplate, '{-line-}', line, []);
+
+		AResponse.Content := StringReplace(page, '{-sensors-}', list, []);
 	end;
 
 	procedure TDashboardModule.OnCreate(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
 	var
-		dname, description: string;
+		dname, description, isPublic: string;
 		layout, message: string;
 		userid: TUserId;
 		dashboardId: TDashboardId;
+		ssensors: string;
 	begin
 		Handled := True;
 		message := IsAuthorized(ARequest);
@@ -135,6 +162,8 @@ implementation
 
 		dname := ARequest.ContentFields.Values['name'];
 		description := ARequest.ContentFields.Values['description'];
+		isPublic := ARequest.ContentFields.Values['public'];
+		ssensors := ARequest.ContentFields.Values['sensors'];
 
 		if (dname = '') and (description = '') then
 		begin
@@ -155,7 +184,7 @@ implementation
 		end;
 
 		userId := GetCurrentUserId(ARequest);
-		dashboardId := DashboardManager.CreateDashboard(dname, description);
+		dashboardId := DashboardManager.CreateDashboard(dname, description, isPublic <> 'on', ParseSensors(ssensors));
 		AccountManager.AddDashboard(userId, dashboardid);
 		AddPermission(ARequest, AResponse, dashboardid);
 
@@ -168,6 +197,8 @@ initialization
 	listTemplate := GetTemplate(ModuleName, 'list');
 	listATemplate := GetSubTemplate(ModuleName, 'list.a');
 	viewTemplate := GetTemplate(ModuleName, 'view');
+	viewSensorTemplate := GetSubTemplate(ModuleName, 'view.sensor');
+	viewLineTemplate := GetSubTemplate(ModuleName, 'view.line');
 	createTemplate := GetTemplate(ModuleName, 'create');
 	RegisterHTTPModule(ModuleName, TDashboardModule);
 

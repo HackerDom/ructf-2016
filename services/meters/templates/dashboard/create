@@ -1,6 +1,8 @@
 <p style='color: red'>{-message-}</p>
 <form method='post'>
-	<input type='text' name='name' required>
-	<input type='text' name='description'>
+	<input type='text' name='name' required><br>
+	<input type='text' name='description'><br>
+	<input type='checkbox' name='public'> Is Public<br>
+	<input type='text' name='sensors'><br>
 	<input type='submit'>
 </form>

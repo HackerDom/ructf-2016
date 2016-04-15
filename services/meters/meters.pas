@@ -3,7 +3,7 @@ program meters;
 {$mode objfpc}{$H+}
 
 uses
-	cthreads, fphttpapp, fpWebFile, UserController, AccountController, DashboardController, Sensor, DashboardContainer, RootController;
+	cthreads, fphttpapp, fpWebFile, UserController, AccountController, DashboardController, RawSensor, DashboardContainer, RootController;
 
 function StartTickSensor(p: pointer): int64;
 begin
@@ -11,9 +11,16 @@ begin
 	result := 0;
 end;
 
+function StartRandomSensor(p: pointer): int64;
+begin
+	RawRandomSensor.Run;
+	result := 0;
+end;
+
 procedure StartSensors;
 begin
 	BeginThread(@StartTickSensor);
+	BeginThread(@StartRandomSensor);
 end;
 
 
@@ -28,6 +35,7 @@ begin
 	DashboardManager.Initialize;
 
 	RawTickSensor.Initialize;
+	RawRandomSensor.Initialize;
 
 	StartSensors;
 

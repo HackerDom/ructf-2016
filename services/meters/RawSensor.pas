@@ -1,4 +1,4 @@
-unit Sensor;
+unit RawSensor;
 
 {$mode objfpc}{$H+}
 {$modeswitch advancedrecords} 
@@ -10,7 +10,7 @@ interface
 	type
 		TRawValue = record
 			timestamp: longint;
-			value: single;
+			value: double;
 			class operator= (const a, b: TRawValue): Boolean;
 		end;
 		TRawValues = specialize TFPGList<TRawValue>;
@@ -32,17 +32,17 @@ interface
 				procedure Run;
 		end;
 
+		TRawRandom = class(TRawSensor)
+			public
+				procedure Initialize;
+				procedure Run;
+		end;
+
 	var
 		RawTickSensor: TRawTick;
+		RawRandomSensor: TRawRandom;
 
 implementation
-	const
-		UnixStartDate: TDateTime = 25569.0;
-
-	function DateTimeToUnix(dtDate: TDateTime): Longint;
-	begin
-		result := trunc((dtDate - UnixStartDate) * 86400);
-	end;
 
 	class operator TRawValue.= (const a, b: TRawValue): Boolean;
 	begin
@@ -97,6 +97,8 @@ implementation
 
 	procedure TRawTick.Initialize;
 	begin
+		writeln(stderr, 'Initialize RawTickSensor');
+		flush(stderr);
 		Inherited Initialize('ticks.log');
 	end;
 
@@ -125,9 +127,38 @@ implementation
 		end;
 	end;
 
+	procedure TRawRandom.Initialize;
+	begin
+		writeln(stderr, 'Initialize RawRandomSensor');
+		flush(stderr);
+		Inherited Initialize('rand.log');
+	end;
+
+	procedure TRawRandom.Run;
+	var
+		tmp: TRawValue;
+	begin
+		while true do
+		begin
+			tmp.value := (GetGuid mod 65536) / 65536;
+			tmp.timestamp := tsnow;
+			writeln(log, tmp.timestamp, ' ', tmp.value:0:10);
+			flush(log);
+
+			rwSync.BeginWrite;
+			values.Add(tmp);
+			if ready < tmp.timestamp then
+				ready := tmp.timestamp;
+			rwSync.EndWrite;
+
+			sleep(trunc(GetGuid mod 65536 / 655.36));
+		end;
+	end;
+
 initialization
 	writeln(stderr, 'initialization Sensor');
 	flush(stderr);
 	RawTickSensor := TRawTick.Create;
+	RawRandomSensor := TRawRandom.Create;
 
 end.

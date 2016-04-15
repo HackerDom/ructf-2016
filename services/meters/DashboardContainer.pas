@@ -5,25 +5,25 @@ unit DashboardContainer;
 
 interface
 	uses
-		fgl, SysUtils, Utils, avglvltree;
+		fgl, SysUtils, Utils, avglvltree, Sensors;
 
 	type
 		TSensorId = QWord;
 		TDashboardId = QWord;
 
 		TDashboardIds = specialize TFPGList<TDashboardId>;
-		TSensors = specialize TFPGList<TSensorId>;
-		TSensorss = specialize TFPGList<TSensors>;
 
 		TDashboard = record
 			Name: string;
 			Description: string;
-			Sensors: TSensorss;
+			IsPublic: boolean;
+			Sensors: TSensors;
 		end;
 
 		TDashboardPair = record
 			ID: string;
 			Name: string;
+			IsPublic: boolean;
 			class operator = (const a, b: TDashboardPair): Boolean;
 		end;
 
@@ -37,7 +37,7 @@ interface
 			public
 				procedure Initialize;
 				function GetDashBoard(const dashboardId: TDashboardId): TDashboard;
-				function CreateDashboard(const name, description: string): TDashboardId;
+				function CreateDashboard(const name, description: string; const ispub: boolean; const sensors: TSensors): TDashboardId;
 				function GetDashboards(): TDashboards;
 		end;
 
@@ -59,9 +59,10 @@ implementation
 	var
 		filename: string;
 		dashboard: PDashboard;
-		sensor: TSensorId;
+		sensor: TSensor;
 		n, k, i, j: longint;
 		dashboardId: string;
+		ispub: byte;
 	begin
 		writeln(stderr, 'Initialize DashboardManager');
 		flush(stderr);
@@ -79,17 +80,19 @@ implementation
 				readln(saveFile, dashboardid);
 				readln(saveFile, dashboard^.Name);
 				readln(saveFile, dashboard^.Description);
+				readln(saveFile, ispub);
+				dashboard^.IsPublic := ispub = 1;
 				read(saveFile, n);
-				dashboard^.Sensors := TSensorss.Create;
+				dashboard^.Sensors := TSensors.Create;
 				for i := 1 to n do
 				begin
-					dashboard^.Sensors.Add(TSensors.Create);
-					read(saveFile, k);
-					for j := 1 to k do
+					sensor := TSensor.Create;
+					for j := 1 to FactorsCount do
 					begin
-						read(saveFile, sensor);
-						dashboard^.Sensors.last.add(sensor);
+						read(saveFile, k);
+						sensor.add(k);
 					end;
+					dashboard^.Sensors.add(sensor);
 				end;
 				readln(saveFile);
 
@@ -113,21 +116,36 @@ implementation
 		rwSync.endRead;
 	end;
 	
-	function TDashboardManager.CreateDashboard(const name, description: string): TDashboardId;
+	function TDashboardManager.CreateDashboard(const name, description: string; const ispub: boolean; const sensors: TSensors): TDashboardId;
 	var
 		dashboard: PDashboard;
 		dashboardid: TDashboardId;
+		oisPub: byte;
+		i, j: longint;
 	begin
 		new(dashboard);
 		dashboardid := GetGuid;
 		dashboard^.name := htmlEncode(name);
 		dashboard^.description := htmlEncode(description);
+		dashboard^.isPublic := ispub;
+		dashboard^.sensors := sensors;
 
 		rwSync.beginWrite;
 		writeln(saveFile, dashboardid);
 		writeln(saveFile, dashboard^.name);
 		writeln(saveFile, dashboard^.description);
-		writeln(saveFile, 0);
+		if dashboard^.IsPublic then
+			oisPub := 1
+		else
+			oisPub := 0;
+		writeln(saveFile, oisPub);
+		writeln(saveFile, sensors.count);
+		for i := 0 to sensors.count - 1 do
+		begin
+			for j := 0 to FactorsCount - 1 do
+				write(saveFile, sensors[i][j], ' ');
+			writeln(saveFile);
+		end;
 		flush(saveFile);
 		dashboards[IntToStr(dashboardId)] := dashboard;
 		rwSync.endWrite;
@@ -146,6 +164,7 @@ implementation
 		begin
 			pair.Id := s2pitem^.Name;
 			pair.Name := PDashboard(s2pitem^.Value)^.Name;
+			pair.IsPublic := PDashboard(s2pitem^.Value)^.IsPublic;
 			result.add(pair);
 		end;
 		rwSync.endRead;

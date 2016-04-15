@@ -3,12 +3,12 @@ unit Filters;
 {$mode objfpc}{$H+}
 
 interface
-	uses Sensor, fgl, SysUtils;
+	uses RawSensor, fgl, SysUtils;
 
 	type
-		TValues = specialize TFPGList<single>;
+		TValues = specialize TFPGList<double>;
 
-		TRawListener = class abstract(TObject)
+		TFilter = class abstract(TObject)
 			protected
 				sensor: TRawSensor;
 				lastUpdate: longint;
@@ -18,22 +18,22 @@ interface
 			public
 				constructor Create(const rawsensor: TRawSensor; const start: longint);
 				function GetValues(const start, finish: longint): TValues;
-				function HandleSecond(const rawValues: TRawValues): single; virtual; abstract;
+				function HandleSecond(const rawValues: TRawValues): double; virtual; abstract;
 		end;
 
-		TRawCount = class(TRawListener)
+		TCountFilter = class(TFilter)
 			public
-				function HandleSecond(const rawValues: TRawValues): single; override;
+				function HandleSecond(const rawValues: TRawValues): double; override;
 		end;
 
-		TRawMax = class(TRawListener)
+		TMaxFilter = class(TFilter)
 			public
-				function HandleSecond(const rawValues: TRawValues): single; override;
+				function HandleSecond(const rawValues: TRawValues): double; override;
 		end;
 
 implementation	
 
-	constructor TRawListener.Create(const rawsensor: TRawSensor; const start: int64);
+	constructor TFilter.Create(const rawsensor: TRawSensor; const start: longint);
 	begin
 		sensor := rawsensor;
 		lastUpdate := start;
@@ -42,7 +42,7 @@ implementation
 		rwSync := TSimpleRWSync.Create;
 	end;
 
-	function TRawListener.GetValues(const start, finish: int64): TValues;
+	function TFilter.GetValues(const start, finish: longint): TValues;
 	var
 		data, curData: TRawValues;
 		i: longint;
@@ -53,7 +53,7 @@ implementation
 			rwSync.beginWrite;
 			if lastUpdate < finish then
 			begin
-				for i := lastUpdate to finish do
+				for i := lastUpdate to finish + 1 do
 					values.add(0);
 			
 				data := sensor.GetValues(lastUpdate, finish);
@@ -81,22 +81,27 @@ implementation
 		result := TValues.Create;
 		rwSync.BeginRead;
 		for i := start to finish do
-			result.add(values[i]);
+			if i < startTime then
+				result.add(0)
+			else
+				result.add(values[i - startTime]);
 		rwSync.EndWrite;
 	end;
 
-	function TRawCount.HandleSecond(const rawValues: TRawValues): single;
+	function TCountFilter.HandleSecond(const rawValues: TRawValues): double;
 	begin
 		result := rawValues.Count;
 	end;
 
-	function TRawMax.HandleSecond(const rawValues: TRawValues): single;
+	function TMaxFilter.HandleSecond(const rawValues: TRawValues): double;
+	var
+		i: longint;
 	begin
 		if rawValues.Count = 0 then
 			exit(0);
-		result := rawValues[0];
+		result := rawValues[0].value;
 		for i := 1 to rawValues.Count - 1 do
-			if result < rawValues[i] then
-				result := rawValues[i];
+			if result < rawValues[i].value then
+				result := rawValues[i].value;
 	end;
 end.
