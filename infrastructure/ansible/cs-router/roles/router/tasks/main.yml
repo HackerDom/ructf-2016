@@ -10,12 +10,11 @@
     - arping
     - nmap
     - iftop
-    - iftop
     - bmon
     - conntrack
     - isc-dhcp-server
     - minicom
-    - squid3
+#    - squid3
 
 - template: src=interfaces.olymp            dest=/etc/network/interfaces.olymp
 - template: src=interfaces.olymp.eth-teams  dest=/etc/network/interfaces.d/interfaces.olymp.eth-teams
@@ -25,7 +24,7 @@
 
 # Choose: olymp/finals
 - template: src=dhcpd.conf.olymp dest=/etc/dhcp/dhcpd.conf
-#  notify: restart dhcpd
+  notify: restart dhcpd
 
 # Choose: olymp/finals
 - lineinfile: dest=/etc/rc.local line="/sbin/iptables-restore /etc/firewall.olymp" insertbefore="exit 0"
@@ -39,6 +38,18 @@
 - sysctl: name=net.ipv4.ip_forward              value=1      reload=yes
 - sysctl: name=net.ipv4.conf.all.log_martians   value=1      reload=yes
 - sysctl: name=net.netfilter.nf_conntrack_max   value=524288 reload=yes
+- sysctl: name=net.ipv6.conf.all.disable_ipv6   value=1      reload=yes
 
-# Force restart dhcpd
-- service: name=isc-dhcp-server state=restarted
+- service: name=isc-dhcp-server state=started
+
+#- template: src=squid.pem  dest=/etc/squid3/squid.pem
+#- template: src=squid.key  dest=/etc/squid3/squid.key
+
+#- template: src=squid.conf dest=/etc/squid3/squid.conf
+#  notify: reload squid
+
+#- template: src=squid.domains dest=/etc/squid3/squid.domains
+#  notify: reload squid
+
+#- service: name=squid3 state=started
+
