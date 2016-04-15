@@ -3,7 +3,7 @@ program meters;
 {$mode objfpc}{$H+}
 
 uses
-	cthreads, fphttpapp, fpWebFile, UserController, AccountController, DashboardController, RawSensor, DashboardContainer, RootController;
+	cthreads, fphttpapp, fpWebFile, UserController, AccountController, DashboardController, RawSensor, DashboardContainer, RootController, RC5;
 
 function StartTickSensor(p: pointer): int64;
 begin
@@ -38,6 +38,8 @@ begin
 	RawRandomSensor.Initialize;
 
 	StartSensors;
+
+	LoadKey;
 
 	RegisterFileLocation('js', 'js');
 	RegisterFileLocation('css', 'css');

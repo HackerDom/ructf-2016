@@ -4,7 +4,7 @@ unit RC5;
 
 interface
 	uses
-		fgl, SysUtils;
+		fgl, SysUtils, Utils;
 
 	type
 		TList = specialize TFPGList<QWord>;
@@ -19,18 +19,20 @@ interface
 
 	function decode(const txt: string): TList;
 
+	procedure LoadKey;
+
 implementation
 
 	const
 		p: dword = $B7E15163;
 		q: dword = $9E3779B9;
-		r = 0;
+		r = 127;
 		rr = 2 * (r + 1);
-		key = 'Very secret key! Don''t say anybody!!';
-		c = length(key) div 4;
 
 	var
 		s: array [0 .. rr - 1] of dword;
+		key: string;
+		c: longint;
 
 	function pack(const a, b: dword): Qword;
 	begin
@@ -174,9 +176,10 @@ implementation
 
 	procedure expansionKey;
 	var
-		l: array [0 .. c - 1] of dword;
+		l: array of dword;
 		i, j, g, h, k: dword;
 	begin
+		setLength(l, c);
 		for i := 0 to c - 1 do
 			l[i] := pack(copy(key, 4 * i + 1, 4), 4);
 
@@ -200,9 +203,42 @@ implementation
 		end;
 	end;
 
+	procedure LoadKey;
+	var
+		path: string;
+		rand, kfile: text;
+		ch: char;
+		i: longint;
+	begin
+		path := writeDir + 'key';
+		assign(kfile, path);
+		if not FileExists(path) then
+		begin
+			assign(rand, '/dev/urandom');
+			reset(rand);
+			for i := 1 to 256 do
+			begin
+				read(rand, ch);
+				key := key + IntToHex(ord(ch), 2);
+			end;
+			close(rand);
+
+			rewrite(kfile);
+			writeln(kfile, key);
+			close(kfile);
+		end
+		else
+		begin
+			reset(kfile);
+			readln(kfile, key);
+			close(kfile);
+		end;
+		c := length(key) div 4;
+		expansionKey;
+	end;
+
 initialization
 	writeln(stderr, 'initialization RC5');
 	flush(stderr);
-	expansionKey;
 
 end.
