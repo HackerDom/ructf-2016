@@ -10,5 +10,9 @@ namespace Node.Connections
         List<IAddress> PreconfiguredNodes { get; }
 
         TimeSpan KeySendCooldown { get; }
+
+        TimeSpan ConnectingSocketMaxTTL { get; }
+
+        int ConnectingSocketsToConnectionsMultiplier { get; }
     }
 }
