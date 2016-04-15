@@ -19,6 +19,7 @@ interface
 	function htmlEncode(const str: string): string;
 	function DateTimeToUnix(dtDate: TDateTime): dword;
 	function TSNow: dword;
+	function sabs(const a, b: qword): QWord;
 
 implementation
 	uses
@@ -26,6 +27,14 @@ implementation
 
 	const
 		UnixStartDate: TDateTime = 25569.0;
+
+	function sabs(const a, b: qword): QWord;
+	begin
+		if a > b then
+			result := a - b
+		else
+			result := b - a;
+	end;
 
 	function DateTimeToUnix(dtDate: TDateTime): dword;
 	begin
