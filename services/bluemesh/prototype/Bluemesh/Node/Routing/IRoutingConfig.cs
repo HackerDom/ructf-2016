@@ -4,11 +4,13 @@ namespace Node.Routing
 {
     internal interface IRoutingConfig
     {
-        int DesiredConnections { get; set; }
-        int MaxConnections { get; set; }
+        int DesiredConnections { get; }
+        int MaxConnections { get; }
 
-        TimeSpan ConnectCooldown { get; set; }
-        TimeSpan DisconnectCooldown { get; set; }
-        TimeSpan MapUpdateCooldown { get; set; }
+        TimeSpan ConnectCooldown { get; }
+        TimeSpan DisconnectCooldown { get; }
+        TimeSpan MapUpdateCooldown { get; }
+
+        bool LongNames { get; }
     }
 }
