@@ -7,7 +7,7 @@
 
 class TCommandParser {
 public:
-    TCommandParser(const std::string& listing);
+    TCommandParser(const std::string& source);
     std::unique_ptr<ICommand> GetNext();
 
 private:
@@ -22,7 +22,7 @@ private:
         EError
     };
 
-    const std::string& Listing;
+    const std::string& Source;
     size_t Idx;
     EParserState State;
 };

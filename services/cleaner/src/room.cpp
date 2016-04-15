@@ -10,10 +10,10 @@
 TRoom::TRoom() {
 }
 
-TRoom::TRoom(std::string& name, std::string& pass, TRoomConfiguration& configuration)
+TRoom::TRoom(std::string& name, std::string& pass, TRoomPlan& plan)
     : TPassChecker(std::move(pass))
     , Name(std::move(name))
-    , Configuration(std::move(configuration))
+    , Plan(std::move(plan))
 {
 }
 
@@ -21,8 +21,8 @@ const std::string& TRoom::GetName() const {
     return Name;
 }
 
-TRoomConfiguration& TRoom::GetConfiguration() {
-    return Configuration;
+TRoomPlan& TRoom::GetPlan() {
+    return Plan;
 }
 
 const TProgramLogs& TRoom::GetLogs() const {

@@ -10,16 +10,16 @@
 #include <string>
 #include <array>
 
-using TRoomConfiguration = std::string;
+using TRoomPlan = std::string;
 using TProgramLogs = std::vector<std::pair<std::string, std::string>>;
 
 class TRoom : public TPassChecker {
 public:
     TRoom();
-    TRoom(std::string& name, std::string& pass, TRoomConfiguration& configuration);
+    TRoom(std::string& name, std::string& pass, TRoomPlan& plan);
 
     const std::string& GetName() const;
-    TRoomConfiguration& GetConfiguration();
+    TRoomPlan& GetPlan();
     const TProgramLogs& GetLogs() const;
     void AddLog(const std::string& program_name, const std::string& log);
 
@@ -29,12 +29,12 @@ private:
     void serialize(TArchive& archive, const unsigned int /*version*/) {
         archive & boost::serialization::base_object<TPassChecker>(*this);
         archive & const_cast<std::string&>(Name);
-        archive & Configuration;
+        archive & Plan;
         archive & Logs;
     }
 
 private:
     const std::string Name;
-    TRoomConfiguration Configuration;
+    TRoomPlan Plan;
     TProgramLogs Logs;
 };

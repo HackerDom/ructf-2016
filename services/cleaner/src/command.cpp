@@ -17,8 +17,8 @@ TNewCommand::TNewCommand(size_t x, size_t y)
 {
 }
 
-bool TNewCommand::Run(TProgramState& state, TRoomConfiguration& configuration) const {
-    if (X * + Y < configuration.size() && configuration[X * 8 + Y] != 'W') {
+bool TNewCommand::Run(TProgramState& state, TRoomPlan& plan) const {
+    if (X * + Y < plan.size() && plan[X * 8 + Y] != 'W') {
         state.Log << 'N';
         PrintfNum(state, X);
         PrintfNum(state, Y);
@@ -36,7 +36,7 @@ TMoveCommand::TMoveCommand(char direction, size_t len)
 {
 }
 
-bool TMoveCommand::Run(TProgramState& state, TRoomConfiguration& configuration) const {
+bool TMoveCommand::Run(TProgramState& state, TRoomPlan& plan) const {
     bool error = false;
     size_t path_len = 0;
 
@@ -45,28 +45,28 @@ bool TMoveCommand::Run(TProgramState& state, TRoomConfiguration& configuration) 
         size_t y = state.PosY;
         switch (Direction) {
             case 'L':
-                if (x != 0 && configuration[(x - 1) * 8 + y] != 'W') {
+                if (x != 0 && plan[(x - 1) * 8 + y] != 'W') {
                     state.PosX--;
                 } else {
                     error = true;
                 }
                 break;
             case 'R':
-                if (x + 1 < configuration.size() && configuration[(x + 1) * 8 + y] != 'W') {
+                if (x + 1 < plan.size() && plan[(x + 1) * 8 + y] != 'W') {
                     state.PosX++;
                 } else {
                     error = true;
                 }
                 break;
             case 'U':
-                if (y < 7 && configuration[x * 8 + y + 1] != 'W') {
+                if (y < 7 && plan[x * 8 + y + 1] != 'W') {
                     state.PosY++;
                 } else {
                     error = true;
                 }
                 break;
             case 'D':
-                if (y != 0 && configuration[x * 8 + (y - 1)] != 'W') {
+                if (y != 0 && plan[x * 8 + (y - 1)] != 'W') {
                     state.PosY--;
                 } else {
                     error = true;
@@ -99,7 +99,7 @@ bool TMoveCommand::Run(TProgramState& state, TRoomConfiguration& configuration) 
     return !error;
 }
 
-bool TErrorCommand::Run(TProgramState& state, TRoomConfiguration& /*configuration*/) const {
+bool TErrorCommand::Run(TProgramState& state, TRoomPlan& /*plan*/) const {
     return Error(state);
 }
 
@@ -108,8 +108,8 @@ TPrintCommand::TPrintCommand(char c)
 {
 }
 
-bool TPrintCommand::Run(TProgramState& state, TRoomConfiguration& configuration) const {
-    configuration[state.PosX * 8 + state.PosY] = Char;
+bool TPrintCommand::Run(TProgramState& state, TRoomPlan& plan) const {
+    plan[state.PosX * 8 + state.PosY] = Char;
     state.Log << 'P' << Char;
     return true;
 }

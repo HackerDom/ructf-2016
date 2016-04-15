@@ -10,11 +10,21 @@
 #include <boost/range/iterator_range.hpp>
 
 const char* HELP = "\
-THIS\n\
-IS\n\
-COOL\n\
-HELP\n\
-==============\n\
+=========================================================\n\
+HI this is CLEANER - cleaner robot hivemind\n\
+\n\
+You can:\n\
+1. upload your room plan and cleaner robot program\n\
+   [upload - password - (room - plan | program - source))\n\
+2. run program for your room\n\
+   [run - password - room - program]\n\
+3. get your room\n\
+   [get_room - password - room]\n\
+4. list existing rooms and programs\n\
+   [list - (rooms | programs)]\n\
+\n\
+Pass each command or argument on a seperate line!\n\
+=========================================================\n\
 ";
 
 static const std::string ROOMS_DIR = "rooms";
@@ -86,34 +96,34 @@ void TCleanerServant::Upload() {
     while (Session.ReadLinesImpl(entity)) {
         if (entity == "room") {
             std::string name;
-            std::string configuration;
-            Session.ReadLines(name, configuration);
+            std::string plan;
+            Session.ReadLines(name, plan);
 
             if (ContainsNotAlphaNum(name)) {
                 Session.Write("Only alnum names allowed\n");
                 return;
             }
 
-            while (configuration.size() % 8) {
-                configuration += " ";
+            while (plan.size() % 8) {
+                plan += " ";
             }
 
-            TRoom room(name, pass, configuration);
+            TRoom room(name, pass, plan);
             if (!SaveRoom(room)) {
                 Session.Write("Can't save room: already exists\n");
                 return;
             }
         } else if (entity == "program") {
             std::string name;
-            std::string listing;
-            Session.ReadLines(name, listing);
+            std::string source;
+            Session.ReadLines(name, source);
 
             if (ContainsNotAlphaNum(name)) {
                 Session.Write("Only alnum names allowed\n");
                 return;
             }
 
-            TProgram program(name, pass, listing);
+            TProgram program(name, pass, source);
             if (!SaveProgram(program)) {
                 Session.Write("Can't save program: already exists\n");
                 return;
@@ -130,10 +140,10 @@ void TCleanerServant::List() {
     Session.ReadLines(what);
 
     if (what == "programs" || what == "rooms") {
-        Session.Write("=====================\n"); 
+        Session.Write("=========================================================\n");
         std::string result = ListDir(what);
         Session.Write(result); 
-        Session.Write("=====================\n"); 
+        Session.Write("=========================================================\n");
     } else {
         Session.Write("Unknown listing entity : ", what, "\n");
     }
@@ -182,9 +192,9 @@ void TCleanerServant::GetRoom() {
         return;
     }
 
-    const auto& configuration = room.GetConfiguration();
+    const auto& plan = room.GetPlan();
 
-    Session.Write(configuration, "\n");
+    Session.Write(plan, "\n");
     Session.Write("Program results:\n");
 
     for (const auto& pair: room.GetLogs()) {
@@ -193,7 +203,7 @@ void TCleanerServant::GetRoom() {
             continue;
         }
         Session.Write(pair.first, "\n");
-        Session.Write(program.GetListing(), "\n");
+        Session.Write(program.GetSource(), "\n");
         Session.Write(pair.second, "\n");
     }
 }

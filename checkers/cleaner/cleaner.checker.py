@@ -10,8 +10,8 @@ import socket
 import collections
 
 PORT = 12500
-DELIM = "====================="
-HELLO_LINES = 5
+DELIM = "========================================================="
+HELLO_LINES = 15
 BASE = 2
 HEIGHT = 8
 

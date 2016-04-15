@@ -1,7 +1,7 @@
 #include "parser.h"
 
-TCommandParser::TCommandParser(const std::string& listing)
-    : Listing(listing)
+TCommandParser::TCommandParser(const std::string& source)
+    : Source(source)
     , Idx(0)
     , State(EWaitCmd)
 {
@@ -11,10 +11,10 @@ std::unique_ptr<ICommand> TCommandParser::GetNext() {
     char cmd;
     size_t num = 0;
 
-    while (Idx < Listing.size()) {
+    while (Idx < Source.size()) {
         switch (State) {
             case EWaitCmd:
-                cmd = Listing[Idx];
+                cmd = Source[Idx];
                 if (cmd == 'P') {
                     State = EWaitChar; 
                 } else {
@@ -43,7 +43,7 @@ std::unique_ptr<ICommand> TCommandParser::GetNext() {
                 return std::unique_ptr<ICommand>(new TNewCommand(num, num2));
             case EWaitChar:
                 char c;
-                c = Listing[Idx];
+                c = Source[Idx];
                 Idx++;
                 State = EWaitCmd;
                 return std::unique_ptr<ICommand>(new TPrintCommand(c));
@@ -57,13 +57,13 @@ std::unique_ptr<ICommand> TCommandParser::GetNext() {
 }
 
 bool TCommandParser::GetNum(size_t& num) {
-    char buf = Listing[Idx]; 
+    char buf = Source[Idx]; 
     if (buf < '0' || buf > '9') {
         return false;
     }
     num = 10 * (buf - '0');
     Idx++;
-    buf = Listing[Idx]; 
+    buf = Source[Idx]; 
     if (buf < '0' || buf > '9') {
         return false;
     }
