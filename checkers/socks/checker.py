@@ -59,12 +59,11 @@ def handler_info(*args):
 def handler_check(*args):
     service_ok()
 
-def handler_get(args, db, things):
-    _, _, hostname, id, flag, vuln = args
-    thing = db.get_doc(id)
+def handler_get(args, things):
+    _, _, hostname, id_bid, flag, vuln = args
+    id, thing = id_bid.split("===", 1)
     request = "http://{0}:{3}/search?text={1}&owner={2}".format(hostname, thing, id, PORT)
     reply = None
-    print(request)
     try:
         r = requests.get(request)
         reply = r.text
@@ -81,14 +80,14 @@ def handler_get(args, db, things):
     return service_corrupt(message="Bad flag", error=make_err_message("Bad flag", request, reply))
 
 
-def handler_put(args, db, things):
+def handler_put(args, things):
     _, _, hostname, id, flag, vuln = args
+    thing = things.random()
+    id_bid = "{}==={}".format(id, thing)
     request = "http://{0}:{3}/set?text={1}&owner={2}".format(hostname, flag, id, PORT)
     reply = None
     thing = None
     try:
-        thing = things.random()
-        db.save_doc(id, thing)
         r = requests.post(request, data=thing)
         reply = r.text
         r.raise_for_status()
@@ -98,7 +97,7 @@ def handler_put(args, db, things):
         return service_mumble(message="Server error: {}".format(e), exception=e, request=request, reply=reply, body=thing)
 
 
-    return service_ok(message=None)
+    return service_ok(message=id_bid)
 
 
 HANDLERS = {
@@ -107,46 +106,6 @@ HANDLERS = {
     'get' : handler_get,
     'put' : handler_put,
 }
-
-class DB:
-    DB_VERSION = 1
-
-    def __init__(self, filename):
-        self.filename = filename
-        new_databse = False
-
-        if not os.path.exists(filename):
-            new_databse = True
-
-        conn = sqlite3.connect(filename, timeout=10)
-        self.conn = conn
-        c = conn.cursor()
-        if new_databse:
-            c.execute('''CREATE TABLE config (key VARCHAR(128) PRIMARY KEY, value VARCHAR(128))''')
-            c.execute('''INSERT INTO config VALUES ("version", ?)''', (self.DB_VERSION,))
-
-            c.execute('''CREATE TABLE documents (id VARCHAR(128) PRIMARY KEY, document TEXT)''')
-        else:
-            version = None
-            for row in c.execute('''SELECT value FROM config WHERE key = ?''', ("version",)):
-                version = int(row[0])
-
-            if version != self.DB_VERSION:
-                print("Version missmatch: {} != {}".format(version, self.DB_VERSION), file=sys.stderr)
-                os.remove(filename)
-                return self.__init__(filename)
-        conn.commit()
-
-    def get_doc(self, id):
-        for row in self.conn.execute('''SELECT document FROM documents WHERE id = ?''', (id,)):
-            return row[0]
-        raise KeyError("Cant find document id: '{}'".format(id))
-
-    def save_doc(self, id, document):
-        c = self.conn.cursor()
-        c.execute('''INSERT INTO documents VALUES (?, ?)''', (id, document))
-        self.conn.commit()
-
 
 class Things:
     def __init__(self, filename):
@@ -159,11 +118,10 @@ class Things:
 
 
 def main():
-    db = DB(DB_FILENAME)
     things = Things(THING_FILENMAME)
 
     handler = HANDLERS[sys.argv[1]]
-    handler(sys.argv, db, things)
+    handler(sys.argv, things)
 
 
 if __name__ == "__main__":
