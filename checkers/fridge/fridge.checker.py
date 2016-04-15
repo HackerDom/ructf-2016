@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import time
 import uuid
 import random
 import string
@@ -312,7 +313,15 @@ class Checker(HttpCheckerBase):
 		csrf_token = s.cookies.get("csrf-token")
 		cookies_string = "; ".join([str(key) + "=" + str(val) for key, val in s.cookies.items()])
 
-		msg = {'title': self.randphrase(), 'ingredients': self.randphrase() + ', ' + flag, 'csrf-token': csrf_token}
+		user = self.randuser(0)
+		result = self.spost(s, addr, '/auth', [('csrf-token', csrf_token), ('login', user['login']), ('pass', user['pass'])])
+		#if not result or len(result) == 0:
+		#	print('register user failed')
+		#	return EXITCODE_MUMBLE
+
+		time.sleep(3)
+
+		msg = [('title', self.randphrase()), ('ingredients', self.randphrase() + ', ' + flag), ('csrf-token', csrf_token)]
 
 		ws = DummyClient('ws://{}:{}/'.format(addr, WSPORT), headers=[
 			('Origin', 'http://{}:{}'.format(addr, PORT)),
@@ -320,7 +329,7 @@ class Checker(HttpCheckerBase):
 			('Cookie', cookies_string)])
 		try:
 			ws.daemon = True
-			ws.setargs('test', 'FoodBot')
+			ws.setargs('test', user['login'])
 			ws.connect()
 
 		except WebSocketException:

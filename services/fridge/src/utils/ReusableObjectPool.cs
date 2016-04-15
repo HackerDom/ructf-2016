@@ -10,7 +10,7 @@ namespace frɪdʒ.utils
 	{
 		public ReusableObjectPool(Func<T> factory, int size)
 		{
-			items = new ConcurrentBag<T>(Enumerable.Range(0, size).Select(i => factory()));
+			items = new ConcurrentStack<T>(Enumerable.Range(0, size).Select(i => factory()));
 			semaphore = new SemaphoreSlim(size, size);
 		}
 
@@ -18,14 +18,14 @@ namespace frɪdʒ.utils
 		{
 			T item;
 			await semaphore.WaitAsync().ConfigureAwait(false);
-			if(items.TryTake(out item))
+			if(items.TryPop(out item))
 				return new PooledObject(item, this);
 			throw new InvalidOperationException("Pool is empty");
 		}
 
 		private void Release(PooledObject obj)
 		{
-			items.Add(obj.Item);
+			items.Push(obj.Item);
 			semaphore.Release();
 		}
 
@@ -50,7 +50,7 @@ namespace frɪdʒ.utils
 			private int sync;
 		}
 
-		private readonly ConcurrentBag<T> items;
+		private readonly ConcurrentStack<T> items;
 		private readonly SemaphoreSlim semaphore;
 	}
 }
