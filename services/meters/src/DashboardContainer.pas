@@ -96,9 +96,12 @@ implementation
 		result := EmpyDashboard;
 		sdashboardid := inttostr(dashboardId);
 		rwSync.beginRead;
-		if dashboards.contains(sdashboardid) then
-			result := PDashboard(dashboards[sdashboardid])^;
-		rwSync.endRead;
+		try
+			if dashboards.contains(sdashboardid) then
+				result := PDashboard(dashboards[sdashboardid])^;
+		finally
+			rwSync.endRead;
+		end;
 	end;
 	
 	function TDashboardManager.CreateDashboard(const name, description: string; const ispub: boolean; const sensors: TSensors): TDashboardId;
@@ -115,18 +118,21 @@ implementation
 		dashboard^.sensors := sensors;
 
 		rwSync.beginWrite;
-		writeln(saveFile, dashboardid);
-		writeln(saveFile, dashboard^.name);
-		writeln(saveFile, dashboard^.description);
-		if dashboard^.IsPublic then
-			oisPub := 1
-		else
-			oisPub := 0;
-		writeln(saveFile, oisPub);
-		writeln(saveFile, sensors);
-		flush(saveFile);
-		dashboards[IntToStr(dashboardId)] := dashboard;
-		rwSync.endWrite;
+		try
+			writeln(saveFile, dashboardid);
+			writeln(saveFile, dashboard^.name);
+			writeln(saveFile, dashboard^.description);
+			if dashboard^.IsPublic then
+				oisPub := 1
+			else
+				oisPub := 0;
+			writeln(saveFile, oisPub);
+			writeln(saveFile, sensors);
+			flush(saveFile);
+			dashboards[IntToStr(dashboardId)] := dashboard;
+		finally
+			rwSync.endWrite;
+		end;
 
 		result := dashboardid;
 	end;
@@ -138,14 +144,17 @@ implementation
 	begin
 		result := TDashboards.Create;
 		rwSync.beginRead;
-		for s2pitem in dashboards do
-		begin
-			pair.Id := s2pitem^.Name;
-			pair.Name := PDashboard(s2pitem^.Value)^.Name;
-			pair.IsPublic := PDashboard(s2pitem^.Value)^.IsPublic;
-			result.add(pair);
+		try
+			for s2pitem in dashboards do
+			begin
+				pair.Id := s2pitem^.Name;
+				pair.Name := PDashboard(s2pitem^.Value)^.Name;
+				pair.IsPublic := PDashboard(s2pitem^.Value)^.IsPublic;
+				result.add(pair);
+			end;
+		finally
+			rwSync.endRead;
 		end;
-		rwSync.endRead;
 	end;
 
 initialization

@@ -134,8 +134,11 @@ implementation
 			exit('username and password must contains symbols with codes from [32 .. 127]');
 
 		usersRWSync.beginread;
-		was := users.contains(username);
-		usersRWSync.endread;
+		try
+			was := users.contains(username);
+		finally
+			usersRWSync.endread;
+		end;
 
 		if was then
 			exit('username has already used');
@@ -145,12 +148,15 @@ implementation
 		user^.password := password;
 
 		usersRWSync.beginWrite;
-		writeln(usersFile, user^.userId);
-		writeln(usersFile, username);
-		writeln(usersFile, user^.password);
-		flush(usersFile);
-		users[username] := user;
-		usersRWSync.endWrite;
+		try
+			writeln(usersFile, user^.userId);
+			writeln(usersFile, username);
+			writeln(usersFile, user^.password);
+			flush(usersFile);
+			users[username] := user;
+		finally
+			usersRWSync.endWrite;
+		end;
 	end;
 
 	function TAccountManager.IsAuthorized(const token: string): string;
@@ -177,8 +183,11 @@ implementation
 	begin
 		result := 0;
 		usersRWSync.beginread;
-		user := users[username];
-		usersRWSync.endread;
+		try
+			user := users[username];
+		finally
+			usersRWSync.endread;
+		end;
 		if (user <> nil) and (user^.password = password) then
 			result := user^.userid;
 	end;
@@ -197,9 +206,12 @@ implementation
 		dashboards := TDashboardIds.Create;
 
 		usersDashboardsRWSync.beginread;
-		if usersDashboards.contains(suserid) then
-			dashboards.assign(TDashboardIds(usersDashboards[suserid]));
-		usersDashboardsRWSync.endread;
+		try
+			if usersDashboards.contains(suserid) then
+				dashboards.assign(TDashboardIds(usersDashboards[suserid]));
+		finally
+			usersDashboardsRWSync.endread;
+		end;
 		for j := 0 to dashboards.Count - 1 do
 		begin
 			dt := now;
@@ -248,12 +260,15 @@ implementation
 	begin
 		suserid := inttostr(userid);
 		usersDashboardsRWSync.beginWrite;
-		writeln(usersDashboardsFile, userid, ' ', dashboardId);
-		flush(usersDashboardsFile);
-		if not usersDashboards.contains(suserid) then
-			usersDashboards[suserid] := TDashboardIds.Create;
-		TDashboardIds(usersDashboards[suserid]).add(dashboardId);
-		usersDashboardsRWSync.endWrite;
+		try
+			writeln(usersDashboardsFile, userid, ' ', dashboardId);
+			flush(usersDashboardsFile);
+			if not usersDashboards.contains(suserid) then
+				usersDashboards[suserid] := TDashboardIds.Create;
+			TDashboardIds(usersDashboards[suserid]).add(dashboardId);
+		finally
+			usersDashboardsRWSync.endWrite;
+		end;
 	end;
 
 	function TAccountManager.AddPermission(const token: string; const dashboardId: TDashboardId): string;
