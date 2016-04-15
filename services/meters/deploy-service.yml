@@ -1,0 +1,46 @@
+# Ansible >2 deploy playbook
+# use: ansible-playbook -i 192.168.0.1, deploy-service.yml
+# LOOK AT COMMA, IT IS IMPORTANT     ^^^
+# or as usual: ansible-playbook -i hosts.list deploy-service.yml
+
+---
+- hosts: all
+  remote_user: root
+  become_user: root
+  become: yes
+  tasks:
+    - name: install system requiremets
+      dnf: name={{item}} state=latest disable_gpg_check=yes
+      with_items:
+        - fpc
+    - name: add user
+      user: name=meters shell=/sbin/nologin
+    - name: set permissions
+      file: path=/home/meters owner=meters group=meters mode=0700
+    - name: copy files 
+      copy: src={{item}} dest=/home/meters force=yes owner=meters
+      with_items:
+        - src
+        - templates
+    - name: create data directory
+      file: path=/home/meters/data state=directory owner=meters
+    - name: create css directory
+      file: path=/home/meters/css state=directory owner=meters    
+    - name: create js directory
+      file: path=/home/meters/js state=directory owner=meters
+    - name: build meters
+      command: chdir=/home/meters/src sudo -u meters {{item}}
+      with_items:
+        - fpc -Fusystem-libs meters.pas
+        - cp meters ../
+    - name: copy meters.service
+      copy:
+        src=files/meters.service
+        dest=/usr/lib/systemd/system/meters.service
+        force=yes
+    - name: reload daemon
+      command: systemctl daemon-reload
+    - name: services enable
+      service: name=meters enabled=yes
+    - name: services restart
+      service: name=meters state=restarted
