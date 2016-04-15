@@ -64,8 +64,11 @@ namespace Node.Routing
         {
             if (DateTime.UtcNow - lastConnect < config.ConnectCooldown.AdjustForNode(connectionManager.Address))
                 return;
-            foreach (var peer in connectionManager.GetAvailablePeers())
+            var peers = connectionManager.GetAvailablePeers();
+            var firstIndex = random.Next(peers.Count);
+            for (int i = 0; i < peers.Count; i++)
             {
+                var peer = peers[(i + firstIndex) % peers.Count];
                 if (Map.ShouldConnectTo(peer) && connectionManager.TryConnect(peer))
                 {
                     lastConnect = DateTime.UtcNow;
