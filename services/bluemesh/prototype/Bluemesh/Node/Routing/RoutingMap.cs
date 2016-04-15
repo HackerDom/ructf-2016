@@ -24,6 +24,9 @@ namespace Node.Routing
 
         public IAddress FindExcessPeer()
         {
+            if (GraphHelper.GetPeers(OwnAddress, Links).Count() <= config.DesiredConnections)
+                return null;
+
             IAddress excessPeer = null;
             foreach (var peerLink in Links.Where(link => link.Contains(OwnAddress)).ToList())
             {
@@ -40,9 +43,6 @@ namespace Node.Routing
         public bool IsLinkExcess(RoutingMapLink link)
         {
             if (!link.Connected)
-                return false;
-
-            if (GraphHelper.GetPeers(OwnAddress, Links).Count() <= config.DesiredConnections)
                 return false;
 
             var stateBefore = GraphHelper.CalculateConnectivity(Links);
