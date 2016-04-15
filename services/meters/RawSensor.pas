@@ -18,23 +18,20 @@ interface
 		TRawSensor = class abstract(TObject)
 			protected
 				values: TRawValues;
-				log: Text;
 				rwSync: TSimpleRWSync;
 				ready: int64;
-				procedure Initialize(const fileName: unicodestring);
 			public
+				procedure Initialize;
 				function GetValues(const start, finish: int64): TRawValues;
 		end;
 
 		TRawTick = class(TRawSensor)
 			public
-				procedure Initialize;
 				procedure Run;
 		end;
 
 		TRawRandom = class(TRawSensor)
 			public
-				procedure Initialize;
 				procedure Run;
 		end;
 
@@ -49,31 +46,11 @@ implementation
 		result := (a.timestamp = b.timestamp) and (a.value = b.value);
 	end;
 
-	procedure TRawSensor.Initialize(const fileName: unicodestring);
-	var
-		tmp: TRawValue;
-		logFilePath: unicodestring;
+	procedure TRawSensor.Initialize;
 	begin
 		values := TRawValues.Create;
-		logFilePath := writeDir + fileName;
-		assign(log, logFilePath);
 		rwSync := TSimpleRWSync.Create;
 		ready := -1;
-
-		if not FileExists(logFilePath) then
-		begin
-			rewrite(log);
-			exit;
-		end;
-
-		reset(log);
-		
-		while not seekeof(log) do
-		begin
-			read(log, tmp.timestamp, tmp.value);
-			values.Add(tmp);
-		end;
-		append(log);
 	end;
 
 	function TRawSensor.GetValues(const start, finish: int64): TRawValues;
@@ -95,13 +72,6 @@ implementation
 		rwSync.EndRead;
 	end;
 
-	procedure TRawTick.Initialize;
-	begin
-		writeln(stderr, 'Initialize RawTickSensor');
-		flush(stderr);
-		Inherited Initialize('ticks.log');
-	end;
-
 	procedure TRawTick.Run;
 	var
 		prev, current: TDateTime;
@@ -114,8 +84,6 @@ implementation
 			tmp.value := (current - prev) * 1e6;
 			tmp.timestamp := DateTimeToUnix(current);
 			prev := current;
-			writeln(log, tmp.timestamp, ' ', tmp.value:0:10);
-			flush(log);
 
 			rwSync.BeginWrite;
 			values.Add(tmp);
@@ -127,13 +95,6 @@ implementation
 		end;
 	end;
 
-	procedure TRawRandom.Initialize;
-	begin
-		writeln(stderr, 'Initialize RawRandomSensor');
-		flush(stderr);
-		Inherited Initialize('rand.log');
-	end;
-
 	procedure TRawRandom.Run;
 	var
 		tmp: TRawValue;
@@ -142,8 +103,6 @@ implementation
 		begin
 			tmp.value := (GetGuid mod 65536) / 65536;
 			tmp.timestamp := tsnow;
-			writeln(log, tmp.timestamp, ' ', tmp.value:0:10);
-			flush(log);
 
 			rwSync.BeginWrite;
 			values.Add(tmp);
