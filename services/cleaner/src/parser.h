@@ -5,16 +5,6 @@
 #include <string>
 #include <memory>
 
-namespace {
-    enum EParserState {
-        EWaitCmd,
-        EWaitChar,
-        EWaitNumber1,
-        EWaitNumber2,
-        EError
-    };
-}
-
 class TCommandParser {
 public:
     TCommandParser(const std::string& listing);
@@ -24,6 +14,14 @@ private:
     bool GetNum(size_t& num);
 
 private:
+    enum EParserState {
+        EWaitCmd,
+        EWaitChar,
+        EWaitNumber1,
+        EWaitNumber2,
+        EError
+    };
+
     const std::string& Listing;
     size_t Idx;
     EParserState State;

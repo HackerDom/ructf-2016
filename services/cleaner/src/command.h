@@ -37,4 +37,3 @@ private:
 class TErrorCommand : public ICommand {
     virtual bool Run(TProgramState& state, TRoomConfiguration& configuration) const;
 };
-

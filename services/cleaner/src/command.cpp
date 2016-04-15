@@ -1,11 +1,5 @@
 #include "command.h"
 
-TNewCommand::TNewCommand(size_t x, size_t y)
-    : X(x)
-    , Y(y)
-{
-}
-
 bool Error(TProgramState& state) {
     state.Log << 'E';
     return false;
@@ -17,6 +11,12 @@ void PrintfNum(TProgramState& state, size_t num) {
     state.Log << buf;
 }
 
+TNewCommand::TNewCommand(size_t x, size_t y)
+    : X(x)
+    , Y(y)
+{
+}
+
 bool TNewCommand::Run(TProgramState& state, TRoomConfiguration& configuration) const {
     if (X * + Y < configuration.size() && configuration[X * 8 + Y] != 'W') {
         state.Log << 'N';
@@ -25,12 +25,12 @@ bool TNewCommand::Run(TProgramState& state, TRoomConfiguration& configuration) c
         state.PosX = X;
         state.PosY = Y;
         return true;
-    } else {
-        return Error(state);
-    }
+    } 
+
+    return Error(state);
 }
 
-TMoveCommand::TMoveCommand(char direction, size_t len) 
+TMoveCommand::TMoveCommand(char direction, size_t len)
     : Direction(direction)
     , Len(len)
 {

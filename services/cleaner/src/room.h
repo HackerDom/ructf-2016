@@ -28,13 +28,13 @@ private:
     template<class TArchive>
     void serialize(TArchive& archive, const unsigned int /*version*/) {
         archive & boost::serialization::base_object<TPassChecker>(*this);
-        archive & Name;
+        archive & const_cast<std::string&>(Name);
         archive & Configuration;
         archive & Logs;
     }
 
 private:
-    std::string Name;
+    const std::string Name;
     TRoomConfiguration Configuration;
     TProgramLogs Logs;
 };
