@@ -18,7 +18,6 @@ void PrintfNum(TProgramState& state, size_t num) {
 }
 
 bool TNewCommand::Run(TProgramState& state, TRoomConfiguration& configuration) const {
-    std::cout << "run new " << X << " " << Y << " " << ((int) configuration[X * 8 + Y]) << std::endl;
     if (X * + Y < configuration.size() && configuration[X * 8 + Y] != 'W') {
         state.Log << 'N';
         PrintfNum(state, X);
@@ -44,7 +43,6 @@ bool TMoveCommand::Run(TProgramState& state, TRoomConfiguration& configuration) 
     for (size_t i = 0; i < Len; ++i) {
         size_t x = state.PosX;
         size_t y = state.PosY;
-        std::cout << (ssize_t) x << " " << (ssize_t) y << " " << ((int) configuration[x * 8 + y]) << " " << configuration[x * 8 + y] <<std::endl;
         switch (Direction) {
             case 'L':
                 if (x != 0 && configuration[(x - 1) * 8 + y] != 'W') {
@@ -77,8 +75,6 @@ bool TMoveCommand::Run(TProgramState& state, TRoomConfiguration& configuration) 
             default:
                 error = true;
         }
-
-        std::cout << "Run " << Direction << " "<< Len << " " << path_len << " " << error << std::endl;
 
         if (error) {
             break;
