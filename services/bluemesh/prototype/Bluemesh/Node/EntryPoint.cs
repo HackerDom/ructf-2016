@@ -43,9 +43,9 @@ namespace Node
                 LongNames = true
             };
             var node = CreateNode(config, config);
-            node.Start();
             var consoleServer = new ConsoleServer(new IPEndPoint(IPAddress.Loopback, 16801), node);
             consoleServer.Start();
+            node.Start();
         }
 
         private static TcpAddress GetLocalAddress(int port)
