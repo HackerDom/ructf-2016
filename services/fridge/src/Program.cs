@@ -13,6 +13,8 @@ namespace frɪdʒ
 	{
 		private static void Main()
 		{
+			AppDomain.CurrentDomain.UnhandledException += (sender, args) => Console.Error.WriteLine(args.ExceptionObject);
+
 			ThreadPool.SetMinThreads(HttpServerSettings.Concurrency, HttpServerSettings.Concurrency);
 			ThreadPool.SetMaxThreads(HttpServerSettings.Concurrency, HttpServerSettings.Concurrency);
 
@@ -32,7 +34,7 @@ namespace frɪdʒ
 
 				ctx.Response.Headers["X-Frame-Options"] = "deny";
 				ctx.Response.Headers["X-XSS-Protection"] = "1; mode=block";
-				ctx.Response.Headers["Content-Security-Policy"] = $"default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self' ws://{url.Host}:9999;";
+				ctx.Response.Headers["Content-Security-Policy"] = $"default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self' ws://{url.Host}:9999;";
 
 				ctx.SetCsrfTokenCookie();
 			});

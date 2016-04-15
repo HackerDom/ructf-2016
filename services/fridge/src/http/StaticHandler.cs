@@ -71,6 +71,7 @@ namespace frɪdʒ.http
 			{".html", PageContentType},
 			{".css", "text/css"},
 			{".js", "application/javascript"},
+			{".woff", "application/font-woff"},
 			{".ico", "image/x-icon"},
 			{".gif", "image/gif"},
 			{".png", "image/png"},
