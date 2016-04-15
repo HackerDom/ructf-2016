@@ -49,6 +49,8 @@ namespace Tests
             var address = new TcpAddress(new IPEndPoint(IPAddress.Loopback, 16800 + id));
             connectionConfig.LocalAddress.Returns(address);
             connectionConfig.PreconfiguredNodes.Returns(_ => nodes.Where(n => !Equals(n, address)).ToList());
+            connectionConfig.ConnectingSocketMaxTTL.Returns(TimeSpan.FromMilliseconds(50));
+            connectionConfig.ConnectingSocketsToConnectionsMultiplier.Returns(5);
             nodes.Add(address);
             var encryptionManager = Substitute.For<IEncryptionManager>();
             var encoder = Substitute.For<IMessageEncoder>();

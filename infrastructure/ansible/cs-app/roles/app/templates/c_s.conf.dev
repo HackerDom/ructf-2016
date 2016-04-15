@@ -1,5 +1,5 @@
-{ pg => {uri => 'postgresql://cs:{{cs_db_pass}}@127.0.0.1/cs_dev'},
-  hypnotoad => {listen => ['http://*:8080'], workers => 64},
+{ pg => {uri => 'postgresql://cs:{{cs_db_pass}}@172.16.16.41/cs_dev'},
+  hypnotoad => {listen => ['http://*:8080'], workers => 16},
   cs => {
     time => {
       start => '2013-01-01 00:00:00',
@@ -18,5 +18,29 @@
   ],
   services => [
 {% include "services.dev" %}
-  ]
+  ],
+  queues => {
+    team101 => {environ => 'checker-1'},
+    team102 => {environ => 'checker-1'},
+    team103 => {environ => 'checker-1'},
+    team104 => {environ => 'checker-1'},
+    team105 => {environ => 'checker-1'},
+    team106 => {environ => 'checker-1'},
+    team107 => {environ => 'checker-1'},
+    team108 => {environ => 'checker-1'},
+    team109 => {environ => 'checker-1'},
+    team110 => {environ => 'checker-1'},
+    team111 => {environ => 'checker-1'},
+    team112 => {environ => 'checker-2'},
+    team113 => {environ => 'checker-2'},
+    team114 => {environ => 'checker-2'},
+    team115 => {environ => 'checker-2'},
+    team116 => {environ => 'checker-2'},
+    team117 => {environ => 'checker-2'},
+    team118 => {environ => 'checker-2'},
+    team119 => {environ => 'checker-2'},
+    team120 => {environ => 'checker-2'},
+    team121 => {environ => 'checker-2'},
+    team122 => {environ => 'checker-2'}
+  }
 }

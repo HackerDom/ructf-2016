@@ -27,16 +27,25 @@ public:
     {
     }
 
-    bool ReadLines(std::string& data) {
+    bool ReadLinesImpl(std::string& data) {
         return ReadSocket(data);
     }
 
     template <typename ... Args>
-    bool ReadLines(std::string& data, Args&... args) {
+    bool ReadLinesImpl(std::string& data, Args&... args) {
         if (ReadSocket(data)) {
-            return ReadLines(args...);
+            return ReadLinesImpl(args...);
         }
         return false;
+    }
+
+    template <typename ... Args>
+    void ReadLines(Args&... args) {
+        bool result = ReadLinesImpl(args...);
+
+        if (!result) {
+            throw std::runtime_error("unexpected end of data");
+        }
     }
 
     template <typename ... Args>

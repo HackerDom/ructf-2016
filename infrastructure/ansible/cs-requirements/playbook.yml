@@ -4,3 +4,9 @@
     cs_user: cs
     cs_dir: /home/cs
     cs_db_pass: jPcTXXmHIg3RfD2X1706UtXLpUpk2htk
+- hosts: [dev-cs2,dev-cs3]
+  roles: [app]
+  vars:
+    cs_user: cs
+    cs_dir: /home/cs
+    cs_db_pass: jPcTXXmHIg3RfD2X1706UtXLpUpk2htk

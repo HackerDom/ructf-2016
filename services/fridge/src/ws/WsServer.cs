@@ -78,7 +78,7 @@ namespace frɪdʒ.ws
 							Remove(ws);
 							return false;
 						})
-						.Select(pair => TrySendAsync(pair.Key, pair.Value.Lock, format(pair.Value.Item), token)));
+						.Select(pair => TrySendAsync(pair.Key, pair.Value, format, token)));
 		}
 
 		private async Task TrySendHelloAsync(WebSocket ws, CancellationToken token)
@@ -95,11 +95,12 @@ namespace frɪdʒ.ws
 			}
 		}
 
-		private async Task TrySendAsync(WebSocket ws, AsyncLockSource lockSource, string msg, CancellationToken token)
+		private async Task TrySendAsync(WebSocket ws, State state, Func<T, string> format, CancellationToken token)
 		{
 			try
 			{
-				using(await lockSource.AcquireAsync(token))
+				var msg = format.TryOrDefault(state.Item);
+				using(await state.Lock.AcquireAsync(token))
 					await ws.WriteStringAsync(msg, token).ConfigureAwait(false);
 				//Console.WriteLine($"[{ws.RemoteEndpoint}] WS sent '{msg}'");
 			}

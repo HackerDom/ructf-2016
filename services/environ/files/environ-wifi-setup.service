@@ -1,0 +1,18 @@
+[Unit]
+Description=Environ Wifi Setup
+After=network.target
+Before=environ.service environ-web.service
+
+[Service]
+Type=oneshot
+ExecStartPre=/bin/bash -c 'modprobe rt3290sta && rmmod rt3290sta; modprobe rt2800pci'
+ExecStartPre=/bin/bash -c '/usr/bin/systemctl set-environment WIFICARD=$(/usr/sbin/iwconfig 2> /dev/null | grep IEEE | cut -d \" \" -f 1)'
+ExecStartPre=/bin/bash -c '/usr/sbin/ifconfig $WIFICARD down'
+ExecStartPre=/bin/bash -c '/usr/sbin/iwconfig $WIFICARD mode monitor'
+ExecStartPre=-/bin/bash -c '/usr/sbin/iwconfig $WIFICARD channel 1'
+ExecStartPre=/bin/bash -c '/usr/sbin/ifconfig $WIFICARD up'
+
+ExecStart=/bin/true
+
+[Install]
+WantedBy=multi-user.target

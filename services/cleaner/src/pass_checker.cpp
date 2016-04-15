@@ -22,7 +22,7 @@ public:
 
         std::string result;
         boost::algorithm::hex(hash, hash + MD5_DIGEST_LENGTH, std::back_inserter(result));
-                
+
         return result;
     }
 

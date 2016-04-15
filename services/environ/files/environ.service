@@ -1,0 +1,14 @@
+[Unit]
+Description=Environ
+After=network.target environ-web.service
+Requires=environ-web.service
+
+[Service]
+ExecStartPre=/bin/bash -c '/usr/bin/systemctl set-environment WIFICARD=$(/usr/sbin/iwconfig 2> /dev/null | grep IEEE | cut -d \" \" -f 1)'
+ExecStart=/usr/bin/python3.5 /home/environ/server.py
+User=environ
+Restart=always
+WorkingDirectory=/home/environ
+
+[Install]
+WantedBy=multi-user.target

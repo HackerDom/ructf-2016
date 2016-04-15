@@ -19,6 +19,8 @@ namespace frɪdʒ
 			var cancellation = new CancellationTokenSource();
 			var token = cancellation.Token;
 
+			var authHandler = new AuthHandler();
+
 			var wsServer = new WsServer<User>(9999, ws => Users.Find(ws.HttpRequest.Cookies?.GetAuth()));
 			var foodHandler = new FoodHandler((login, food) => Task.Run(() => wsServer.BroadcastAsync(user => FoodHandler.FormatUserMessage(user, login, food), token), token));
 
@@ -36,7 +38,8 @@ namespace frɪdʒ
 			});
 
 			var httpServer = new HttpServer(8888)
-				.AddHandler("POST", "/auth", new AuthHandler().AuthAsync)
+				.AddHandler("POST", "/auth", authHandler.AuthAsync)
+				.AddHandler("GET", "/info", authHandler.InfoAsync)
 				.AddHandler("POST", "/put", foodHandler.PutAsync)
 				.AddHandler("GET", "/get", foodHandler.GetAsync)
 				.AddHandler("GET", "/", staticHandler.GetAsync);

@@ -12,10 +12,10 @@
 class TProgram : public TPassChecker {
 public:
     TProgram();
-    TProgram(std::string& name, std::string& pass, std::string& listing);
+    TProgram(std::string& name, std::string& pass, std::string& source);
 
     const std::string& GetName() const;
-    const std::string& GetListing() const;
+    const std::string& GetSource() const;
 
     void Run(TRoom& room, TProgramState& state) const;
 
@@ -24,11 +24,11 @@ private:
     template<class TArchive>
     void serialize(TArchive& archive, const unsigned int /*version*/) {
         archive & boost::serialization::base_object<TPassChecker>(*this);
-        archive & Name;
-        archive & Listing;
+        archive & const_cast<std::string&>(Name);
+        archive & const_cast<std::string&>(Source);
     }
 
 private:
-    std::string Name;
-    std::string Listing;
+    const std::string Name;
+    const std::string Source;
 };
