@@ -60,8 +60,8 @@ def handler_check(*args):
     service_ok()
 
 def handler_get(args, things):
-    _, _, hostname, id_bid, flag, vuln = args
-    id, thing = id_bid.split("===", 1)
+    _, _, hostname, id_big, flag, vuln = args
+    id, thing = id_big.split("===", 1)
     request = "http://{0}:{3}/search?text={1}&owner={2}".format(hostname, thing, id, PORT)
     reply = None
     try:
@@ -83,7 +83,7 @@ def handler_get(args, things):
 def handler_put(args, things):
     _, _, hostname, id, flag, vuln = args
     thing = things.random()
-    id_bid = "{}==={}".format(id, thing)
+    id_big = "{}==={}".format(id, thing)
     request = "http://{0}:{3}/set?text={1}&owner={2}".format(hostname, flag, id, PORT)
     reply = None
     thing = None
@@ -97,7 +97,7 @@ def handler_put(args, things):
         return service_mumble(message="Server error: {}".format(e), exception=e, request=request, reply=reply, body=thing)
 
 
-    return service_ok(message=id_bid)
+    return service_ok(message=id_big)
 
 
 HANDLERS = {
