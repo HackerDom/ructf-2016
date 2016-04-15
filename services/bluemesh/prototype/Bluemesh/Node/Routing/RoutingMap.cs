@@ -63,8 +63,12 @@ namespace Node.Routing
             var oldLinks = Links.ToList();
 
             var linksToAdd = links.Where(link => !link.Contains(OwnAddress) && 
-                ((link.Contains(source) && link.Connected != Links.FirstOrDefault(l => Equals(l, link)).Connected) ||  
-                link.Version > Links.FirstOrDefault(l => Equals(l, link)).Version)).ToList();
+                    ((link.Contains(source) && link.Connected != Links.FirstOrDefault(l => Equals(l, link)).Connected) ||  
+                    link.Version > Links.FirstOrDefault(l => Equals(l, link)).Version))
+                .Concat(Links
+                    .Where(l => l.Contains(source) && !l.Contains(OwnAddress) && !links.Contains(l))
+                    .Select(l => new RoutingMapLink(l.A, l.B, l.Version + 1, false)))
+                .Concat(links.Where(l => l.Contains(OwnAddress) && !Links.Contains(l) && !l.Connected)).ToList();
 
             if (linksToAdd.Count > 0)
                 Version++;
