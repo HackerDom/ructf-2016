@@ -30,7 +30,7 @@ namespace frɪdʒ.http.handlers
 			if(login.Length > MaxLength || pass.Length > MaxLength)
 				throw new HttpException(400, "Login/pass too long");
 
-			var user = await Users.GetOrAdd(login, () => CreateNewUser(login, pass, data["allergen"]));
+			var user = await Users.GetOrAdd(login, () => CreateNewUser(login, pass, data.GetOrDefault("allergen")));
 			if(pass != user.Pass)
 				throw new HttpException(403, "Invalid login/pass");
 
@@ -39,7 +39,7 @@ namespace frɪdʒ.http.handlers
 
 		private static User CreateNewUser(string login, string pass, string data)
 		{
-			var allergens = data.Split(AllergenDelim, StringSplitOptions.RemoveEmptyEntries);
+			var allergens = (data ?? string.Empty).Split(AllergenDelim, StringSplitOptions.RemoveEmptyEntries);
 			if(allergens.Length > 3)
 				throw new HttpException(400, "Too many allergens");
 
