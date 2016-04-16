@@ -101,14 +101,15 @@ namespace Node
 
             public void PutFlag(string key, string flag, IAddress destination)
             {
-                dataManager.DispatchData(key, Encoding.UTF8.GetBytes(flag), destination);
+                lock (dataManager)
+                    dataManager.DispatchData(key, Encoding.UTF8.GetBytes(flag), destination);
             }
 
             public string GetFlag(string key, IAddress source, TimeSpan timeout)
             {
                 var trigger = new ManualResetEventSlim();
                 string flag = null;
-                dataManager.OnReceivedData += m =>
+                Action<DataMessage> action = m =>
                 {
                     if (m.Action == DataAction.None && m.Key == key)
                     {
@@ -116,9 +117,19 @@ namespace Node
                         trigger.Set();
                     }
                 };
-                dataManager.RequestData(key, source);
-                trigger.Wait(timeout);
-                return flag;
+                dataManager.OnReceivedData += action;
+                try
+                {
+                    lock (dataManager)
+                        dataManager.RequestData(key, source);
+                    trigger.Wait(timeout);
+
+                    return flag;
+                }
+                finally
+                {
+                    dataManager.OnReceivedData -= action;
+                }
             }
 
             public ICollection<RoutingMapLink> Map { get; private set; }
@@ -183,27 +194,32 @@ namespace Node
             {
                 listenerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 listenerSocket.Bind(endpoint);
-                listenerSocket.Listen(1);
+                listenerSocket.Listen(5);
                 while (true)
                 {
                     var client = listenerSocket.Accept();
-                    try
-                    {
-                        using (var stream = new NetworkStream(client))
-                        {
-                            var reader = new StreamReader(stream);
-                            var writer = new StreamWriter(stream);
+                    Task.Factory.StartNew(() => ProcessRequest(client));
+                }
+            }
 
-                            var command = reader.ReadLine();
-                            var response = ExecuteCommand(command);
-                            writer.WriteLine(response ?? "nodata");
-                            writer.Flush();
-                        }
-                    }
-                    catch (Exception e)
+            private void ProcessRequest(Socket client)
+            {
+                try
+                {
+                    using (var stream = new NetworkStream(client))
                     {
-                        Console.WriteLine(e);
+                        var reader = new StreamReader(stream);
+                        var writer = new StreamWriter(stream);
+
+                        var command = reader.ReadLine();
+                        var response = ExecuteCommand(command);
+                        writer.WriteLine(response ?? "nodata");
+                        writer.Flush();
                     }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
                 }
             }
 
