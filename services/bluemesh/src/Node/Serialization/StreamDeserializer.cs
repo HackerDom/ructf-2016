@@ -14,6 +14,17 @@ namespace Node.Serialization
         public byte[] ReadBytes()
         {
             var length = ReadInt();
+            try
+            {
+                if (stream.CanSeek && length > stream.Length - stream.Position)
+                {
+                    Console.WriteLine("Tried to read too much data!");
+                    length = (int) (stream.Length - stream.Position);
+                }
+            }
+            catch
+            {
+            }
             var buffer = new byte[length];
             stream.Read(buffer, 0, length);
             return buffer;
