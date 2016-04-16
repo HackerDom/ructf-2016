@@ -120,6 +120,8 @@ namespace Node
                 return flag;
             }
 
+            public ICollection<RoutingMapLink> Map { get; private set; }
+
             private void Tick()
             {
                 connectionManager.PurgeDeadConnections();
@@ -153,6 +155,7 @@ namespace Node
                 Console.WriteLine("[{0}] v: {2} {1}", routingManager.Map.OwnAddress, routingManager.Map, routingManager.Map.Version);
                 if (dataManager.DataStorage.ToString().Length > 0)
                     Console.WriteLine("[{0}] !! my flags : {1}", routingManager.Map.OwnAddress, dataManager.DataStorage);
+                Map = routingManager.Map.Links.ToList();
             }
 
             private readonly RoutingManager routingManager;
@@ -229,6 +232,10 @@ namespace Node
                     if (address == null)
                         return null;
                     return node.GetFlag(parts[2], address);
+                }
+                if (parts[0] == "list")
+                {
+                    return string.Join(", ", GraphHelper.GetNodes(node.Map));
                 }
                 return null;
             }
