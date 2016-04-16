@@ -1,0 +1,12 @@
+[Unit]
+Description=Strongbox
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/bundle exec rails server -e production --bind 0.0.0.0 --port 3000
+User=strongbox
+Restart=always
+WorkingDirectory=/home/strongbox
+
+[Install]
+WantedBy=multi-user.target
