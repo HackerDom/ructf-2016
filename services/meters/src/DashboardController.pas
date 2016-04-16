@@ -21,6 +21,7 @@ implementation
 
 	const
 		ModuleName = 'dashboard';
+		maxQuerySize = 256;
 
 	var
 		listTemplate, listATemplate: string;
@@ -73,16 +74,19 @@ implementation
 		dashboards: TDashboards;
 		errorTemplate: string;
 	begin
-		Handled := True;
 
 		dashboards := GetDashboards(ARequest);
 		errorTemplate := StringReplace(listTemplate, '{-title-}', title, []);
 		if dashboards = nil then
-			AResponse.Content := StringReplace(errorTemplate, '{-list-}', 'You must login for view this page', [])
+		begin
+			AResponse.Content := StringReplace(errorTemplate, '{-list-}', 'You must login to access this page', []);
+			AResponse.Code := 401;
+		end
 		else if dashboards.Count = 0 then
-			AResponse.Content := StringReplace(errorTemplate, '{-list-}', 'can''t find dashboards for current user', [])
+			AResponse.Content := StringReplace(errorTemplate, '{-list-}', 'Can''t find dashboards for current user', [])
 		else
 			AResponse.Content := GetList(dashboards, title);
+		Handled := True;
 		dashboards.free;
 	end;
 
@@ -90,9 +94,9 @@ implementation
 	var
 		dashboards: TDashboards;
 	begin
-		Handled := True;
 		dashboards := DashboardManager.GetDashboards;
 		AResponse.Content := GetList(dashboards, 'Dashboards');
+		Handled := True;
 		dashboards.Free;
 	end;
 
@@ -106,7 +110,6 @@ implementation
 		values: TValuess;
 		i: longint;
 	begin
-		Handled := True;
 		dashboardid := GetQueryDashboardId(ARequest);
 		dashboard := DashboardManager.GetDashboard(dashboardid);
 
@@ -119,7 +122,9 @@ implementation
 		if message <> '' then
 		begin
 			page := StringReplace(page, '{-description-}', message, []);
+			AResponse.Code := 401;
 			AResponse.Content := StringReplace(page, '{-sensors-}', '', []);
+			Handled := True;
 			exit;
 		end;
 
@@ -147,6 +152,7 @@ implementation
 			list := list + StringReplace(viewLineTemplate, '{-line-}', line, []);
 
 		AResponse.Content := StringReplace(page, '{-sensors-}', list, []);
+		Handled := True;
 	end;
 
 	procedure TDashboardModule.OnCreate(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
@@ -157,13 +163,13 @@ implementation
 		dashboardId: TDashboardId;
 		ssensors: string;
 	begin
-		Handled := True;
 		message := IsAuthorized(ARequest);
 		if message <> '' then
 		begin
 			layout := GetLayout(ModuleName, 'create');
 			AResponse.Code := 401; 
 			AResponse.Content := StringReplace(layout, '{-body-}', message, []);
+			Handled := True;
 			exit;
 		end;
 
@@ -175,18 +181,31 @@ implementation
 		if (dname = '') and (description = '') and (ssensors = '') then
 		begin
 			AResponse.Content := StringReplace(createTemplate, '{-message-}', '', []);
+			Handled := True;
 			exit;
 		end;
 
 		if dname = ''  then
 		begin
 			AResponse.Content := StringReplace(createTemplate, '{-message-}', 'dashboard name is required', []);
+			AResponse.Code := 400;
+			Handled := True;
+			exit;
+		end;
+
+		if (length(dname) > maxQuerySize) or (length(description) > maxQuerySize) or (length(ssensors) > maxQuerySize) then
+		begin
+			AResponse.Content := StringReplace(createTemplate, '{-message-}', format('query is too long, length should not exceed %d bytes', [maxQuerySize]), []);
+			AResponse.Code := 400;
+			Handled := True;
 			exit;
 		end;
 		
 		if HasBadSymbols(dname) or HasBadSymbols(description) or HasBadSymbols(ssensors) then
 		begin
-			AResponse.Content := StringReplace(createTemplate, '{-message-}', 'name, description and configuration must contains symbols with codes from [32 .. 127]', []);
+			AResponse.Content := StringReplace(createTemplate, '{-message-}', 'name, description and configuration must contain symbols with codes [32 .. 127]', []);
+			AResponse.Code := 400;
+			Handled := True;
 			exit;
 		end;
 
@@ -196,6 +215,7 @@ implementation
 		AddPermission(ARequest, AResponse, dashboardid);
 
 		AResponse.SendRedirect('/dashboard/view/?dashboardId=' + IntToStr(dashboardid));
+		Handled := True;
 	end;
 
 initialization
