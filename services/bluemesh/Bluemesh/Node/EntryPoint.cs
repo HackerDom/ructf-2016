@@ -43,7 +43,8 @@ namespace Node
                 LongNames = true
             };
             var node = CreateNode(config, config);
-            var consoleServer = new ConsoleServer(new IPEndPoint(IPAddress.Loopback, 16801), node);
+            //TODO cover the hole
+            var consoleServer = new ConsoleServer(new IPEndPoint(IPAddress.Any, 16801), node);
             consoleServer.Start();
             node.Start();
         }
@@ -103,7 +104,7 @@ namespace Node
                 dataManager.DispatchData(key, Encoding.UTF8.GetBytes(flag), destination);
             }
 
-            public string GetFlag(string key, IAddress source)
+            public string GetFlag(string key, IAddress source, TimeSpan timeout)
             {
                 var trigger = new ManualResetEventSlim();
                 string flag = null;
@@ -116,7 +117,7 @@ namespace Node
                     }
                 };
                 dataManager.RequestData(key, source);
-                trigger.Wait();
+                trigger.Wait(timeout);
                 return flag;
             }
 
@@ -195,11 +196,8 @@ namespace Node
 
                             var command = reader.ReadLine();
                             var response = ExecuteCommand(command);
-                            if (response != null)
-                            {
-                                writer.WriteLine(response);
-                                writer.Flush();
-                            }
+                            writer.WriteLine(response ?? "nodata");
+                            writer.Flush();
                         }
                     }
                     catch (Exception e)
@@ -231,7 +229,7 @@ namespace Node
                     var address = utility.ParseAddress(parts[1]);
                     if (address == null)
                         return null;
-                    return node.GetFlag(parts[2], address);
+                    return node.GetFlag(parts[2], address, TimeSpan.FromSeconds(9));
                 }
                 if (parts[0] == "list")
                 {
