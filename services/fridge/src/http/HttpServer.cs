@@ -78,8 +78,8 @@ namespace frɪdʒ.http
 			}
 			catch(Exception e)
 			{
-				if(!(e is InvalidOperationException))
-					Console.Error.WriteLine(e);
+				//if(!(e is InvalidOperationException))
+					//Console.Error.WriteLine(e);
 			}
 		}
 
