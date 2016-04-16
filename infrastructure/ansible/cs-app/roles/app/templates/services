@@ -3,3 +3,5 @@
     {name => 'fridge',    path => '../checkers/fridge/fridge.checker.py',        timeout => 14},
     {name => 'cleaner',   path => '../checkers/cleaner/cleaner.checker.py',      timeout => 14},
     {name => 'strongbox', path => '../checkers/strongbox/strongbox.checker.py',  timeout => 14},
+    {name => 'bluemesh',  path => '../checkers/bluemesh/bluemesh.checker.py',     timeout => 14},
+    {name => 'discoball', path => '../checkers/discoball/discoball.checker.pl',  timeout => 14},
