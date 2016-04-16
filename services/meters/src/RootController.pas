@@ -22,4 +22,7 @@ implementation
 		AResponse.SendRedirect('/user/login/');
 	end;
 
+initialization
+	RegisterHTTPModule('', TRootModule);
+
 end.
