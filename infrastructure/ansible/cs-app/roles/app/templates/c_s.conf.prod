@@ -1,16 +1,17 @@
-{ pg => {uri => 'postgresql://cs:jrCiW2c9268x@10.10.10.2/cs_prod'},
-  hypnotoad => {listen => ['http://*:8080'], workers => 64},
+{ pg => {uri => 'postgresql://cs:{{cs_db_pass}}@a.b.c.d/cs_prod'},
+  hypnotoad => {listen => ['http://127.0.0.1:8080'], workers => 16},
   cs => {
-    base_url => 'http://monitor.e.ructf.org/',
+    base_url => 'http://monitor.ructf.org/',
     time => {
-      start => '2015-11-21 11:00:00',
-      end   => '2015-11-21 19:00:00'
+      start => '2016-04-17 00:00:00',
+      end   => '2016-04-17 20:00:00',
+      break => ['2016-04-17 13:00:00', '2016-04-17 14:00:00']
     },
-    ctf            => {name => 'RuCTFE 2015'},
+    ctf            => {name => 'RuCTF 2016'},
     round_length   => 60,
     flag_life_time => 15,
     flags => {port => 31337, timeout => 5 * 60},
-    admin => {auth => 'root:LjdjkmysqCbybqRhjkbr'},
+    admin => {auth => 'root:Ja0eeWooLoovajuMaic3'},
     checkers       => {}
   },
   teams => [
@@ -18,5 +19,28 @@
   ],
   services => [
 {% include "services.prod" %}
-  ]
+  ],
+  queues => {
+    'Magic-Hat'         => {environ => 'checker-1'},
+    'Noobs4Win'         => {environ => 'checker-1'},
+    '!SpamAndHex'       => {environ => 'checker-1'},
+    'SUSlo.PAS'         => {environ => 'checker-1'},
+    'Cat-n-Fish'        => {environ => 'checker-1'},
+    'Guest'             => {environ => 'checker-2'},
+    'Life'              => {environ => 'checker-2'},
+    'ked'               => {environ => 'checker-2'},
+    'Shadow Servants'   => {environ => 'checker-2'},
+    'Bushwhackers'      => {environ => 'checker-2'},
+    'SiBears'           => {environ => 'checker-2'},
+    'ENOFLAG'           => {environ => 'checker-2'},
+    'LC↯BC'             => {environ => 'checker-2'},
+    'Honeypot'          => {environ => 'checker-3'},
+    'c00kies@venice'    => {environ => 'checker-3'},
+    'Like a heron'      => {environ => 'checker-3'},
+    'saarsec'           => {environ => 'checker-3'},
+    'Destructive Voice' => {environ => 'checker-3'},
+    'UFOlogists'        => {environ => 'checker-3'},
+    'Lights Out'        => {environ => 'checker-3'},
+    'keva'              => {environ => 'checker-3'},
+  }
 }

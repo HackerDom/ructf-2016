@@ -132,7 +132,7 @@ implementation
 		user: PUser;
 	begin
 		if HasBadSymbols(username) or HasBadSymbols(password) then
-			exit('username and password must contains symbols with codes from [32 .. 127]');
+			exit('username and password must contain symbols with codes [32 .. 127]');
 
 		usersRWSync.beginread;
 		try
@@ -142,7 +142,7 @@ implementation
 		end;
 
 		if was then
-			exit('username has already used');
+			exit('username has already been taken');
 
 		new(user);
 		user^.userId := GetGuid;
@@ -251,7 +251,7 @@ implementation
 				else
 					exit('');
 			end;
-		result := 'You haven''t permission for this dashboard';
+		result := 'You don''t have permission for this dashboard';
 		decoded.free;
 	end;
 
