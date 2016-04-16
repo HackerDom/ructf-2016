@@ -1,19 +1,25 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using Node;
 using Node.Connections;
 using Node.Connections.Tcp;
 using Node.Data;
 using Node.Encryption;
+using Node.Messages;
 using Node.Routing;
 using Node.Serialization;
 
-namespace Node
+namespace HackerNode
 {
     internal class EntryPoint
     {
@@ -39,7 +45,7 @@ namespace Node
                 LongNames = true
             };
             var node = CreateNode(config, config, "storage");
-            var consoleServer = new ConsoleServer(new IPEndPoint(IPAddress.Any, 16801), node);
+            var consoleServer = new Node.ConsoleServer(new IPEndPoint(IPAddress.Any, 16801), node);
             consoleServer.Start();
             node.Start();
         }
@@ -59,13 +65,13 @@ namespace Node
             throw new Exception("Could not find interface 10.23.*.3 to listen on!");
         }
 
-        private static BluemeshNode CreateNode(IConnectionConfig connectionConfig, IRoutingConfig routingConfig, string storagePath)
+        private static Node.BluemeshNode CreateNode(IConnectionConfig connectionConfig, IRoutingConfig routingConfig, string storagePath)
         {
             var encryptionManager = new EncryptionManager(((TcpAddress)connectionConfig.LocalAddress).Endpoint, connectionConfig.KeySendCooldown);
             var connectionManager = new TcpConnectionManager(connectionConfig, routingConfig, encryptionManager);
             var routingManager = new RoutingManager(connectionManager, routingConfig);
             var dataManager = new DataManager(LoadStorage(storagePath) ?? new DataStorage(), storagePath, routingManager, encryptionManager);
-            return new BluemeshNode(routingManager, connectionManager, dataManager, encryptionManager, routingConfig.DoLogMap);
+            return new Node.BluemeshNode(routingManager, connectionManager, dataManager, encryptionManager, routingConfig.DoLogMap);
         }
 
         private static IDataStorage LoadStorage(string path)

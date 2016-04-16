@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Node")]
+[assembly: AssemblyTitle("HackerNode")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Node")]
+[assembly: AssemblyProduct("HackerNode")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("2d0bfa48-007d-4e03-8283-7d66cb516540")]
+[assembly: Guid("69586c1d-1d88-4b66-aef2-b3a872c18146")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -34,9 +34,3 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
-
-[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
-[assembly: InternalsVisibleTo("Tests")]
-[assembly: InternalsVisibleTo("CheckerNode")]
-[assembly: InternalsVisibleTo("HackerNode")]
-[assembly: InternalsVisibleTo("PatchedNode")]

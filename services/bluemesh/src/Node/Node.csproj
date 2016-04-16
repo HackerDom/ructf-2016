@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BluemeshNode.cs" />
     <Compile Include="Connections\ConnectionState.cs" />
     <Compile Include="Connections\IAddress.cs" />
     <Compile Include="Connections\IConnectionConfig.cs" />
@@ -57,6 +58,7 @@
     <Compile Include="Connections\Tcp\SocketExtensions.cs" />
     <Compile Include="Connections\IConnection.cs" />
     <Compile Include="Connections\IConnectionManager.cs" />
+    <Compile Include="ConsoleServer.cs" />
     <Compile Include="Data\DataManager.cs" />
     <Compile Include="Data\DataStorage.cs" />
     <Compile Include="Encryption\BluemeshEncryptor.cs" />
