@@ -22,6 +22,7 @@ implementation
 {$R *.lfm}
 	const
 		ModuleName = 'user';
+		maxQuerySize = 256;
 
 	var
 		loginTemplate: string;
@@ -40,6 +41,12 @@ implementation
 		if (username = '') or (password = '') then
 		begin
 			AResponse.Content := StringReplace(template, '{-message-}', 'both username and password are required', []);
+			exit(false);
+		end;
+
+		if (length(username) > maxQuerySize) or (length(password) > maxQuerySize) then
+		begin
+			AResponse.Content := StringReplace(template, '{-message-}', format('query is too long, length should not exceed %d bytes', [maxQuerySize]), []);
 			exit(false);
 		end;
 
@@ -82,7 +89,6 @@ implementation
 		userid: TUserId;
 	begin
 		Handled := True;
-		AResponse.ContentType := 'text/html';
 
 		if not TryGetUsernameAndPassword(ARequest, AResponse, username, password, registerTemplate) then
 			exit;

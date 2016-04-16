@@ -21,6 +21,7 @@ implementation
 
 	const
 		ModuleName = 'dashboard';
+		maxQuerySize = 256;
 
 	var
 		listTemplate, listATemplate: string;
@@ -78,7 +79,7 @@ implementation
 		dashboards := GetDashboards(ARequest);
 		errorTemplate := StringReplace(listTemplate, '{-title-}', title, []);
 		if dashboards = nil then
-			AResponse.Content := StringReplace(errorTemplate, '{-list-}', 'You must login for view this page', [])
+			AResponse.Content := StringReplace(errorTemplate, '{-list-}', 'You must login to access this page', [])
 		else if dashboards.Count = 0 then
 			AResponse.Content := StringReplace(errorTemplate, '{-list-}', 'can''t find dashboards for current user', [])
 		else
@@ -183,10 +184,16 @@ implementation
 			AResponse.Content := StringReplace(createTemplate, '{-message-}', 'dashboard name is required', []);
 			exit;
 		end;
+
+		if (length(dname) > maxQuerySize) or (length(description) > maxQuerySize) or (length(ssensors) > maxQuerySize) then
+		begin
+			AResponse.Content := StringReplace(createTemplate, '{-message-}', format('query is too long, length should not exceed %d bytes', [maxQuerySize]), []);
+			exit;
+		end;
 		
 		if HasBadSymbols(dname) or HasBadSymbols(description) or HasBadSymbols(ssensors) then
 		begin
-			AResponse.Content := StringReplace(createTemplate, '{-message-}', 'name, description and configuration must contains symbols with codes from [32 .. 127]', []);
+			AResponse.Content := StringReplace(createTemplate, '{-message-}', 'name, description and configuration must contain symbols with codes [32 .. 127]', []);
 			exit;
 		end;
 
