@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -10,7 +9,6 @@ using FluentAssertions;
 using Node.Connections;
 using Node.Connections.Tcp;
 using Node.Encryption;
-using Node.Messages;
 using Node.Routing;
 using NSubstitute;
 using NUnit.Framework;

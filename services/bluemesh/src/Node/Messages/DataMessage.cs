@@ -1,5 +1,4 @@
 ﻿using Node.Connections;
-using Node.Encryption;
 using Node.Serialization;
 
 namespace Node.Messages
