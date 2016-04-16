@@ -116,7 +116,6 @@ namespace Node.Data
             {
                 var length = new MessageContainer(message).WriteToBuffer(serializerBuffer, 0);
                 encryptionManager.EncryptData(serializerBuffer, MessageContainer.HeaderSize, length - MessageContainer.HeaderSize, path.Last());
-                //TODO optimize
                 var wrapped = new RedirectMessage(path.Last(), serializerBuffer.Take(length).ToArray());
                 message = wrapped;
                 path = path.Take(path.Count - 1).ToList();
