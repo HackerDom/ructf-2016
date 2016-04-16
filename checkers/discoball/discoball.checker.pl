@@ -11,8 +11,8 @@ my %MODES = (check => \&check, get => \&get, put => \&put);
 my ($mode, $ip) = splice @ARGV, 0, 2;
 my @chars = ('A' .. 'Z', 'a' .. 'z', '_', '0' .. '9');
 
-#my $transmitterIp = '10.23.0.14';
-my $transmitterIp = '127.0.0.1';
+my $transmitterIp = '10.23.0.14';
+#my $transmitterIp = '127.0.0.1';
 
 
 warn 'Invalid input. Empty mode or ip address.' and exit $INTERNAL_ERROR
