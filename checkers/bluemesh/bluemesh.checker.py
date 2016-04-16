@@ -72,7 +72,7 @@ class State:
 		send("put " + self.hostname + ":" + str(PORT) + " " + flag_id + " " + flag, socket)
 		result = readline(socket_fd)
 		if result == "done":
-			service_ok()
+			service_ok(message=flag_id)
 		else:
 			ructf_error(message="Unexpected PUT response: " + result)
 
