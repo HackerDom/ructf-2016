@@ -22,6 +22,8 @@
       with_items:
         - src
         - templates
+        - css
+        - js
     - name: create data directory
       file: path=/home/meters/data state=directory owner=meters
     - name: build meters

@@ -14,6 +14,39 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILENAME = os.path.join(DIR, 'db.sqlite3')
 THING_FILENMAME = os.path.join(DIR, 'things.txt')
 
+
+UA = [
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.517 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.3319.102 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.124 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36',
+
+    'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 YaBrowser/14.8.1985.11875 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 YaBrowser/14.8.1985.12017 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 YaBrowser/14.8.1985.12018 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 YaBrowser/14.8.1985.12084 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 YaBrowser/14.8.1985.12084 Safari/537.36',
+
+    'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/33.0.1750.152 Chrome/33.0.1750.152 Safari/537.36',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/34.0.1847.116 Chrome/34.0.1847.116 Safari/537.36',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/36.0.1985.125 Chrome/36.0.1985.125 Safari/537.36',
+    'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/38.0.2125.111 Chrome/38.0.2125.111 Safari/537.36',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/38.0.2125.111 Chrome/38.0.2125.111 Safari/537.36',
+
+    'Mozilla/5.0 (X11; Linux i586; rv:31.0) Gecko/20100101 Firefox/31.0',
+    'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:31.0) Gecko/20130401 Firefox/31.0',
+    'Mozilla/5.0 (X11; OpenBSD amd64; rv:28.0) Gecko/20100101 Firefox/28.0',
+    'Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0',
+    'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:36.0) Gecko/20100101 Firefox/36.0',
+    'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:41.0) Gecko/20100101 Firefox/41.0',
+
+    'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)',
+    'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)',
+]
+
+
 def ructf_error(status=110, message=None, error=None, exception=None, request=None, reply=None, body=None):
     if message:
         sys.stdout.write(message)
@@ -58,16 +91,32 @@ def make_err_message(message, request, reply):
 def handler_info(*args):
     service_ok(message="vulns: 1")
 
-def handler_check(*args):
+def handler_check(args, *other):
+    _, _, hostname = args
+    request = "http://{0}:{1}/".format(hostname, PORT)
+    r = requests.get(request)
+    r.raise_for_status()
     service_ok()
+
+def make_request(things):
+    things_list = things.split()
+    things_out = []
+    for _ in range(3):
+        t = random.choice(things_list)
+        things_list.remove(t)
+        things_out.append(t)
+    return " ".join(things_out)
+
 
 def handler_get(args, things):
     _, _, hostname, id_big, flag, vuln = args
-    id, thing = base64.b64decode(id_big).decode("utf-8").split("===", 1)
-    request = "http://{0}:{3}/search?text={1}&owner={2}".format(hostname, thing, id, PORT)
+    id, thing_full = base64.b64decode(id_big).decode("utf-8").split("===", 1)
+    things = make_request(thing_full)
+
+    request = "http://{0}:{3}/search?text={1}&owner={2}".format(hostname, things, id, PORT)
     reply = None
     try:
-        r = requests.get(request)
+        r = requests.get(request, headers={ "User-Agent" : random.choice(UA) })
         reply = r.text
         r.raise_for_status()
     except requests.exceptions.ConnectionError as e:
@@ -89,7 +138,7 @@ def handler_put(args, things):
     request = "http://{0}:{3}/set?text={1}&owner={2}".format(hostname, flag, id, PORT)
     reply = None
     try:
-        r = requests.post(request, data=thing)
+        r = requests.post(request, data=thing, headers={ "User-Agent" : random.choice(UA) })
         reply = r.text
         r.raise_for_status()
     except requests.exceptions.ConnectionError as e:

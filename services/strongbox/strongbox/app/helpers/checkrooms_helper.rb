@@ -1,0 +1,2 @@
+module CheckroomsHelper
+end

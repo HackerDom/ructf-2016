@@ -1,0 +1,14 @@
+<div class="row">
+  <div class="col-md-12">
+    <% unless @items.nil? %>
+        <h1>List your items:</h1>
+        <ul>
+          <% @items.each do |item| %>
+              <li> <%= link_to item.title, item_path(item) %><br/></li>
+          <% end %>
+        </ul>
+    <% end %>
+    <h2>Add item</h2>
+    <%= render 'shared/item_form' %>
+  </div>
+</div>

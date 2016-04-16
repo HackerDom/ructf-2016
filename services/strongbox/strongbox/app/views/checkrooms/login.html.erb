@@ -1,0 +1,13 @@
+<% provide(:title, 'Secret form') %>
+
+<div class="row">
+  <div class="col-md-12">
+    <h1>Open checkroom</h1>
+    <%= form_tag(checkroom_path) do %>
+        <div class="form-group">
+          <%= password_field_tag :secret, nil, placeholder: "Secret", class: "form-control" %>
+        </div>
+        <%= submit_tag "View", class: "btn btn-large btn-primary" %>
+    <% end %>
+  </div>
+</div>

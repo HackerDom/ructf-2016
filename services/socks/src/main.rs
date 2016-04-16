@@ -29,6 +29,8 @@ use serialize::base64::{self, ToBase64, FromBase64};
 
 use regex::Regex;
 
+mod st;
+
 struct Context {
     docs : Mutex<Vec<String>>,
     index : Mutex<HashMap<String, Vec<usize>>>,
@@ -136,7 +138,14 @@ impl Handler for Context {
     fn handle(&self, mut req: Request, mut res: Response) {
         // self.sender.lock().unwrap().send("start").unwrap();
         // println!("{}", req.uri);
+
         let url = urlparse(req.uri.to_string());
+        if url.path == "/" {
+            let mut res = res.start().unwrap();
+            res.write_all(st::INDEX.as_bytes());
+            return;
+        }
+
         let query = url.get_parsed_query().unwrap();
         let mut text = query.get_first_from_str("text").unwrap();
         let owner = query.get_first_from_str("owner").unwrap();

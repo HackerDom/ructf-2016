@@ -1,0 +1,16 @@
+<div class="row">
+  <div class="col-md-12">
+    <div>
+      <% unless @items.nil? %>
+          <h1>Public strongbox:</h1>
+          <ul style="list-style: none; margin: 0; padding: 0;border: 1px solid #BBB;">
+            <% @items.each do |item| %>
+                <li style="border: 1px solid #BBBBBB; border-left:0;padding: 20px; width: 140px; height: 140px; text-align: center;display: list-item; float: left;">
+                  <%= link_to item.name, checkroom_path(item) %>
+                </li>
+            <% end %>
+          </ul>
+      <% end %></div>
+    <%= link_to "Add checkroom", new_checkroom_path %>
+  </div>
+</div>
