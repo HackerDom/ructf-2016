@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using frɪdʒ.Db;
 using frɪdʒ.utils;
+
 using Newtonsoft.Json;
 
 namespace frɪdʒ.http.handlers
@@ -31,8 +32,10 @@ namespace frɪdʒ.http.handlers
 			if(login.Length > MaxLength || pass.Length > MaxLength)
 				throw new HttpException(400, "Login/pass too long");
 
-			var user = await Users.GetOrAdd(login, () => CreateNewUser(login, pass, data.GetOrDefault("allergen")));
-			if(pass != user.Pass)
+			var hash = pass.Hmac();
+
+			var user = await Users.GetOrAdd(login, () => CreateNewUser(login, hash, data.GetOrDefault("allergen")));
+			if(!SecurityUtils.TimingSecureEquals(hash, user.Pass))
 				throw new HttpException(403, "Invalid login/pass");
 
 			context.SetAuthCookies(user.Login);

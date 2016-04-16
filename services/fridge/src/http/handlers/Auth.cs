@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Security.Cryptography;
+using System.Text;
 
 using frɪdʒ.utils;
 
@@ -36,10 +37,10 @@ namespace frɪdʒ.http.handlers
 			context.SetCookie(AuthCookieName, Hmac(login), true);
 		}
 
-		private static string Hmac(string value)
+		public static string Hmac(this string value)
 		{
 			using(var hmac = new HMACSHA256(Key))
-				return hmac.ComputeHash(value.ToBytes()).ToHex();
+				return hmac.ComputeHash(Encoding.UTF8.GetBytes(value)).ToHex();
 		}
 
 		private const int KeyLength = 64;
