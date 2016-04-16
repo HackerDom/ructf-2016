@@ -36,7 +36,7 @@ namespace Node.Messages
                 var messageType = (MessageType)deserializer.ReadInt();
                 if (!Enum.IsDefined(typeof (MessageType), messageType))
                 {
-                    Console.WriteLine("Invalid message type!");
+                    //Console.WriteLine("Invalid message type!");
                     return null;
                 }
                 //Console.WriteLine(" !! MessageType = " + messageType);

@@ -40,12 +40,12 @@ namespace Node.Data
                 if (pending.Destination == null)
                     continue;
 
-                Console.WriteLine("[{0}] Pending :  {1} {2}", routingManager.Map.OwnAddress, pending.Message, pending.RawData);
+                //Console.WriteLine("[{0}] Pending :  {1} {2}", routingManager.Map.OwnAddress, pending.Message, pending.RawData);
                 
                 var result = pending.Message != null ? connection.Push(pending.Message) : connection.Push(pending.RawData);
                 if (result == SendResult.Success)
                 {
-                    Console.WriteLine("[{0}] Pushed a pending message to {1}", routingManager.Map.OwnAddress, connection.RemoteAddress);
+                    //Console.WriteLine("[{0}] Pushed a pending message to {1}", routingManager.Map.OwnAddress, connection.RemoteAddress);
                     pendingMessages.Remove(pending);
                 }
             }
@@ -104,8 +104,8 @@ namespace Node.Data
                     continue;
                 var pathBody = path.GetPathBody();
                 var wrapped = WrapMessage(message, pathBody);
-                Console.WriteLine("[{0}] Added pending message : {1} {2} - {3} by path {4} to {5}", routingManager.Map.OwnAddress, message, wrapped, message.Key,
-                    string.Join(", ", path), destination);
+                //Console.WriteLine("[{0}] Added pending message : {1} {2} - {3} by path {4} to {5}", routingManager.Map.OwnAddress, message, wrapped, message.Key,
+                //    string.Join(", ", path), destination);
                 pendingMessages.Add(new QueueEntry(wrapped, message, path[1]));
             }
         }
@@ -128,7 +128,7 @@ namespace Node.Data
             if (redirectMessage == null)
                 return false;
 
-            Console.WriteLine("[{0}] Process redirect : {1}", routingManager.Map.OwnAddress, redirectMessage.Destination);
+            //Console.WriteLine("[{0}] Process redirect : {1}", routingManager.Map.OwnAddress, redirectMessage.Destination);
 
             pendingMessages.Add(new QueueEntry(redirectMessage.Data, redirectMessage.Destination));
             return true;
@@ -139,7 +139,7 @@ namespace Node.Data
             if (dataMessage == null)
                 return false;
 
-            Console.WriteLine("[{0}] Process data : {1} ({2})", routingManager.Map.OwnAddress, dataMessage.Key, dataMessage.Action);
+            //Console.WriteLine("[{0}] Process data : {1} ({2})", routingManager.Map.OwnAddress, dataMessage.Key, dataMessage.Action);
 
             switch (dataMessage.Action)
             {
@@ -147,12 +147,13 @@ namespace Node.Data
                     OnReceivedData(dataMessage);
                     break;
                 case DataAction.Put:
+                    Console.WriteLine("[{0}] Put by key {1}", routingManager.Map.OwnAddress, dataMessage.Key);
                     if (dataStorage.PutData(dataMessage.Key, dataMessage.Data))
                         FlushData();
                     break;
                 case DataAction.Get:
                     var data = dataStorage.GetData(dataMessage.Key);
-                    Console.WriteLine("[{0}] Get by key {1} : {2}", routingManager.Map.OwnAddress, dataMessage.Key, data);
+                    Console.WriteLine("[{0}] Get by key {1}", routingManager.Map.OwnAddress, dataMessage.Key);
                     if (data != null)
                     {
                         var message = new DataMessage(DataAction.None, dataMessage.Key, data, routingManager.Map.OwnAddress);
@@ -172,12 +173,12 @@ namespace Node.Data
         {
             if (pullMessage == null)
                 return false;
-            Console.WriteLine("[{0}] Processing pull message ({1}) from {2}", routingManager.Map.OwnAddress, pullMessage.Limit, connection.RemoteAddress);
+            //Console.WriteLine("[{0}] Processing pull message ({1}) from {2}", routingManager.Map.OwnAddress, pullMessage.Limit, connection.RemoteAddress);
             for (int i = 0; i < pullMessage.Limit; i++)
             {
                 if (!PullPendingMessage(connection))
                     break;
-                Console.WriteLine("[{0}] Fast-forwarded a message to {1}", routingManager.Map.OwnAddress, connection.RemoteAddress);
+                //Console.WriteLine("[{0}] Fast-forwarded a message to {1}", routingManager.Map.OwnAddress, connection.RemoteAddress);
             }
             return true;
         }

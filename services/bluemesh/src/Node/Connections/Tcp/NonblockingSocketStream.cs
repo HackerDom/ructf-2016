@@ -65,7 +65,7 @@ namespace Node.Connections.Tcp
                 readLength = MessageContainer.GetNeededLength(readBuffer, 0);
                 if (readLength > readBuffer.Length)
                 {
-                    Console.WriteLine("Message too long!");
+                    //Console.WriteLine("Message too long!");
                     readLength = readBuffer.Length;
                 }
             }

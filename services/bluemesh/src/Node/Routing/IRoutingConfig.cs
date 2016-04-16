@@ -12,5 +12,7 @@ namespace Node.Routing
         TimeSpan MapUpdateCooldown { get; }
 
         bool LongNames { get; }
+
+        bool DoLogMap { get; }
     }
 }

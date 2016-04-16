@@ -18,7 +18,7 @@ namespace Node.Serialization
             {
                 if (stream.CanSeek && length > stream.Length - stream.Position)
                 {
-                    Console.WriteLine("Tried to read too much data!");
+                    //Console.WriteLine("Tried to read too much data!");
                     length = (int) (stream.Length - stream.Position);
                 }
             }
