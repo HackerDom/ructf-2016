@@ -84,6 +84,7 @@ input {
 
 label {
 	font-weight: bold;
+	color: #000;
 }
 
 input[type=text], input[type=password] {
@@ -103,6 +104,7 @@ p.error-message {
 
 p.description {
 	color: #333;
+	text-align: center;
 }
 
 div.line {
