@@ -91,18 +91,6 @@ $(function() {
 		console.error("ws error: " + error.message);
 	};
 
-	/*$("form").submit(function() {
-		$(this).find("input[name=csrf-token]").val(Cookies.get("csrf-token"));
-		$.post($(this).attr("action"), $(this).serialize())
-			.done(function(data) {
-				console.log(data);
-			})
-			.fail(function(xhr) {
-				console.log(xhr.responseText);
-			});
-		return false;
-	});*/
-
 	(function($) {
 		$.fn.submitAjax = function() {
 			var $form = $(this);
@@ -137,7 +125,9 @@ $(function() {
 		}, function(isConfirm) {
 			if (!isConfirm)
 				return;
-			submit("You are logged in", 1000).done(function() {
+			submit(function(data) {
+				return "You are logged in, your allergens are\r\n" + (data ? (JSON.parse(data).allergens || []).join("\r\n") : "n/a")
+			}, 3000).done(function() {
 				login();
 				socket.reconnect();
 			});
