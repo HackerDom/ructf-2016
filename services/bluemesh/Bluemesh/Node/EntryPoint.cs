@@ -89,7 +89,8 @@ namespace Node
                 encryptionManager.Start();
                 while (!Stopped)
                 {
-                    Tick();
+                    lock (dataManager)
+                        Tick();
                     Thread.Sleep(TimeSpan.FromMilliseconds(10));
                 }
                 connectionManager.Stop();
@@ -204,22 +205,24 @@ namespace Node
 
             private void ProcessRequest(Socket client)
             {
-                try
+                using (var stream = new NetworkStream(client))
                 {
-                    using (var stream = new NetworkStream(client))
+                    var reader = new StreamReader(stream);
+                    var writer = new StreamWriter(stream);
+                    try
                     {
-                        var reader = new StreamReader(stream);
-                        var writer = new StreamWriter(stream);
 
                         var command = reader.ReadLine();
                         var response = ExecuteCommand(command);
                         writer.WriteLine(response ?? "nodata");
                         writer.Flush();
                     }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
+                    catch (Exception e)
+                    {
+                        writer.WriteLine(e);
+                        writer.Flush();
+                        Console.WriteLine("!! Error in ConsoleServer: " + e);
+                    }
                 }
             }
 
