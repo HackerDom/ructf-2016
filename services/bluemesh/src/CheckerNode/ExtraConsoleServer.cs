@@ -3,15 +3,14 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using System.Threading.Tasks;
 using Node.Connections.Tcp;
 using Node.Routing;
 
 namespace CheckerNode
 {
-    internal class ConsoleServer
+    internal class ExtraConsoleServer
     {
-        public ConsoleServer(IPEndPoint endpoint, BluemeshNode node)
+        public ExtraConsoleServer(IPEndPoint endpoint, CheckerNode node)
         {
             this.endpoint = endpoint;
             this.node = node;
@@ -27,11 +26,11 @@ namespace CheckerNode
         {
             listenerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             listenerSocket.Bind(endpoint);
-            listenerSocket.Listen(5);
+            listenerSocket.Listen(1);
             while (true)
             {
                 var client = listenerSocket.Accept();
-                Task.Factory.StartNew(() => ProcessRequest(client));
+                ProcessRequest(client);
             }
         }
 
@@ -63,35 +62,32 @@ namespace CheckerNode
             var parts = command.Split(' ');
             if (parts.Length == 0)
                 return null;
-            if (parts[0] == "put")
+            if (parts[0] == "connect")
             {
-                if (parts.Length != 4)
+                if (parts.Length != 2)
                     return null;
                 var address = utility.ParseAddress(parts[1]);
                 if (address == null)
                     return null;
-                node.PutFlag(parts[2], parts[3], address);
+                node.Connect(address);
                 return "done";
             }
-            if (parts[0] == "get")
+            if (parts[0] == "disconnect")
             {
-                if (parts.Length != 3)
+                if (parts.Length != 2)
                     return null;
                 var address = utility.ParseAddress(parts[1]);
                 if (address == null)
                     return null;
-                return node.GetFlag(parts[2], address, TimeSpan.FromSeconds(9));
-            }
-            if (parts[0] == "list")
-            {
-                return string.Join(", ", GraphHelper.GetNodes(node.Map));
+                node.Disconnect(address);
+                return "done";
             }
             return null;
         }
 
         private Socket listenerSocket;
         private readonly IPEndPoint endpoint;
-        private readonly BluemeshNode node;
+        private readonly CheckerNode node;
         private readonly TcpUtility utility;
     }
 }
