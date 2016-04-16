@@ -18,6 +18,8 @@ namespace Node.Messages
                     return d => DataMessage.Deserialize(d, utility);
                 case MessageType.Redirect:
                     return d => RedirectMessage.Deserialize(d, utility);
+                case MessageType.Pull:
+                    return PullMessage.Deserialize;
                 default:
                     throw new ArgumentOutOfRangeException("Unknown message type: " + type);
             }

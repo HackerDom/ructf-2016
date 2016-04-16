@@ -28,7 +28,8 @@ namespace Node.Data
                 return true;
             return
                 ProcessData(message as DataMessage) ||
-                ProcessRedirect(message as RedirectMessage);
+                ProcessRedirect(message as RedirectMessage) ||
+                ProcessPull(message as PullMessage, connection);
         }
 
         public void PushMessages(IEnumerable<IConnection> readyConnections)
@@ -76,17 +77,19 @@ namespace Node.Data
 
         public event Action<DataMessage> OnReceivedData = data => { };
 
-        public void PullPendingMessage(IConnection connection)
+        public bool PullPendingMessage(IConnection connection)
         {
             var message = pendingMessages
                 .FirstOrDefault(m => Equals(m.Destination, connection.RemoteAddress) && m.UnwrappedMessage != null);
             if (message.UnwrappedMessage == null)
-                return;
+                return false;
             var result = connection.Push(message.UnwrappedMessage);
             if (result == SendResult.Success)
             {
                 pendingMessages.Remove(message);
+                return true;
             }
+            return false;
         }
 
         public IDataStorage DataStorage => dataStorage;
@@ -162,6 +165,20 @@ namespace Node.Data
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
+            }
+            return true;
+        }
+
+        private bool ProcessPull(PullMessage pullMessage, IConnection connection)
+        {
+            if (pullMessage == null)
+                return false;
+            Console.WriteLine("[{0}] Processing pull message ({1}) from {2}", routingManager.Map.OwnAddress, pullMessage.Limit, connection.RemoteAddress);
+            for (int i = 0; i < pullMessage.Limit; i++)
+            {
+                if (!PullPendingMessage(connection))
+                    break;
+                Console.WriteLine("[{0}] Fast-forwarded a message to {1}", routingManager.Map.OwnAddress, connection.RemoteAddress);
             }
             return true;
         }

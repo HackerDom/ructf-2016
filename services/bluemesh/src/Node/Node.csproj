@@ -73,6 +73,7 @@
     <Compile Include="Messages\MessageHelper.cs" />
     <Compile Include="Messages\MessageContainer.cs" />
     <Compile Include="Messages\MessageType.cs" />
+    <Compile Include="Messages\PullMessage.cs" />
     <Compile Include="Messages\RedirectMessage.cs" />
     <Compile Include="Routing\GraphHelper.cs" />
     <Compile Include="Data\IDataManager.cs" />
