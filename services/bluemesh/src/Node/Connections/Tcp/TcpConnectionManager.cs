@@ -57,7 +57,18 @@ namespace Node.Connections.Tcp
         public void PurgeDeadConnections()
         {
             connections.RemoveAll(c => c.State > ConnectionState.Connected || !c.Socket.IsOk());
-            foreach (var info in connectingSockets.Where(s => DateTime.UtcNow - s.Timestamp > connectionConfig.ConnectingSocketMaxTTL).ToList())
+            var badSockets = null as List<SocketInfo>;
+            foreach (var info in connectingSockets)
+            {
+                if (DateTime.UtcNow - info.Timestamp <= connectionConfig.ConnectingSocketMaxTTL)
+                    continue;
+                if (badSockets == null)
+                    badSockets = new List<SocketInfo>(connectingSockets.Count);
+                badSockets.Add(info);
+            }
+            if (badSockets == null)
+                return;
+            foreach (var info in badSockets)
             {
                 info.Socket.Close();
                 connectingSockets.Remove(info);
@@ -92,8 +103,6 @@ namespace Node.Connections.Tcp
             {
                 //Console.WriteLine("!! {0} accept : {1} + {2} < {3}", Address, Connections.Count, connectingSockets.Count, routingConfig.MaxConnections);
                 var socket = serverSocket.Accept();
-                if (socket.Blocking)
-                    throw new Exception("FUCK");
                 var address = new TcpAddress((IPEndPoint)socket.RemoteEndPoint);
                 if (connections.Any(c => c.RemoteAddress.Equals(address)) || connections.Count >= routingConfig.MaxConnections)
                 {
@@ -127,7 +136,7 @@ namespace Node.Connections.Tcp
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("MEGAFUCK: " + e);
+                    Console.WriteLine("Failed to close socket: " + e);
                 }
             }
             return new SelectResult(

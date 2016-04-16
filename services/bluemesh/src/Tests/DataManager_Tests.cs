@@ -96,14 +96,17 @@ namespace Tests
             {
                 encryptionManager.GenerateKeyPair(BitConverter.GetBytes(connectionManager.Address.GetHashCode()));
                 encryptionManager.Start();
+                var ticks = 0;
                 while (!Stopped)
                 {
                     Tick();
+                    ticks++;
                     Thread.Sleep(10.Milliseconds());
                 }
                 connectionManager.Stop();
                 encryptionManager.Stop();
                 Console.WriteLine("Stopped node {0}", connectionManager.Address);
+                Console.WriteLine("Times: \r\n" + string.Join("\r\n", times.OrderBy(pair => pair.Key).Select(pair => pair.Key + ": " + TimeSpan.FromTicks(pair.Value / ticks))));
             }
 
             public bool Stopped { get; set; }
@@ -130,27 +133,52 @@ namespace Tests
                 return flag;
             }
 
+            private readonly Dictionary<string, long> times = new Dictionary<string, long>
+            {
+                { "purge", 0 },
+                { "select", 0 },
+                { "update", 0 },
+                { "read", 0 },
+                { "push-maps", 0 },
+                { "push-messages", 0 },
+                { "disconnect", 0 },
+                { "connect", 0 },
+                { "tick-conns", 0 },
+                { "dump-flags", 0 },
+            }; 
+
             private void Tick()
             {
+                var watch = Stopwatch.StartNew();
+
                 connectionManager.PurgeDeadConnections();
+                times["purge"] += ResetTimer(watch).Ticks;
+
                 var selectResult = connectionManager.Select();
+                times["select"] += ResetTimer(watch).Ticks;
 
                 routingManager.UpdateConnections();
+                times["update"] += ResetTimer(watch).Ticks;
 
                 foreach (var connection in selectResult.ReadableConnections.Where(c => c.State == ConnectionState.Connected))
                 {
-                    //while (connection.Socket.Available > 0)
+                    for (int i = 0; i < 3 && connection.Socket.Available > 0; i++)
                     {
                         var message = connection.Receive();
                         if (!routingManager.ProcessMessage(message, connection))
                             dataManager.ProcessMessage(message, connection);
                     }
                 }
+                times["read"] += ResetTimer(watch).Ticks;
                 routingManager.PushMaps(selectResult.WritableConnections.Where(c => c.State == ConnectionState.Connected));
+                times["push-maps"] += ResetTimer(watch).Ticks;
                 dataManager.PushMessages(selectResult.WritableConnections.Where(c => c.State == ConnectionState.Connected));
+                times["push-messages"] += ResetTimer(watch).Ticks;
 
                 routingManager.DisconnectExcessLinks();
+                times["disconnect"] += ResetTimer(watch).Ticks;
                 routingManager.ConnectNewLinks();
+                times["connect"] += ResetTimer(watch).Ticks;
 
                 foreach (var connection in selectResult.ReadableConnections)
                 {
@@ -162,10 +190,19 @@ namespace Tests
                     //Console.WriteLine("[{0}] tick: {1} -> {2}", connectionManager.Address, connectionManager.Address, connection.RemoteAddress);
                     connection.Tick(false);
                 }
+                times["tick-conns"] += ResetTimer(watch).Ticks;
 
                 //Console.WriteLine("[{0}] v: {2} {1}", routingManager.Map.OwnAddress, routingManager.Map, routingManager.Map.Version);
                 if (dataManager.DataStorage.ToString().Length > 0)
                     Console.WriteLine("[{0}] !! my flags : {1}", routingManager.Map.OwnAddress, dataManager.DataStorage);
+                times["dump-flags"] += ResetTimer(watch).Ticks;
+            }
+
+            private static TimeSpan ResetTimer(Stopwatch timer)
+            {
+                var time = timer.Elapsed;
+                timer.Restart();
+                return time;
             }
 
             public IAddress Address => connectionManager.Address;
