@@ -1,6 +1,5 @@
 Rails.application.routes.draw do
 
-
   get 'users/new'
 
   root 'static_pages#home'
@@ -8,8 +7,10 @@ Rails.application.routes.draw do
   # Static
   match '/index', to: 'static_pages#home', via: 'get'
 
+  match '/strongbox/', to: 'static_pages#type', via: 'get'
+
   # User
-  resources :users
+  resources :users, only: [:new, :create, :show]
   match '/signup', to: 'users#new', via: 'get'
 
   #Auth
@@ -17,7 +18,10 @@ Rails.application.routes.draw do
   match '/signin', to: 'sessions#new', via: 'get'
   match '/signout', to: 'sessions#destroy', via: 'delete'
 
-  #Things
-  resources :things, only: [:create, :destroy, :edit, :update, :show]
+  #Items
+  resources :items, only: [:create, :destroy, :edit, :update, :show]
 
+  #Checkroom
+  resources :checkrooms, only: [:new, :create, :show]
+  match '/checkrooms/:id', to: 'checkrooms#show', via: 'post'
 end

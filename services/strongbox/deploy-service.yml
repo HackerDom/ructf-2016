@@ -29,11 +29,11 @@
       user: name=strongbox shell=/bin/bash
     - name: copy project
       copy: src=strongbox dest=/home/ force=yes owner=strongbox
-    - set_fact: socks_path="/home/strongbox/tmp/socks"
+    - set_fact: socks_path="/home/strongbox/tmp/socks/app.sock"
     - set_fact: app_sock="{{ socks_path }}/app.sock"
     - set_fact: pids_path="/home/strongbox/tmp/pids"
     - set_fact: app_pid="{{ pids_path }}/passenger.pid"
-    - name: bundle install
+    - name: bundle update
       bundler: state=latest chdir=/home/strongbox executable=/usr/local/bin/bundle
     - name: bundle install
       bundler: state=present user_install=True chdir=/home/strongbox executable=/usr/local/bin/bundle
@@ -61,8 +61,14 @@
       become: yes
       become_user: strongbox
       become_method: su
-    - name: run
-      shell: "cd /home/strongbox/ && RAILS_ENV=production bundle exec passenger start -d -S {{ app_sock }} --environment production --pid-file {{ app_pid }}"
-      become: yes
-      become_user: strongbox
-      become_method: su
+    - name: copy strongbox.service
+      copy:
+        src=files/strongbox.service
+        dest=/usr/lib/systemd/system/strongbox.service
+        force=yes
+    - name: reload daemon
+      command: systemctl daemon-reload
+    - name: services enable
+      service: name=strongbox enabled=yes
+    - name: services restart
+      service: name=strongbox state=restarted

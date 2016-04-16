@@ -1,0 +1,12 @@
+<% provide(:title, @item.title) %>
+<div class="row">
+  <div class="col-md-12">
+
+    <%= form_for(@item) do |f| %>
+        <%= render 'shared/error_messages', object: f.object %>
+        <%= number_field_tag "item[][user_id]" %>
+        <%= number_field_tag "item[][user_id]" %>
+        <%= f.submit "Save", class: "btn btn-large btn-primary" %>
+    <% end %>
+  </div>
+</div>

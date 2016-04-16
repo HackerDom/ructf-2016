@@ -1,5 +1,5 @@
 class User < ActiveRecord::Base
-  has_many :things
+  has_many :items
   has_secure_password
   before_save { email.downcase! }
   before_create :create_remember_token
