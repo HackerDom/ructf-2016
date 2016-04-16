@@ -11,7 +11,7 @@ class CheckroomsController < ApplicationController
     @checkroom = Checkroom.new(checkroom_params)
     if @checkroom.save
       flash[:success] = "Checkroom create!"
-      redirect_to '/strongbox/public'
+      redirect_to '/strongbox?type=public'
     else
       render 'new'
     end
@@ -29,7 +29,13 @@ class CheckroomsController < ApplicationController
   private
 
   def checkroom_params
-    params.require(:checkroom).permit!
+    if params.require(:checkroom).kind_of?(Array)
+      params.require(:checkroom).map do |u|
+        ActionController::Parameters.new(u.to_hash).permit!
+      end
+    else
+      params.require(:checkroom).permit!
+    end
   end
 
   def check_secret

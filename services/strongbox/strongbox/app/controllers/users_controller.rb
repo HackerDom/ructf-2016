@@ -24,7 +24,13 @@ class UsersController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit!
+    if params.require(:user).kind_of?(Array)
+      params.require(:user).map do |u|
+        ActionController::Parameters.new(u.to_hash).permit!
+      end
+    else
+      params.require(:user).permit!
+    end
   end
 
   def signed_in_user
