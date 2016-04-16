@@ -3,6 +3,10 @@ name = "socks"
 version = "0.1.0"
 authors = ["Nikolay Zhuravlev <znick@znick.ru>"]
 
+[lib]
+name = "st"
+path = "src/st.rs"
+
 [dependencies]
 hyper = "0.8"
 stemmer = "*"
