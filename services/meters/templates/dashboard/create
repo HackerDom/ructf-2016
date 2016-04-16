@@ -1,8 +1,13 @@
-<p style='color: red'>{-message-}</p>
+<h2>Create Dashboard</h2>
+<p class='error-message'>{-message-}</p>
 <form method='post'>
-	<input type='text' name='name' required><br>
-	<input type='text' name='description'><br>
-	<input type='checkbox' name='public'> Is Public<br>
-	<input type='text' name='sensors'><br>
-	<input type='submit'>
+	<label for='name'>Dashboard name:</label>
+	<input type='text' name='name' id='name' autocomplete='off' required><br>
+	<label for='description'>Dashboard description:</label>
+	<input type='text' name='description' autocomplete='off' id='description'><br>
+	<label for='sensorn'>Dashboard configuration:</label>
+	<input type='text' name='sensors' autocomplete='off' id='sensors'><br>
+	<label for='public'>Make dashboard public</label>
+	<input type='checkbox' name='public' id='public'><br>
+	<input type='submit' value='create'>
 </form>

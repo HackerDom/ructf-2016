@@ -1,6 +1,11 @@
-<p style='color: red'>{-message-}</p>
-<form action='/user/login' method='post'>
-	<input type='text' name='username' required>
-	<input type='password' name='password' required>
-	<input type='submit'>
+<h2>Login</h2>
+<p class='error-message'>{-message-}</p>
+<form method='post'>
+	<label for='username'>Your name:</label>
+	<input type='text' name='username' id='username' autocomplete='off' required>
+	<br>
+	<label for='password'>Your password:</label>
+	<input type='password' name='password' id='password' autocomplete='off' required>
+	<br>
+	<input type='submit' value='login'>
 </form>

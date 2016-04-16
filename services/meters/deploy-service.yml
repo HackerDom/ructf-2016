@@ -24,8 +24,6 @@
         - templates
     - name: create data directory
       file: path=/home/meters/data state=directory owner=meters
-    - name: create css directory
-      file: path=/home/meters/css state=directory owner=meters    
     - name: create js directory
       file: path=/home/meters/js state=directory owner=meters
     - name: build meters

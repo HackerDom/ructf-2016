@@ -42,6 +42,8 @@ implementation
 			AResponse.Content := StringReplace(template, '{-message-}', 'both username and password are required', []);
 			exit(false);
 		end;
+
+		username := lowercase(username);
 		
 		result := true;
 	end;

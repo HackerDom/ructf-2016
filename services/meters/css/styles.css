@@ -1,0 +1,117 @@
+body {
+	background: #555;
+	margin: 0;
+	color: #F55;
+}
+
+#menu {
+	width: 160px;
+	height: 100%;
+	background: #111;
+	position: fixed;
+	overflow: auto;
+	font-size: 1.25em;
+	padding: 10px 0 0 10px;
+}
+
+#menu h3 {
+	color: #AAA;
+	margin: 0;
+	padding: 0 0 10px 0;
+	text-align: center;
+}
+
+#menu ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
+#menu li {
+	display: block;
+	padding: 2px;
+}
+
+#menu li:hover {
+	background: #AAA
+}
+
+#menu a {
+	color: #AAA;
+	text-decoration: none;
+	width: 100%;
+}
+
+#menu li:hover a {
+	color: #111;
+}
+
+#data {
+	margin-left: 200px;
+	padding-top: 10px;
+}
+
+#data a {
+	color: #FAA;
+	text-decoration: none;
+}
+
+#data a:hover {
+	color: #F77;
+}
+
+#data a.public {
+	color: #AFA;
+}
+
+#data a.public:hover {
+	color: #6F6;
+}
+
+#data h2 {
+	color: #EEE;
+	margin: 0;
+	text-align: center;
+}
+
+input {
+	background: #888;
+	border: 0;
+	border-radius: 2px;
+	padding: 6px;
+	margin: 6px;
+}
+
+label {
+	font-weight: bold;
+}
+
+input[type=text], input[type=password] {
+	width: 90%;
+	margin-left: 2.5%;
+}
+
+input[type=submit] {
+	cursor: pointer;
+	font-size: 1em;
+	font-weight: bold;
+}
+
+p.error-message {
+	color: #F55;
+}
+
+p.description {
+	color: #333;
+}
+
+div.line {
+	height: 300px;
+	width: 95%;
+}
+
+div.line div {
+	height: 100%;
+	width: 25%;
+	float: left;
+}

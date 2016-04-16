@@ -27,7 +27,7 @@ implementation
 		viewTemplate, viewSensorTemplate, viewLineTemplate: string;
 		createTemplate: string;
 
-	function GetList(const dashboards: TDashboards): string;
+	function GetList(const dashboards: TDashboards; const listName: string): string;
 	var
 		list, tmp: string;
 		i: longint;
@@ -41,6 +41,7 @@ implementation
 		end;
 
 		result := StringReplace(listTemplate, '{-list-}', list, []);
+		result := StringReplace(result, '{-title-}', listName, []);
 	end;
 
 	function GetDashboards(ARequest: TRequest): TDashboards;
@@ -66,18 +67,22 @@ implementation
 	end;
 
 	procedure TDashboardModule.OnMy(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
+	const
+		title = 'My Dasboards';
 	var
 		dashboards: TDashboards;
+		errorTemplate: string;
 	begin
 		Handled := True;
 
 		dashboards := GetDashboards(ARequest);
+		errorTemplate := StringReplace(listTemplate, '{-title-}', title, []);
 		if dashboards = nil then
-			AResponse.Content := StringReplace(listTemplate, '{-list-}', 'not authorized', [])
+			AResponse.Content := StringReplace(errorTemplate, '{-list-}', 'You must login for view this page', [])
 		else if dashboards.Count = 0 then
-			AResponse.Content := StringReplace(listTemplate, '{-list-}', 'can''t find dashboards for current user', [])
+			AResponse.Content := StringReplace(errorTemplate, '{-list-}', 'can''t find dashboards for current user', [])
 		else
-			AResponse.Content := GetList(dashboards);
+			AResponse.Content := GetList(dashboards, title);
 		dashboards.free;
 	end;
 
@@ -87,7 +92,7 @@ implementation
 	begin
 		Handled := True;
 		dashboards := DashboardManager.GetDashboards;
-		AResponse.Content := GetList(dashboards);
+		AResponse.Content := GetList(dashboards, 'Dashboards');
 		dashboards.Free;
 	end;
 
@@ -167,21 +172,21 @@ implementation
 		isPublic := ARequest.ContentFields.Values['public'];
 		ssensors := ARequest.ContentFields.Values['sensors'];
 
-		if (dname = '') and (description = '') then
+		if (dname = '') and (description = '') and (ssensors = '') then
 		begin
 			AResponse.Content := StringReplace(createTemplate, '{-message-}', '', []);
 			exit;
 		end;
 
-		if (dname = '') or (description = '') then
+		if dname = ''  then
 		begin
-			AResponse.Content := StringReplace(createTemplate, '{-message-}', 'both name and description are required', []);
+			AResponse.Content := StringReplace(createTemplate, '{-message-}', 'dashboard name is required', []);
 			exit;
 		end;
 		
 		if HasBadSymbols(dname) or HasBadSymbols(description) or HasBadSymbols(ssensors) then
 		begin
-			AResponse.Content := StringReplace(createTemplate, '{-message}', 'name, description and configuration must contains symbols with codes from [32 .. 127]', []);
+			AResponse.Content := StringReplace(createTemplate, '{-message-}', 'name, description and configuration must contains symbols with codes from [32 .. 127]', []);
 			exit;
 		end;
 
