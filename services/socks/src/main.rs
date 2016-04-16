@@ -2,6 +2,7 @@ extern crate hyper;
 extern crate urlparse;
 extern crate stemmer;
 extern crate rustc_serialize as serialize;
+extern crate regex;
 
 use std::sync::{Arc, Mutex};
 
@@ -26,18 +27,21 @@ use std::fs::OpenOptions;
 
 use serialize::base64::{self, ToBase64, FromBase64};
 
+use regex::Regex;
 
 struct Context {
     docs : Mutex<Vec<String>>,
     index : Mutex<HashMap<String, Vec<usize>>>,
     logfile : String,
+    owner_re : Regex,
 }
 
 impl Context {
     pub fn new() -> Context {
         let mut context = Context{docs : Mutex::new(Vec::new()),
                                   index : Mutex::new(HashMap::new()),
-                                  logfile : "query.log".to_string() };
+                                  logfile : "query.log".to_string(),
+                                  owner_re : Regex::new(r"^\w{4}-\w{4}-\w{4}$").unwrap() };
         context.read_from_log();
         context
     }
@@ -69,7 +73,7 @@ impl Context {
         {
             let mut index = self.index.lock().unwrap();
             let mut stemmer = Stemmer::new("english").unwrap();
-            for word in body.split_whitespace() {
+            for word in body.to_lowercase().split_whitespace() {
                 let stem = stemmer.stem(word);
                 if !index.contains_key(&stem) {
                     index.insert(stem.clone(), Vec::new());
@@ -92,6 +96,7 @@ impl Context {
     }
 
     pub fn search(&self, text:String) -> Vec<String> {
+        let text = text.to_lowercase();
         let mut res: Vec<String> = Vec::new();
         let mut doc_ids: HashSet<usize> = HashSet::new();
 
@@ -135,6 +140,11 @@ impl Handler for Context {
         let query = url.get_parsed_query().unwrap();
         let mut text = query.get_first_from_str("text").unwrap();
         let owner = query.get_first_from_str("owner").unwrap();
+
+        if (!self.owner_re.is_match(owner.as_str())) {
+            *res.status_mut() = StatusCode::Forbidden;
+            return;
+        }
 
         println!("{}", url.path);
 
