@@ -13,6 +13,7 @@
       dnf: name={{item}} state=latest disable_gpg_check=yes
       with_items:
         - yum-utils
+        - wget
     - name: copy mono repo
       copy:
         src=files/download.mono-project.com_repo_centos_.repo

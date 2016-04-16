@@ -14,14 +14,11 @@ namespace FlagsTransmitter
 			container[ip] = flag;
 		}
 
-		public IEnumerable<string> EnumerateFlagsInfinite()
+		public IEnumerable<KeyValuePair<string, string>> EnumerateFlags()
 		{
-			while(true)
+			foreach(var kvp in container)
 			{
-				foreach(var kvp in container)
-				{
-					yield return kvp.Value;
-				}
+				yield return kvp;
 			}
 		}
 

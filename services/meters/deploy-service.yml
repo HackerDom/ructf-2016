@@ -24,8 +24,6 @@
         - templates
     - name: create data directory
       file: path=/home/meters/data state=directory owner=meters
-    - name: create js directory
-      file: path=/home/meters/js state=directory owner=meters
     - name: build meters
       command: chdir=/home/meters/src sudo -u meters {{item}}
       with_items:
