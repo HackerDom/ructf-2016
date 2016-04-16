@@ -32,10 +32,14 @@ namespace Node.Data
             }).ToDictionary(x => x.Key, x => x.Value));
         }
 
-        public void PutData(string key, byte[] value)
+        public bool PutData(string key, byte[] value)
         {
             if (!data.ContainsKey(key))
+            {
                 data[key] = value;
+                return true;
+            }
+            return false;
         }
 
         public byte[] GetData(string key)

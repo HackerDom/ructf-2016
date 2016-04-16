@@ -141,7 +141,8 @@ namespace Node.Data
                     OnReceivedData(dataMessage);
                     break;
                 case DataAction.Put:
-                    dataStorage.PutData(dataMessage.Key, dataMessage.Data);
+                    if (dataStorage.PutData(dataMessage.Key, dataMessage.Data))
+                        FlushData();
                     break;
                 case DataAction.Get:
                     var data = dataStorage.GetData(dataMessage.Key);
