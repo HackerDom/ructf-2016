@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Electro.Handlers;
+using FlagsTransmitter.Utils;
+using log4net.Config;
 
 namespace FlagsTransmitter
 {
@@ -12,6 +10,8 @@ namespace FlagsTransmitter
 	{
 		static void Main(string[] args)
 		{
+			XmlConfigurator.Configure();
+
 			if(args.Length < 1)
 				PrintUsageAndExit();
 
@@ -34,6 +34,5 @@ namespace FlagsTransmitter
 		}
 
 		const int ComPortSpeed = 9600;
-
 	}
 }

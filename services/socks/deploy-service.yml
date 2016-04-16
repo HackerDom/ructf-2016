@@ -1,0 +1,31 @@
+# Ansible >2 deploy playbook
+# use: ansible-playbook -i 192.168.0.1, deploy-service.yml
+# LOOK AT COMMA, IT IS IMPORTANT     ^^^
+# or as usual: ansible-playbook -i hosts.list deploy-service.yml
+
+---
+- hosts: all
+  remote_user: root
+  become_user: root
+  become: yes
+  tasks:
+    - name: add user
+      user: name=socks shell=/sbin/nologin
+    - name: set permissions
+      file: path=/home/socks owner=socks group=socks mode=0700
+    - name: copy files 
+      copy: src={{item}} dest=/home/socks/ force=yes owner=socks
+      with_items:
+        - Cargo.toml
+        - src
+    - name: copy socks.service
+      copy:
+        src=files/socks.service
+        dest=/usr/lib/systemd/system/socks.service
+        force=yes
+    - name: reload daemon
+      command: systemctl daemon-reload
+    - name: services enable
+      service: name=socks enabled=yes
+    - name: services restart
+      service: name=socks state=restarted

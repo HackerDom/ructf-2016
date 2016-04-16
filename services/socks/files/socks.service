@@ -1,0 +1,16 @@
+[Unit]
+Description=Socks
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/socks
+ExecStart=/usr/local/bin/cargo run
+User=socks
+Restart=always
+CPUQuota=100%
+MemoryLimit=1024M
+TasksMax=100
+
+[Install]
+WantedBy=multi-user.target

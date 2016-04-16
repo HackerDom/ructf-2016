@@ -4,20 +4,6 @@ namespace frɪdʒ.utils
 {
 	internal static class SecurityUtils
 	{
-		public static byte[] ToBytes(this string str)
-		{
-			var length = str.Length;
-			byte[] bytes = new byte[length << 1];
-			for(int i = 0; i < length; ++i)
-			{
-				var c = str[i];
-				var idx = i << 1;
-				bytes[idx] = (byte)c;
-				bytes[idx + 1] = (byte)(c >> 8);
-			}
-			return bytes;
-		}
-
 		public static string ToHex(this byte[] bytes)
 		{
 			var array = new char[bytes.Length << 1];

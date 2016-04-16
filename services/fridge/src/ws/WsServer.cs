@@ -54,12 +54,7 @@ namespace frɪdʒ.ws
 						continue;
 					//Console.WriteLine($"[{ws.RemoteEndpoint}] WS connected v{ws.HttpRequest.WebSocketVersion} as '{ws.HttpRequest.Headers["User-Agent"]}' from '{ws.HttpRequest.Headers["Origin"]}'");
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-					Task.Run(async () =>
-					{
-						await Task.Delay(100, token); //NOTE: ws4py issue workaround =\
-						await TrySendHelloAsync(ws, token);
-						sockets[ws] = new State {Item = auth(ws), Lock = new AsyncLockSource()};
-					}, token);
+					Task.Run(() => TryRegister(ws, token), token);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 				} catch {}
 			}
@@ -81,12 +76,14 @@ namespace frɪdʒ.ws
 						.Select(pair => TrySendAsync(pair.Key, pair.Value, format, token)));
 		}
 
-		private async Task TrySendHelloAsync(WebSocket ws, CancellationToken token)
+		private async Task TryRegister(WebSocket ws, CancellationToken token)
 		{
+			await Task.Delay(100, token); //NOTE: ws4py issue workaround =\
 			try
 			{
 				await ws.WriteStringAsync(HelloMessage, token).ConfigureAwait(false);
 				//Console.WriteLine($"[{ws.RemoteEndpoint}] WS sent '{HelloMessage}'");
+				sockets[ws] = new State {Item = auth(ws), Lock = new AsyncLockSource()};
 			}
 			catch
 			{
