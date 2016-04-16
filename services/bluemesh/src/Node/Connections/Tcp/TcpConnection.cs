@@ -33,7 +33,6 @@ namespace Node.Connections.Tcp
 
         public SendResult Push(IMessage message)
         {
-            // TODO do something with it
             SendResult result;
             do
             {
@@ -44,7 +43,6 @@ namespace Node.Connections.Tcp
 
         public SendResult Push(byte[] rawData)
         {
-            // TODO do something with it
             SendResult result;
             do
             {

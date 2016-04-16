@@ -3,3 +3,4 @@
 __pycache__
 environ/sensors/
 /environ/id.key
+*.retry

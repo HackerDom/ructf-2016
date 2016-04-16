@@ -76,7 +76,8 @@ namespace frɪdʒ.http
 			{".gif", "image/gif"},
 			{".png", "image/png"},
 			{".jpg", "image/jpeg"},
-			{".jpeg", "image/jpeg"}
+			{".jpeg", "image/jpeg"},
+			{".svg", "image/svg+xml"}
 		};
 
 		private const string DefaultDocument = "index.html";

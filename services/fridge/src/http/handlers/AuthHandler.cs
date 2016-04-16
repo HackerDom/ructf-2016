@@ -1,23 +1,43 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 
 using frɪdʒ.Db;
 using frɪdʒ.utils;
+
 using Newtonsoft.Json;
 
 namespace frɪdʒ.http.handlers
 {
 	internal class AuthHandler
 	{
-		public async Task AuthAsync(HttpListenerContext context)
+		public AuthHandler(Func<string, Task> callback)
 		{
-			var data = await context.ReadPostDataAsync();
-			if(data == null)
+			this.callback = callback;
+		}
+
+		public async Task SignInAsync(HttpListenerContext context)
+		{
+			var data = await CheckFormAsync(context);
+
+			var login = data.GetOrDefault("login");
+			var pass = data.GetOrDefault("pass");
+
+			if(string.IsNullOrEmpty(login) || string.IsNullOrEmpty(pass))
 				throw new HttpException(400, "Login/pass required");
 
-			if(!context.CheckCsrfToken(data.GetOrDefault("csrf-token")))
-				throw new HttpException(403, "Request is forged");
+			var user = Users.Find(login);
+			if(user == null || !SecurityUtils.TimingSecureEquals(pass.Hmac(), user.Pass))
+				throw new HttpException(403, "Invalid login/pass");
+
+			context.SetAuthCookies(user.Login);
+			await context.WriteStringAsync(JsonConvert.SerializeObject(new {login = user.Login, allergens = user.Allergens}));
+		}
+
+		public async Task SignUpAsync(HttpListenerContext context)
+		{
+			var data = await CheckFormAsync(context);
 
 			var login = data.GetOrDefault("login");
 			var pass = data.GetOrDefault("pass");
@@ -31,37 +51,43 @@ namespace frɪdʒ.http.handlers
 			if(login.Length > MaxLength || pass.Length > MaxLength)
 				throw new HttpException(400, "Login/pass too long");
 
-			var user = await Users.GetOrAdd(login, () => CreateNewUser(login, pass, data.GetOrDefault("allergen")));
-			if(pass != user.Pass)
-				throw new HttpException(403, "Invalid login/pass");
+			var allergenString = data.GetOrDefault("allergen") ?? string.Empty;
+			if(allergenString.Length > MaxAllergensSize)
+				throw new HttpException(400, "Allergens too large");
 
-			context.SetAuthCookies(user.Login);
-		}
-
-		public async Task InfoAsync(HttpListenerContext context)
-		{
-			var login = context.Request.Cookies.GetAuth();
-			if(login == null)
-				throw new HttpException(401, "Unauthorized");
-
-			var user = Users.Find(login);
-			if(user == null)
-				throw new HttpException(403, "Forbidden");
-
-			await context.WriteStringAsync(JsonConvert.SerializeObject(new {login = user.Login, allergens = user.Allergens}));
-		}
-
-		private static User CreateNewUser(string login, string pass, string data)
-		{
-			var allergens = (data ?? string.Empty).Split(AllergenDelim, StringSplitOptions.RemoveEmptyEntries);
-			if(allergens.Length > 3)
+			var allergens = allergenString.Split(AllergenDelim, StringSplitOptions.RemoveEmptyEntries);
+			if(allergens.Length > MaxAllergens)
 				throw new HttpException(400, "Too many allergens");
 
-			return new User {Login = login, Pass = pass, Allergens = allergens};
+			if(!await Users.TryAdd(new User {Login = login, Pass = pass.Hmac(), Allergens = allergens}))
+				throw new HttpException(409, "User already exists");
+
+			context.SetAuthCookies(login);
+			await callback(login).ConfigureAwait(false);
 		}
 
-		private const int MinLength = 5;
+		private async Task<Dictionary<string, string>> CheckFormAsync(HttpListenerContext context)
+		{
+			var data = await context.ReadPostDataAsync();
+			if(data == null)
+				throw new HttpException(400, "Login/pass required");
+
+			if(!context.CheckCsrfToken(data.GetOrDefault("csrf-token")))
+				throw new HttpException(403, "Request is forged");
+
+			return data;
+		}
+
+		public static string FormatUserMessage(User user, string sender)
+		{
+			return JsonConvert.SerializeObject(new {type = "user", login = sender});
+		}
+
+		private const int MinLength = 4;
 		private const int MaxLength = 20;
+		private const int MaxAllergens = 3;
+		private const int MaxAllergensSize = 128;
 		private static readonly char[] AllergenDelim = {',', ' ', '\t', '\r', '\n', '\v'};
+		private readonly Func<string, Task> callback;
 	}
 }

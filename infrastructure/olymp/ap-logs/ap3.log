@@ -1,0 +1,112 @@
+olymp-3#show log
+Syslog logging: enabled (0 messages dropped, 2 messages rate-limited, 0 flushes, 0 overruns, xml disabled, filtering disabled)
+
+No Active Message Discriminator.
+          
+          
+
+No Inactive Message Discriminator.
+
+
+    Console logging: level debugging, 83 messages logged, xml disabled,
+                     filtering disabled
+    Monitor logging: level debugging, 0 messages logged, xml disabled,
+                     filtering disabled
+    Buffer logging:  level debugging, 83 messages logged, xml disabled,
+                    filtering disabled
+    Exception Logging: size (4096 bytes)
+    Count and timestamp logging messages: disabled
+    Persistent logging: disabled
+    Trap logging: level informational, 76 message lines logged
+        Logging Source-Interface:       VRF Name:
+
+Log Buffer (1048576 bytes):
+
+*Mar  1 00:00:14.895: %IFMGR-7-NO_IFINDEX_FILE: Unable to open nvram:/ifIndex-table No such file or directory
+*Mar  1 00:00:15.015: %SOAP_FIPS-2-SELF_TEST_IOS_SUCCESS: IOS crypto FIPS self test passed (11)APAVC:  WlanPAKs 18174 RadioPaks  17566
+
+*Mar  1 00:00:21.999: %SOAP_FIPS-2-SELF_TEST_RAD_SUCCESS: RADIO crypto FIPS self test passed on interface Dot11Radio 0 (4)
+*Mar  1 00:00:28.327: %SOAP_FIPS-2-SELF_TEST_RAD_SUCCESS: RADIO crypto FIPS self test passed on interface Dot11Radio 1 (4)
+*Mar  1 00:00:28.387: initializing dot11 onplus
+*Mar  1 00:00:28.551: not a autoconfig enabled device!!!
+*Mar  1 00:00:30.531: %LINK-6-UPDOWN: Interface GigabitEthernet0, changed state to up
+*Mar  1 00:00:31.003: %LINK-5-CHANGED: Interface Dot11Radio1, changed state to administratively down
+*Mar  1 00:00:31.015: %SYS-5-CONFIG_I: Configured from memory by console
+*Mar  1 00:00:31.119: Starting Ethernet promiscuous mode
+*Mar  1 00:00:31.119: %SYS-5-RESTART: System restarted --
+Cisco IOS Software, C2600 Software (AP3G2-K9W7-M), Version 15.2(4)JB5, RELEASE SOFTWARE (fc1)
+Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2014 by Cisco Systems, Inc.
+Compiled Thu 01-May-14 22:04 by prod_rel_team
+*Mar  1 00:00:31.119: %SNMP-5-COLDSTART: SNMP agent on host olymp-3 is undergoing a cold start
+*Dec 21 15:24:58.035: %LINK-5-CHANGED: Interface Dot11Radio0, changed state to reset
+*Dec 21 15:24:58.391: %LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0, changed state to down
+*Dec 21 15:24:58.823: %LINEPROTO-5-UPDOWN: Line protocol on Interface BVI1, changed state to up
+*Dec 21 15:24:58.863: %LINEPROTO-5-UPDOWN: Line protocol on Interface Dot11Radio1, changed state to down
+*Dec 21 15:24:59.035: %LINEPROTO-5-UPDOWN: Line protocol on Interface Dot11Radio0, changed state to downERROR: Failed to configure ethernet promiscuous mode. Interface Descriptor mismatch
+*Dec 21 15:25:02.635: %SOAP_FIPS-2-SELF_TEST_HW_SUCCESS: HW crypto FIPS self test passed (0-0)
+*Dec 21 15:25:02.635: DPAA Initialization Complete
+*Dec 21 15:25:02.635: %SYS-3-HARIKARI: Process DPAA INIT top-level routine exited
+*Dec 21 15:25:03.635: %LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0, changed state to up
+Apr 16 05:39:34.009: %CDP_PD-4-POWER_OK: Full power - NEGOTIATED inline power source
+Apr 16 05:39:35.114: %LINK-6-UPDOWN: Interface Dot11Radio0, changed state to up
+Apr 16 05:39:36.114: %LINEPROTO-5-UPDOWN: Line protocol on Interface Dot11Radio0, changed state to up
+Apr 16 05:39:36.122: %LINK-6-UPDOWN: Interface Dot11Radio0, changed state to down
+Apr 16 05:39:36.130: %LINK-5-CHANGED: Interface Dot11Radio0, changed state to reset
+Apr 16 05:39:37.123: %LINEPROTO-5-UPDOWN: Line protocol on Interface Dot11Radio0, changed state to down
+Apr 16 05:39:37.159: %LINK-6-UPDOWN: Interface Dot11Radio0, changed state to up
+Apr 16 05:39:38.159: %LINEPROTO-5-UPDOWN: Line protocol on Interface Dot11Radio0, changed state to up
+Apr 16 05:40:01.163: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   ec55.f98b.9c5e Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:40:07.906: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   c485.088f.205a Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:40:31.632: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   ccaf.782f.17e4 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:40:31.840: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   0015.af37.c733 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:41:17.119: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   50b7.c315.b9a6 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:43:15.156: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   b8ee.65ac.b699 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:43:43.944: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   e8b1.fc7c.0957 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:44:46.615: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   8c70.5a84.4e18 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:44:46.623: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 8c70.5a84.4e18 Reason: Sending station has left the BSS 
+Apr 16 05:44:46.711: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   8c70.5a84.4e18 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:45:36.726: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   240a.6435.00fb Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:46:57.996: %DOT11-6-ASSOC: Interface Dot11Radio0, Station olymp-3 8019.3442.83df Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:49:41.412: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   48d2.24e8.f12a Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:50:57.774: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   3010.b358.0f0c Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 06:00:34.104: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   ccaf.7808.7fc8 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 06:00:57.659: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station ccaf.7808.7fc8 Reason: Sending station has left the BSS 
+Apr 16 06:11:10.395: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 3010.b358.0f0c Reason: Sending station has left the BSS 
+Apr 16 06:12:58.645: %DOT11-7-AUTH_FAILED: Station 3010.b358.0f0c Authentication failed
+Apr 16 06:13:03.969: %DOT11-7-AUTH_FAILED: Station 3010.b358.0f0c Authentication failed
+Apr 16 06:13:21.789: %DOT11-7-AUTH_FAILED: Station 3010.b358.0f0c Authentication failed
+Apr 16 06:13:27.153: %DOT11-7-AUTH_FAILED: Station 3010.b358.0f0c Authentication failed
+Apr 16 06:19:54.586: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station ccaf.782f.17e4 Reason: Sending station has left the BSS 
+Apr 16 06:20:11.605: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   74e5.0be6.714a Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 06:21:23.271: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 74e5.0be6.714a Reason: Sending station has left the BSS 
+Apr 16 06:22:10.555: %DOT11-6-ASSOC: Interface Dot11Radio0, Station  3010.b358.0f0c Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 06:33:13.518: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 3010.b358.0f0c Reason: Sending station has left the BSS 
+Apr 16 06:33:13.546: %DOT11-6-ASSOC: Interface Dot11Radio0, Station  3010.b358.0f0c Reassociated KEY_MGMT[WPAv2 PSK]
+Apr 16 07:54:32.415: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station b8ee.65ac.b699 Reason: Sending station has left the BSS 
+Apr 16 07:54:32.439: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   b8ee.65ac.b699 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 08:34:52.980: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   dc85.de2f.d4df Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 08:35:00.456: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station dc85.de2f.d4df Reason: Sending station has left the BSS 
+Apr 16 08:44:31.006: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 50b7.c315.b9a6 Reason: Previous authentication no longer valid 
+Apr 16 08:45:17.847: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 3010.b358.0f0c Reason: Sending station has left the BSS 
+Apr 16 08:46:48.181: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 8c70.5a84.4e18 Reason: Sending station has left the BSS 
+Apr 16 08:48:24.502: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 240a.6435.00fb Reason: Sending station has left the BSS 
+Apr 16 08:48:56.128: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 8019.3442.83df Reason: Sending station has left the BSS 
+Apr 16 08:52:43.856: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   3010.b358.0f0c Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 09:01:06.053: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 48d2.24e8.f12a Reason: Sending station has left the BSS 
+Apr 16 09:04:50.163: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 3010.b358.0f0c Reason: Sending station has left the BSS 
+Apr 16 09:05:01.291: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station b8ee.65ac.b699 Reason: Sending station has left the BSS 
+Apr 16 09:05:50.377: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   b8ee.65ac.b699 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 09:05:54.665: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station b8ee.65ac.b699 Reason: Sending station has left the BSS 
+Apr 16 09:05:54.693: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   b8ee.65ac.b699 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 09:06:14.629: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station c485.088f.205a Reason: Sending station has left the BSS 
+Apr 16 09:06:39.834: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station b8ee.65ac.b699 Reason: Sending station has left the BSS 
+Apr 16 09:06:49.910: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   0c8b.fd68.b55a Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 09:07:09.390: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   ccaf.782f.17e4 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 09:07:19.990: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 0c8b.fd68.b55a Reason: Sending station has left the BSS 
+Apr 16 09:07:27.482: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station ccaf.782f.17e4 Reason: Sending station has left the BSS 
+Apr 16 09:07:27.486: %DOT11-4-MAXRETRIES: Packet to client ccaf.782f.17e4 reached max retries, removing the client
+Apr 16 09:07:28.790: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 0015.af37.c733 Reason: Sending station has left the BSS 
+Apr 16 09:10:28.482: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station e8b1.fc7c.0957 Reason: Sending station has left the BSS 
+olymp-3# 
+

@@ -17,17 +17,12 @@ namespace frɪdʒ.Db
 			});
 		}
 
-		public static async Task<User> GetOrAdd(string login, Func<User> create)
+		public static async Task<bool> TryAdd(User user)
 		{
-			var added = false;
-			var user = Db.GetOrAdd(login, l =>
-			{
-				added = true;
-				return create();
-			});
-			if(added)
-				await Store.WriteAsync(user.Serialize());
-			return user;
+			if(!Db.TryAdd(user.Login, user))
+				return false;
+			await Store.WriteAsync(user.Serialize());
+			return true;
 		}
 
 		public static User Find(string login)
