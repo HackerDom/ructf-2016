@@ -47,11 +47,12 @@ class DummyClient(WebSocketClient):
 				self.debug('WebSocket hello received')
 				OPEN.set()
 				return
-#			result = json.loads(data)
-#			if result.get('login') != self.login:
-#				return
-			self.debug('WebSocket self posted message: ' + data)
-			if data.find(self.text) >= 0:
+			if (not self.login or data.find(self.login) >= 0) and (not self.text or data.find(self.text) >= 0):
+			#result = json.loads(data)
+			#if result.get('login') != self.login:
+				#return
+			#self.debug('WebSocket self posted message: ' + data)
+			#if data.find(self.text) >= 0:
 				DONE.set()
 		except ValueError:
 			self.debug(traceback.format_exc())
@@ -290,19 +291,126 @@ class Checker(HttpCheckerBase):
 	#      GET      #
 	#################
 	def get(self, addr, flag_id, flag, vuln):
+		if vuln == 1:
+			return self.get1(addr, flag_id, flag)
+		else:
+			return self.get2(addr, flag_id, flag)
+
+	##################
+	#      GET 1     #
+	##################
+	def get1(self, addr, flag_id, flag):
 		s = self.session(addr)
 
-		result = self.sget(s, addr, '/get?id=' + flag_id)
-		if result.find(flag) < 0:
-			print('flag not found')
+		parts = flag_id.split(':', 2)
+		user = {'login':parts[0], 'pass':parts[1]}
+
+		self.debug(user)
+
+		result = self.sget(s, addr, '/')
+		if not result or len(result) == 0:
+			print('get / failed')
+			return EXITCODE_MUMBLE
+
+		csrf_token = s.cookies.get('csrf-token')
+
+		result = self.spost(s, addr, '/signin', [
+			('login', user['login']),
+			('pass', user['pass']),
+			('csrf-token', csrf_token)])
+		if not result or result.find(flag) < 0:
+			print('flag not found in allergens')
 			return EXITCODE_CORRUPT
 
 		return EXITCODE_OK
 
-	#################
-	#      PUT      #
-	#################
+	##################
+	#      GET 2     #
+	##################
+	def get2(self, addr, flag_id, flag):
+		s = self.session(addr)
+
+		result = self.sget(s, addr, '/get?id=' + flag_id)
+		if result.find(flag) < 0:
+			print('flag not found in ingredients')
+			return EXITCODE_CORRUPT
+
+		return EXITCODE_OK
+
+	###################
+	#      PUT        #
+	###################
 	def put(self, addr, flag_id, flag, vuln):
+		if vuln == 1:
+			return self.put1(addr, flag_id, flag)
+		else:
+			return self.put2(addr, flag_id, flag)
+
+	###################
+	#      PUT 1      #
+	###################
+	def put1(self, addr, flag_id, flag):
+		s = self.session(addr)
+
+		result = self.sget(s, addr, '/')
+		if not result or len(result) == 0:
+			print('get / failed')
+			return EXITCODE_MUMBLE
+
+		csrf_token = s.cookies.get('csrf-token')
+		cookies_string = "; ".join([str(key) + "=" + str(val) for key, val in s.cookies.items()])
+
+		user = self.randuser(8)
+		user['allergens'] = [flag]
+		self.debug(user)
+
+		ws = DummyClient('ws://{}:{}/'.format(addr, WSPORT), headers=[
+			#('Origin', 'http://{}:{}'.format(addr, PORT)),
+			('User-Agent', 'qqqqqqq'),
+			('Cookie', cookies_string)])
+		try:
+			ws.daemon = True
+			ws.setargs(None, user['login'])
+			ws.connect()
+
+		except WebSocketException:
+			self.debug(traceback.format_exc())
+			print('websocket connect failed')
+			return EXITCODE_MUMBLE
+
+		else:
+			if not OPEN.wait(5):
+				print('await hello failed')
+				return EXITCODE_MUMBLE
+
+			time.sleep(5 + random.randrange(1,5))
+
+			result = self.spost(s, addr, '/signup', [
+				('csrf-token', csrf_token),
+				('login', user['login']),
+				('pass', user['pass']),
+				('allergen', ", ".join(user['allergens']))])
+			#if not result or result.get('about') != flag:
+			#	print('registration failed')
+			#	return EXITCODE_MUMBLE
+
+			if not DONE.wait(5):
+				print('await message failed')
+				return EXITCODE_MUMBLE
+
+			print('{}:{}'.format(user['login'], user['pass']))
+			return EXITCODE_OK
+
+		finally:
+			try:
+				ws.close()
+			except:
+				self.debug('WebSocket close failed')
+
+	###################
+	#      PUT 2      #
+	###################
+	def put2(self, addr, flag_id, flag):
 		s = self.session(addr)
 
 		result = self.sget(s, addr, '/')
@@ -313,15 +421,16 @@ class Checker(HttpCheckerBase):
 		csrf_token = s.cookies.get("csrf-token")
 		cookies_string = "; ".join([str(key) + "=" + str(val) for key, val in s.cookies.items()])
 
-		user = self.randuser(4)
-		result = self.spost(s, addr, '/auth', [('csrf-token', csrf_token), ('login', user['login']), ('pass', user['pass'])])
+		#user = self.randuser(4)
+		#result = self.spost(s, addr, '/auth', [('csrf-token', csrf_token), ('login', user['login']), ('pass', user['pass'])])
 		#if not result or len(result) == 0:
 		#	print('register user failed')
 		#	return EXITCODE_MUMBLE
 
 		time.sleep(0.2)
 
-		msg = [('title', self.randphrase()), ('ingredients', self.randphrase() + ', ' + flag), ('csrf-token', csrf_token)]
+		title = self.randphrase()
+		msg = [('title', title), ('ingredients', self.randphrase() + ', ' + flag), ('csrf-token', csrf_token)]
 
 		ws = DummyClient('ws://{}:{}/'.format(addr, WSPORT), headers=[
 			#('Origin', 'http://{}:{}'.format(addr, PORT)),
@@ -329,7 +438,7 @@ class Checker(HttpCheckerBase):
 			('Cookie', cookies_string)])
 		try:
 			ws.daemon = True
-			ws.setargs('test', user['login'])
+			ws.setargs(title, None)
 			ws.connect()
 
 		except WebSocketException:
@@ -349,7 +458,7 @@ class Checker(HttpCheckerBase):
 				print('send msg failed')
 				return EXITCODE_MUMBLE
 
-			id = result.split(':', 2)[0]
+			id = result
 
 			if not DONE.wait(5):
 				print('await message failed')

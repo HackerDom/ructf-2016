@@ -16,23 +16,13 @@ implementation
 
 {$R *.lfm}
 
-	const
-		ModuleName = 'root';
-
-	var
-		rootTemplate: string;
-
 	procedure TRootModule.OnRequest(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
 	begin
 		Handled := True;
-		AResponse.Content := StringReplace(rootTemplate, '{-body-}', '', []);
+		AResponse.SendRedirect('/user/login/');
 	end;
 
-
 initialization
-	writeln(stderr, 'initialization RootController');
-	flush(stderr);
-	rootTemplate := GetLayout(ModuleName, 'root');
 	RegisterHTTPModule('', TRootModule);
 
 end.

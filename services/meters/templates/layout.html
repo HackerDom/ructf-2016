@@ -1,8 +1,14 @@
+<!DOCTYPE html>
 <html>
 	<head>
 		<title>{-title-}</title>
+		<link rel='stylesheet' type='text/css' href='/css/styles.css'>
+		<script src='/js/chart.min.js'></script>
+		<script src='/js/scripts.js'></script>
 	</head>
 	<body>
+		<div id='menu'>
+		<h3>Meters</h3>
 		<ul>
 			<li><a href='/user/register/'>register</a></li>
 			<li><a href='/user/login/'>login</a></li>
@@ -11,6 +17,9 @@
 			<li><a href='/dashboard/all/'>all dashbords</a></li>
 			<li><a href='/dashboard/create/'>create dashbord</a></li>
 		</ul>
+		</div>
+		<div id='data'>
 		{-body-}
+		</div>
 	</body>
 </html>

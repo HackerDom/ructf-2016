@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
@@ -24,15 +25,23 @@ namespace FlagsTransmitter
 
 		void WorkerLoop()
 		{
-			var flags = flagsContainer.EnumerateFlagsInfinite();
 			while(true)
 			{
-				try
-				{
+                var flags = flagsContainer.EnumerateFlags().ToArray();
+			    if(flags.Length == 0)
+			    {
+			        Thread.Sleep(1000);
+                    continue;
+			    }
+                try
+                {
+                    var sw = Stopwatch.StartNew();
 					foreach(var flag in flags)
 					{
 						TransmitFlag(flag);
 					}
+                    sw.Stop();
+                    log.InfoFormat($"Transmitted batch of {flags.Length} flags in {sw.ElapsedMilliseconds}ms");
 				}
 				catch(Exception e)
 				{
@@ -42,8 +51,12 @@ namespace FlagsTransmitter
 			}
 		}
 
-		private void TransmitFlag(string flag)
+		private void TransmitFlag(KeyValuePair<string, string> kvp)
 		{
+		    string ip = kvp.Key;
+		    string flag = kvp.Value;
+
+		    var sw = Stopwatch.StartNew();
 			var flagBytes = Encoding.GetEncoding(1251).GetBytes(flag);
 			flagBytes = BitHelper.Encode5B4B(flagBytes);
 			for(int i = 0; i < 8; i++)
@@ -51,7 +64,10 @@ namespace FlagsTransmitter
 				comPort.Write(flagBytes, 0, flagBytes.Length);
 				BitHelper.RotateLeft(flagBytes);
 			}
-		}
+            sw.Stop();
+            log.InfoFormat($"Transmitted flag {flag} for team {ip} in {sw.ElapsedMilliseconds}ms");
+
+        }
 
 		public void Start()
 		{
