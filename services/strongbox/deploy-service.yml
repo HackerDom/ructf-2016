@@ -34,7 +34,9 @@
     - set_fact: pids_path="/home/strongbox/tmp/pids"
     - set_fact: app_pid="{{ pids_path }}/passenger.pid"
     - name: bundle install
-      bundler: state=present user_install=True chdir=/home/strongbox
+      bundler: state=latest chdir=/home/strongbox executable=/usr/local/bin/bundle
+    - name: bundle install
+      bundler: state=present user_install=True chdir=/home/strongbox executable=/usr/local/bin/bundle
       become: yes
       become_user: strongbox
     - name: rm tmp
