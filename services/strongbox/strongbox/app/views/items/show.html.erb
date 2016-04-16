@@ -1,0 +1,14 @@
+<% provide(:title, @item.title) %>
+<div class="row">
+  <div class="col-md-12">
+    <section class="item">
+      <h1 class="item__title">
+        <%= @item.title %>
+      </h1>
+      <p class="item__contetn">
+        <%= @item.content %>
+      </p>
+      <%= link_to "Edit", edit_item_path(@item) %>
+    </section>
+  </div>
+</div>

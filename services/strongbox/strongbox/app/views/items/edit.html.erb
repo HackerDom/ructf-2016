@@ -1,8 +1,8 @@
-<% provide(:title, @thing.title) %>
+<% provide(:title, @item.title) %>
 <div class="row">
   <div class="col-md-12">
 
-    <%= form_for(@thing) do |f| %>
+    <%= form_for(@item) do |f| %>
         <%= render 'shared/error_messages', object: f.object %>
         <div class="form-group">
           <%= f.text_field :title, placeholder: "Title", class: "form-control" %>

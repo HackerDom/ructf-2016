@@ -49,10 +49,10 @@ RSpec.configure do |config|
 =begin
   # These two settings work together to allow you to limit a spec run
   # to individual examples or groups you care about by tagging them with
-  # `:focus` metadata. When nothing is tagged with `:focus`, all examples
+  # `:focus` metadata. When noitem is tagged with `:focus`, all examples
   # get run.
   config.filter_run :focus
-  config.run_all_when_everything_filtered = true
+  config.run_all_when_everyitem_filtered = true
 
   # Allows RSpec to persist some state between runs in order to support
   # the `--only-failures` and `--next-failure` CLI options. We recommend

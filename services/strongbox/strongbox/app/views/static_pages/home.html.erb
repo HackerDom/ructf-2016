@@ -1,14 +1,8 @@
 <div class="row">
-  <div class="col-md-12">
-    <% unless @things.nil? %>
-        <h1>List your items:</h1>
-        <ul>
-          <% @things.each do |thing| %>
-              <li> <%= link_to thing.title, thing_path(thing) %><br/></li>
-          <% end %>
-        </ul>
-    <% end %>
-    <h2>Add thing</h2>
-    <%= render 'shared/thing_form' %>
+  <div class="col-md-6" style="text-align: center">
+    <a href="/strongbox?type=public" class="btn btn-large btn-primary">Checkroom</a>
+  </div>
+  <div class="col-md-6" style="text-align: center">
+    <a href="/strongbox?type=private" class="btn btn-large btn-primary">My strongbox</a>
   </div>
 </div>
