@@ -179,9 +179,9 @@ implementation
 			exit;
 		end;
 		
-		if HasBadSymbols(dname) or HasBadSymbols(description) then
+		if HasBadSymbols(dname) or HasBadSymbols(description) or HasBadSymbols(ssensors) then
 		begin
-			AResponse.Content := StringReplace(createTemplate, '{-message}', 'name and description must contains symbols with codes from [32 .. 127]', []);
+			AResponse.Content := StringReplace(createTemplate, '{-message}', 'name, description and configuration must contains symbols with codes from [32 .. 127]', []);
 			exit;
 		end;
 

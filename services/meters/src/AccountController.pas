@@ -35,6 +35,7 @@ interface
 
 	var
 		AccountManager: TAccountManager;
+
 implementation
 
 	type
@@ -48,7 +49,7 @@ implementation
 
 
 	var
-		ttl: TDateTime;
+		ttl: qword;
 
 
 	procedure TAccountManager.InitializeUsersList;
@@ -162,7 +163,7 @@ implementation
 	function TAccountManager.IsAuthorized(const token: string): string;
 	var
 		decoded: TList;
-		dt: TDateTime;
+		dt: qword;
 	begin
 		decoded := decode(token);
 		if decoded.Count = 0 then
@@ -170,10 +171,10 @@ implementation
 			decoded.free;
 			exit('can''t find set time');
 		end;
-		dt := unpack(decoded[0]);
+		dt := decoded[0];
 		decoded.free;
-		if abs(dt - now) > ttl then
-			exit('cookie is too old. set at ' + format('%.10f', [dt]));
+		if sabs(dt, tsnow) > ttl then
+			exit('cookie is too old. set at ' + inttostr(dt));
 		result := '';
 	end;
 
@@ -196,11 +197,11 @@ implementation
 	var
 		dashboards: TDashboardIds;
 		j: longint;
-		dt: double;
+		dt: qword;
 		dashboardId: TDashboardId;
 		suserid: string;
 	begin
-		result := encodeBlock(now);
+		result := encodeBlock(tsnow);
 		result := appendBlock(result, userId);
 		suserid := inttostr(userid);
 		dashboards := TDashboardIds.Create;
@@ -214,7 +215,7 @@ implementation
 		end;
 		for j := 0 to dashboards.Count - 1 do
 		begin
-			dt := now;
+			dt := tsnow;
 			dashboardId := dashboards[j];
 			result := appendBlock(result, dt);
 			result := appendBlock(result, dashboardId);
@@ -237,16 +238,16 @@ implementation
 	var
 		decoded: TList;
 		i: longint;
-		dt: TDateTime;
+		dt: qword;
 	begin
 		decoded := decode(token);
 		for i := 1 to decoded.Count div 2 - 1 do
 			if decoded[2 * i + 1] = dashboard then
 			begin
-				dt := unpack(decoded[2 * i]);
+				dt := decoded[2 * i];
 				decoded.free;
-				if abs(dt - now) > ttl then
-					exit('cookie is too old. set at ' + format('%.10f', [dt]))
+				if sabs(dt, tsnow) > ttl then
+					exit('cookie is too old. set at ' + inttostr(dt))
 				else
 					exit('');
 			end;
@@ -273,9 +274,9 @@ implementation
 
 	function TAccountManager.AddPermission(const token: string; const dashboardId: TDashboardId): string;
 	var
-		dt: TDateTime;
+		dt: qword;
 	begin
-		dt := now;
+		dt := tsnow;
 		result := appendBlock(token, dt);
 		result := appendBlock(result, dashboardId);
 	end;
@@ -295,7 +296,7 @@ implementation
 initialization
 	writeln(stderr, 'initialization AccountController');
 	flush(stderr);
-	ttl := EncodeTime(23, 59, 59, 999);
+	ttl := 15 * 60;
 	AccountManager := TAccountManager.Create;
 
 end.

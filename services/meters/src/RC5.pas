@@ -9,14 +9,8 @@ interface
 	type
 		TList = specialize TFPGList<QWord>;
 
-	function unpack(const qq: qword): TDateTime;
-
 	function appendBlock(const prefix: string; const qq: qword): string;
-	function appendBlock(const prefix: string; const t: TDateTime): string;
-
 	function encodeBlock(const qq: qword): string;
-	function encodeBlock(const t: TDateTime): string;
-
 	function decode(const txt: string): TList;
 
 	procedure LoadKey;
@@ -49,7 +43,7 @@ implementation
 			result := (result * 256) + ord(ss[length(ss) - i]);
 	end;
 
-	function sunpack(a: dword): string; 
+	function unpack(a: dword): string;
 	var
 		i: byte;
 	begin
@@ -59,15 +53,6 @@ implementation
 			result := result + char(a mod 256);
 			a := a div 256;
 		end;
-	end;
-
-	function unpack(const qq: qword): TDateTime;
-	var
-		ts: TTimeStamp;
-	begin
-		ts.Date := qq;
-		ts.Time := qq shr 32;
-		result := TimeStampToDateTime(ts);
 	end;
 
 	function rol(a, sh: dword): dword;
@@ -89,20 +74,12 @@ implementation
 			b := rol(b xor a, a) + s[2 * i + 1];
 		end;
 
-		result := sunpack(a) + sunpack(b);
+		result := unpack(a) + unpack(b);
 	end;
 
 	function encodeBlock(const qq: qword): string;
 	begin
 		 result := encodeBlock(qq, qq shr 32);
-	end;
-
-	function encodeBlock(const t: TDateTime): string;
-	var
-		ts: TTimeStamp;
-	begin
-		ts := DateTimeToTimeStamp(t);
-		result := encodeBlock(ts.date, ts.time)
 	end;
 
 	function appendBlock(const prefix: string; const qq: qword): string;
@@ -113,14 +90,6 @@ implementation
 	function appendBlock(const prefix: string; const a, b: dword): string;
 	begin
 		result := appendBlock(prefix, pack(a, b));
-	end;
-
-	function appendBlock(const prefix: string; const t: TDateTime): string;
-	var
-		ts: TTimeStamp;
-	begin
-		ts := DateTimeToTimeStamp(t);
-		result := appendBlock(prefix, ts.date, ts.time)
 	end;
 
 	function ror(a, sh: dword): dword;

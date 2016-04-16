@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using FlagsTransmitter.Utils;
 using log4net;
 
 namespace FlagsTransmitter
@@ -43,7 +45,12 @@ namespace FlagsTransmitter
 		private void TransmitFlag(string flag)
 		{
 			var flagBytes = Encoding.GetEncoding(1251).GetBytes(flag);
-			comPort.Write(flagBytes, 0, flagBytes.Length);
+			flagBytes = BitHelper.Encode5B4B(flagBytes);
+			for(int i = 0; i < 8; i++)
+			{
+				comPort.Write(flagBytes, 0, flagBytes.Length);
+				BitHelper.RotateLeft(flagBytes);
+			}
 		}
 
 		public void Start()

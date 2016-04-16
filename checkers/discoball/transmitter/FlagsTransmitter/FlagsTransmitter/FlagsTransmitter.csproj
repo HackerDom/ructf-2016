@@ -57,6 +57,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SerialPortTransmitter.cs" />
+    <Compile Include="Utils\BitHelper.cs" />
     <Compile Include="Utils\ByteArrayUtils.cs" />
     <Compile Include="Utils\CommonUtils.cs" />
     <Compile Include="Utils\DateTimeUtils.cs" />

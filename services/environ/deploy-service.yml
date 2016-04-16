@@ -12,7 +12,7 @@
     - name: install deps for ansible
       command: dnf install -y python2 python2-dnf libselinux-python
     - name: enable COPR plugin
-      dnf: name=dnf-plugins-core state=latest
+      dnf: name=dnf-plugins-core
     - name: enable python3.5 repo
       command: dnf copr enable -y mstuchli/Python3.5
     - name: install system requiremets

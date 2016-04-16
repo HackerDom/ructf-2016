@@ -1,0 +1,275 @@
+olymp-2#show log
+Syslog logging: enabled (0 messages dropped, 2 messages rate-limited, 0 flushes, 0 overruns, xml disabled, filtering disabled)
+
+No Active Message Discriminator.
+
+
+
+No Inactive Message Discriminator.
+
+
+    Console logging: level debugging, 246 messages logged, xml disabled,
+                     filtering disabled
+    Monitor logging: level debugging, 0 messages logged, xml disabled,
+                     filtering disabled
+    Buffer logging:  level debugging, 246 messages logged, xml disabled,
+                    filtering disabled
+    Exception Logging: size (4096 bytes)
+    Count and timestamp logging messages: disabled
+    Persistent logging: disabled
+    Trap logging: level informational, 233 message lines logged
+        Logging Source-Interface:       VRF Name:
+
+Log Buffer (1048576 bytes):
+
+*Mar  1 00:00:14.743: %IFMGR-7-NO_IFINDEX_FILE: Unable to open nvram:/ifIndex-table No such file or directory
+*Mar  1 00:00:14.863: %SOAP_FIPS-2-SELF_TEST_IOS_SUCCESS: IOS crypto FIPS self test passed (11)APAVC:  WlanPAKs 18174 RadioPaks  17566
+
+*Mar  1 00:00:21.847: %SOAP_FIPS-2-SELF_TEST_RAD_SUCCESS: RADIO crypto FIPS self test passed on interface Dot11Radio 0 (4)
+*Mar  1 00:00:28.175: %SOAP_FIPS-2-SELF_TEST_RAD_SUCCESS: RADIO crypto FIPS self test passed on interface Dot11Radio 1 (4)
+*Mar  1 00:00:28.235: initializing dot11 onplus
+*Mar  1 00:00:28.399: not a autoconfig enabled device!!!
+*Mar  1 00:00:30.379: %LINK-6-UPDOWN: Interface GigabitEthernet0, changed state to up
+*Mar  1 00:00:30.819: %LINK-5-CHANGED: Interface Dot11Radio1, changed state to administratively down
+*Mar  1 00:00:30.831: %SYS-5-CONFIG_I: Configured from memory by console
+*Mar  1 00:00:30.935: Starting Ethernet promiscuous mode
+*Mar  1 00:00:30.935: %SYS-5-RESTART: System restarted --
+Cisco IOS Software, C2600 Software (AP3G2-K9W7-M), Version 15.2(4)JB5, RELEASE SOFTWARE (fc1)
+Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2014 by Cisco Systems, Inc.
+Compiled Thu 01-May-14 22:04 by prod_rel_team
+*Mar  1 00:00:30.935: %SNMP-5-COLDSTART: SNMP agent on host olymp-2 is undergoing a cold start
+*Dec 21 11:21:03.035: %LINK-5-CHANGED: Interface Dot11Radio0, changed state to reset
+*Dec 21 11:21:03.423: %LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0, changed state to down
+*Dec 21 11:21:03.855: %LINEPROTO-5-UPDOWN: Line protocol on Interface BVI1, changed state to up
+*Dec 21 11:21:03.863: %LINEPROTO-5-UPDOWN: Line protocol on Interface Dot11Radio1, changed state to down
+*Dec 21 11:21:04.035: %LINEPROTO-5-UPDOWN: Line protocol on Interface Dot11Radio0, changed state to downERROR: Failed to configure ethernet promiscuous mode. Interface Descriptor mismatch
+*Dec 21 11:21:07.623: %SOAP_FIPS-2-SELF_TEST_HW_SUCCESS: HW crypto FIPS self test passed (0-0)
+*Dec 21 11:21:07.623: DPAA Initialization Complete
+*Dec 21 11:21:07.623: %SYS-3-HARIKARI: Process DPAA INIT top-level routine exited
+*Dec 21 11:21:08.623: %LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0, changed state to up
+*Dec 21 11:21:15.711: %CDP_PD-4-POWER_OK: Full power - NEGOTIATED inline power source
+*Dec 21 11:21:16.815: %LINK-6-UPDOWN: Interface Dot11Radio0, changed state to up
+*Dec 21 11:21:17.815: %LINEPROTO-5-UPDOWN: Line protocol on Interface Dot11Radio0, changed state to up
+*Dec 21 11:21:17.823: %LINK-6-UPDOWN: Interface Dot11Radio0, changed state to down
+*Dec 21 11:21:17.831: %LINK-5-CHANGED: Interface Dot11Radio0, changed state to reset
+*Dec 21 11:21:18.823: %LINEPROTO-5-UPDOWN: Line protocol on Interface Dot11Radio0, changed state to down
+*Dec 21 11:21:18.859: %LINK-6-UPDOWN: Interface Dot11Radio0, changed state to up
+*Dec 21 11:21:19.859: %LINEPROTO-5-UPDOWN: Line protocol on Interface Dot11Radio0, changed state to up
+*Dec 21 14:04:32.459: %SYS-5-CONFIG_I: Configured from console by root on vty1 (10.1.12.1)
+Apr 15 19:20:00.725: %SYS-5-CONFIG_I: Configured from console by root on vty1 (10.1.12.1)
+Apr 15 19:26:21.638: %SYS-5-CONFIG_I: Configured from console by root on vty0 (10.77.77.5)
+Apr 16 03:08:30.069: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   d05b.a87c.8145 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 03:10:32.411: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station d05b.a87c.8145 Reason: Previous authentication no longer valid 
+Apr 16 03:27:16.534: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   d05b.a87c.8145 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 03:32:29.980: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   4c3c.161e.54b9 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 03:56:52.097: %DOT11-6-ASSOC: Interface Dot11Radio0, Station ANDGEIN-LAPTOP 100b.a9a3.ab90 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:05:49.629: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   8c70.5ac2.2bd8 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:05:49.633: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 8c70.5ac2.2bd8 Reason: Sending station has left the BSS 
+Apr 16 04:05:49.713: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   8c70.5ac2.2bd8 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:11:20.292: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   74e5.0be6.714a Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:15:32.493: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station d05b.a87c.8145 Reason: Sending station has left the BSS 
+Apr 16 04:15:44.313: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   d05b.a87c.8145 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:16:49.491: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 8c70.5ac2.2bd8 Reason: Sending station has left the BSS 
+Apr 16 04:18:07.797: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 100b.a9a3.ab90 Reason: Sending station has left the BSS 
+Apr 16 04:19:27.073: %DOT11-6-ASSOC: Interface Dot11Radio0, Station ANDGEIN-LAPTOP 100b.a9a3.ab90 Reassociated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:19:58.535: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 100b.a9a3.ab90 Reason: Sending station has left the BSS 
+Apr 16 04:22:05.793: %DOT11-4-MAXRETRIES: Packet to client 4c3c.161e.54b9 reached max retries, removing the client
+Apr 16 04:22:05.793: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 4c3c.161e.54b9 Reason: Previous authentication no longer valid 
+Apr 16 04:22:05.825: %DOT11-4-MAXRETRIES: Packet to client 4c3c.161e.54b9 reached max retries, removing the client
+Apr 16 04:28:34.658: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   4c3c.161e.54b9 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:33:10.518: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   bc85.5671.3491 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:37:20.529: %DOT11-6-ASSOC: Interface Dot11Radio0, Station olymp-2 ac72.89a3.8e50 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:37:48.209: %DOT11-6-ASSOC: Interface Dot11Radio0, Station olymp-2 7c5c.f83b.c478 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:39:08.003: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   00c0.ca82.d45b Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:39:44.891: %DOT11-6-ASSOC: Interface Dot11Radio0, Station  5863.568f.b4f3 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:39:47.359: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   b8e8.560b.f06c Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:40:55.589: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   3c15.c2cb.f050 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:40:58.193: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   c485.08a0.8ae3 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:41:01.081: %DOT11-7-AUTH_FAILED: Station e8b1.fc7c.0957 Authentication failed
+Apr 16 04:41:07.278: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   5c93.a2fd.f268 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:42:22.155: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station b8e8.560b.f06c Reason: Sending station has left the BSS 
+Apr 16 04:42:27.517: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   50b7.c327.1399 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:42:51.293: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   7ce9.d3f1.d535 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:43:35.555: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   6c71.d9d3.f2a3 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:43:35.679: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 6c71.d9d3.f2a3 Reason: Sending station has left the BSS 
+Apr 16 04:43:55.379: %DOT11-4-MAXRETRIES: Packet to client 6c71.d9d3.f2a3 reached max retries, removing the client
+Apr 16 04:44:18.655: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   6c71.d9d3.f2a3 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:44:18.723: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 6c71.d9d3.f2a3 Reason: Sending station has left the BSS 
+Apr 16 04:44:33.726: %DOT11-7-AUTH_FAILED: Station 6c71.d9d3.f2a3 Authentication failed
+Apr 16 04:44:53.370: %DOT11-4-MAXRETRIES: Packet to client 6c71.d9d3.f2a3 reached max retries, removing the client
+Apr 16 04:45:19.250: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   6c71.d9d3.f2a3 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:45:19.474: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 6c71.d9d3.f2a3 Reason: Sending station has left the BSS 
+Apr 16 04:45:19.786: %DOT11-7-AUTH_FAILED: Station 6c71.d9d3.f2a3 Authentication failed
+Apr 16 04:47:08.148: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 7ce9.d3f1.d535 Reason: Sending station has left the BSS 
+Apr 16 04:47:44.730: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   7c7a.9119.5316 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:47:59.094: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   7ce9.d3f1.d535 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:48:03.654: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   b8e8.560b.f06c Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:49:04.203: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   4c80.9348.dfc8 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:50:12.411: %DOT11-7-AUTH_FAILED: Station 50b7.c315.b9a6 Authentication failed
+Apr 16 04:50:15.247: %DOT11-4-MAXRETRIES: Packet to client 50b7.c315.b9a6 reached max retries, removing the client
+Apr 16 04:50:19.067: %DOT11-7-AUTH_FAILED: Station 50b7.c315.b9a6 Authentication failed
+Apr 16 04:50:19.631: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station b8e8.560b.f06c Reason: Sending station has left the BSS 
+Apr 16 04:50:52.378: %DOT11-7-AUTH_FAILED: Station 18f4.6a26.dded Authentication failed
+Apr 16 04:50:52.394: %DOT11-4-MAXRETRIES: Packet to client 18f4.6a26.dded reached max retries, removing the client
+Apr 16 04:50:54.434: %DOT11-4-MAXRETRIES: Packet to client 18f4.6a26.dded reached max retries, removing the client
+Apr 16 04:50:58.530: %DOT11-7-AUTH_FAILED: Station 18f4.6a26.dded Authentication failed
+Apr 16 04:50:58.538: %DOT11-4-MAXRETRIES: Packet to client 18f4.6a26.dded reached max retries, removing the client
+Apr 16 04:51:04.586: %DOT11-7-AUTH_FAILED: Station 18f4.6a26.dded Authentication failed
+Apr 16 04:51:12.246: %DOT11-7-AUTH_FAILED: Station 18f4.6a26.dded Authentication failed
+Apr 16 04:51:12.258: %DOT11-4-MAXRETRIES: Packet to client 18f4.6a26.dded reached max retries, removing the client
+Apr 16 04:51:26.526: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   18f4.6a26.dded Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:52:39.506: %DOT11-4-MAXRETRIES: Packet to client 4c80.9348.dfc8 reached max retries, removing the client
+Apr 16 04:52:39.506: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 4c80.9348.dfc8 Reason: Previous authentication no longer valid 
+Apr 16 04:52:40.258: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   4c80.9348.dfc8 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:52:42.826: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   d0e1.4095.6dec Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:53:06.685: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   e803.9af8.f0ac Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:53:56.087: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 5c93.a2fd.f268 Reason: Sending station has left the BSS 
+Apr 16 04:53:56.119: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   5c93.a2fd.f268 Reassociated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:54:18.083: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 5c93.a2fd.f268 Reason: Sending station has left the BSS 
+Apr 16 04:54:18.135: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   5c93.a2fd.f268 Reassociated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:54:41.071: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 5c93.a2fd.f268 Reason: Sending station has left the BSS 
+Apr 16 04:54:41.195: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   5c93.a2fd.f268 Reassociated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:55:00.342: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 5c93.a2fd.f268 Reason: Sending station has left the BSS 
+Apr 16 04:55:00.374: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   5c93.a2fd.f268 Reassociated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:55:42.850: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   b8e8.560b.f06c Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:56:00.094: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 5c93.a2fd.f268 Reason: Sending station has left the BSS 
+Apr 16 04:56:00.134: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   5c93.a2fd.f268 Reassociated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:56:23.089: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 5c93.a2fd.f268 Reason: Sending station has left the BSS 
+Apr 16 04:56:23.121: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   5c93.a2fd.f268 Reassociated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:57:08.540: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 5c93.a2fd.f268 Reason: Sending station has left the BSS 
+Apr 16 04:57:08.616: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   5c93.a2fd.f268 Reassociated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:57:46.828: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   2068.9dc1.3f84 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 04:57:47.032: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 2068.9dc1.3f84 Reason: Sending station has left the BSS 
+Apr 16 04:57:47.340: %DOT11-7-AUTH_FAILED: Station 2068.9dc1.3f84 Authentication failed
+Apr 16 04:58:53.558: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 5c93.a2fd.f268 Reason: Sending station has left the BSS 
+Apr 16 04:58:53.618: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   5c93.a2fd.f268 Reassociated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:00:00.673: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 5c93.a2fd.f268 Reason: Sending station has left the BSS 
+Apr 16 05:00:00.781: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   5c93.a2fd.f268 Reassociated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:00:31.128: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   645a.0495.5620 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:02:10.559: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 5c93.a2fd.f268 Reason: Sending station has left the BSS 
+Apr 16 05:02:10.599: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   5c93.a2fd.f268 Reassociated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:02:20.155: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 5c93.a2fd.f268 Reason: Sending station has left the BSS 
+Apr 16 05:02:20.199: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   5c93.a2fd.f268 Reassociated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:02:27.370: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station d05b.a87c.8145 Reason: Sending station has left the BSS 
+Apr 16 05:02:48.726: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 5c93.a2fd.f268 Reason: Sending station has left the BSS 
+Apr 16 05:02:48.830: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   5c93.a2fd.f268 Reassociated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:03:10.670: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 5c93.a2fd.f268 Reason: Sending station has left the BSS 
+Apr 16 05:03:10.710: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   5c93.a2fd.f268 Reassociated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:03:47.101: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 5c93.a2fd.f268 Reason: Sending station has left the BSS 
+Apr 16 05:03:47.157: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   5c93.a2fd.f268 Reassociated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:04:20.969: %DOT11-4-MAXRETRIES: Packet to client 4c80.9348.dfc8 reached max retries, removing the client
+Apr 16 05:04:20.969: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 4c80.9348.dfc8 Reason: Previous authentication no longer valid 
+Apr 16 05:04:21.749: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   4c80.9348.dfc8 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:04:51.088: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 5c93.a2fd.f268 Reason: Sending station has left the BSS 
+Apr 16 05:04:51.092: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   dc85.de2f.d4df Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:04:51.160: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   5c93.a2fd.f268 Reassociated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:05:43.974: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   dca9.7175.78fd Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:06:59.306: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   10d3.8ad9.1973 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:07:05.466: %DOT11-4-MAXRETRIES: Packet to client d0e1.4095.6dec reached max retries, removing the client
+Apr 16 05:07:05.466: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station d0e1.4095.6dec Reason: Previous authentication no longer valid 
+Apr 16 05:07:05.470: %DOT11-4-MAXRETRIES: Packet to client d0e1.4095.6dec reached max retries, removing the client
+Apr 16 05:07:11.462: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   a42b.b0bf.9b4c Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:08:30.669: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   50b7.c33f.a0bf Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:14:00.071: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station bc85.5671.3491 Reason: Sending station has left the BSS 
+Apr 16 05:14:03.667: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   bc85.5671.3491 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:16:40.624: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station bc85.5671.3491 Reason: Sending station has left the BSS 
+Apr 16 05:16:41.800: %DOT11-4-MAXRETRIES: Packet to client bc85.5671.3491 reached max retries, removing the client
+Apr 16 05:16:45.844: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   bc85.5671.3491 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:17:02.152: %DOT11-4-MAXRETRIES: Packet to client 4c80.9348.dfc8 reached max retries, removing the client
+Apr 16 05:17:02.152: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 4c80.9348.dfc8 Reason: Previous authentication no longer valid 
+Apr 16 05:17:02.980: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   4c80.9348.dfc8 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:17:04.580: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station bc85.5671.3491 Reason: Sending station has left the BSS 
+Apr 16 05:17:05.116: %DOT11-4-MAXRETRIES: Packet to client bc85.5671.3491 reached max retries, removing the client
+Apr 16 05:17:26.946: %DOT11-4-MAXRETRIES: Packet to client 4c80.9348.dfc8 reached max retries, removing the client
+Apr 16 05:17:26.946: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 4c80.9348.dfc8 Reason: Previous authentication no longer valid 
+Apr 16 05:17:27.786: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   4c80.9348.dfc8 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:20:19.832: %DOT11-4-MAXRETRIES: Packet to client 4c80.9348.dfc8 reached max retries, removing the client
+Apr 16 05:20:19.832: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 4c80.9348.dfc8 Reason: Previous authentication no longer valid 
+Apr 16 05:20:20.608: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   4c80.9348.dfc8 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:20:31.824: %DOT11-4-MAXRETRIES: Packet to client 4c80.9348.dfc8 reached max retries, removing the client
+Apr 16 05:20:31.824: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 4c80.9348.dfc8 Reason: Previous authentication no longer valid 
+Apr 16 05:20:32.736: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   4c80.9348.dfc8 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:22:03.762: %DOT11-4-MAXRETRIES: Packet to client 4c80.9348.dfc8 reached max retries, removing the client
+Apr 16 05:22:03.766: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 4c80.9348.dfc8 Reason: Previous authentication no longer valid 
+Apr 16 05:22:04.538: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   4c80.9348.dfc8 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:22:29.250: %DOT11-4-MAXRETRIES: Packet to client 4c80.9348.dfc8 reached max retries, removing the client
+Apr 16 05:22:29.250: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 4c80.9348.dfc8 Reason: Previous authentication no longer valid 
+Apr 16 05:22:30.034: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   4c80.9348.dfc8 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:23:31.371: %DOT11-4-MAXRETRIES: Packet to client 4c80.9348.dfc8 reached max retries, removing the client
+Apr 16 05:23:31.371: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 4c80.9348.dfc8 Reason: Previous authentication no longer valid 
+Apr 16 05:23:32.199: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   4c80.9348.dfc8 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:24:56.474: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 4c3c.161e.54b9 Reason: Sending station has left the BSS 
+Apr 16 05:25:56.535: %DOT11-4-MAXRETRIES: Packet to client 4c80.9348.dfc8 reached max retries, removing the client
+Apr 16 05:25:56.535: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 4c80.9348.dfc8 Reason: Previous authentication no longer valid 
+Apr 16 05:25:57.303: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   4c80.9348.dfc8 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:26:30.984: %DOT11-4-MAXRETRIES: Packet to client 4c80.9348.dfc8 reached max retries, removing the client
+Apr 16 05:26:30.988: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 4c80.9348.dfc8 Reason: Previous authentication no longer valid 
+Apr 16 05:26:31.816: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   4c80.9348.dfc8 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:31:36.827: %DOT11-4-MAXRETRIES: Packet to client 4c80.9348.dfc8 reached max retries, removing the client
+Apr 16 05:31:36.827: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 4c80.9348.dfc8 Reason: Previous authentication no longer valid 
+Apr 16 05:31:37.643: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   4c80.9348.dfc8 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:33:41.754: %DOT11-4-MAXRETRIES: Packet to client 4c80.9348.dfc8 reached max retries, removing the client
+Apr 16 05:33:41.754: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 4c80.9348.dfc8 Reason: Previous authentication no longer valid 
+Apr 16 05:33:42.570: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   4c80.9348.dfc8 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:38:10.068: %DOT11-4-MAXRETRIES: Packet to client 4c80.9348.dfc8 reached max retries, removing the client
+Apr 16 05:38:10.068: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 4c80.9348.dfc8 Reason: Previous authentication no longer valid 
+Apr 16 05:38:10.872: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   4c80.9348.dfc8 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:39:56.374: %DOT11-4-MAXRETRIES: Packet to client 4c80.9348.dfc8 reached max retries, removing the client
+Apr 16 05:39:56.374: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 4c80.9348.dfc8 Reason: Previous authentication no longer valid 
+Apr 16 05:39:57.086: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   4c80.9348.dfc8 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:40:23.658: %DOT11-4-MAXRETRIES: Packet to client 4c80.9348.dfc8 reached max retries, removing the client
+Apr 16 05:40:23.658: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 4c80.9348.dfc8 Reason: Previous authentication no longer valid 
+Apr 16 05:40:24.482: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   4c80.9348.dfc8 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:56:08.342: %DOT11-4-MAXRETRIES: Packet to client 4c80.9348.dfc8 reached max retries, removing the client
+Apr 16 05:56:08.342: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 4c80.9348.dfc8 Reason: Previous authentication no longer valid 
+Apr 16 05:56:09.290: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   4c80.9348.dfc8 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 05:58:32.986: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 4c80.9348.dfc8 Reason: Sending station has left the BSS 
+Apr 16 05:58:33.058: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   4c80.9348.dfc8 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 06:09:34.391: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   4c3c.161e.54b9 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 06:09:40.889: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 4c3c.161e.54b9 Reason: Sending station has left the BSS 
+Apr 16 06:16:59.638: %DOT11-4-MAXRETRIES: Packet to client 74e5.0be6.714a reached max retries, removing the client
+Apr 16 06:16:59.638: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 74e5.0be6.714a Reason: Previous authentication no longer valid 
+Apr 16 06:16:59.642: %DOT11-4-MAXRETRIES: Packet to client 74e5.0be6.714a reached max retries, removing the client
+Apr 16 06:19:56.222: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   74e5.0be6.714a Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 06:20:11.106: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 74e5.0be6.714a Reason: Sending station has left the BSS 
+Apr 16 06:37:45.107: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station dca9.7175.78fd Reason: Sending station has left the BSS 
+Apr 16 06:37:45.147: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   dca9.7175.78fd Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 07:11:54.234: %DOT11-4-CCMP_REPLAY: Client 4c80.9348.dfc8 had 1 AES-CCMP TSC replays
+Apr 16 07:54:15.713: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 18f4.6a26.dded Reason: Sending station has left the BSS 
+Apr 16 07:54:15.725: %DOT11-4-MAXRETRIES: Packet to client 18f4.6a26.dded reached max retries, removing the client
+Apr 16 08:13:03.441: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   18f4.6a26.dded Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 08:26:02.263: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station dc85.de2f.d4df Reason: Sending station has left the BSS 
+Apr 16 08:27:03.802: %DOT11-6-ASSOC: Interface Dot11Radio0, Station  dc85.de2f.d4df Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 08:34:14.085: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station dc85.de2f.d4df Reason: Sending station has left the BSS 
+Apr 16 08:35:01.650: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   dc85.de2f.d4df Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 08:39:49.465: %DOT11-4-MAXRETRIES: Packet to client 4c80.9348.dfc8 reached max retries, removing the client
+Apr 16 08:39:49.465: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 4c80.9348.dfc8 Reason: Previous authentication no longer valid 
+Apr 16 08:39:49.469: %DOT11-4-MAXRETRIES: Packet to client 4c80.9348.dfc8 reached max retries, removing the client
+Apr 16 08:40:06.377: %DOT11-6-ASSOC: Interface Dot11Radio0, Station   4c80.9348.dfc8 Associated KEY_MGMT[WPAv2 PSK]
+Apr 16 08:42:05.740: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 18f4.6a26.dded Reason: Sending station has left the BSS 
+Apr 16 08:42:05.744: %DOT11-4-MAXRETRIES: Packet to client 18f4.6a26.dded reached max retries, removing the client
+Apr 16 08:49:09.130: %DOT11-4-CCMP_REPLAY: Client b8e8.560b.f06c had 1 AES-CCMP TSC replays
+Apr 16 09:01:59.239: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 4c80.9348.dfc8 Reason: Sending station has left the BSS 
+Apr 16 09:02:37.891: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 10d3.8ad9.1973 Reason: Sending station has left the BSS 
+Apr 16 09:03:00.551: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 3c15.c2cb.f050 Reason: Sending station has left the BSS 
+Apr 16 09:03:10.783: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 50b7.c33f.a0bf Reason: Sending station has left the BSS 
+Apr 16 09:04:12.557: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station e803.9af8.f0ac Reason: Sending station has left the BSS 
+Apr 16 09:04:32.445: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station b8e8.560b.f06c Reason: Sending station has left the BSS 
+Apr 16 09:06:28.253: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 7ce9.d3f1.d535 Reason: Sending station has left the BSS 
+Apr 16 09:07:20.843: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station dca9.7175.78fd Reason: Sending station has left the BSS 
+Apr 16 09:07:23.255: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 50b7.c327.1399 Reason: Sending station has left the BSS 
+Apr 16 09:08:19.875: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 7c5c.f83b.c478 Reason: Sending station has left the BSS 
+Apr 16 09:08:32.307: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station dc85.de2f.d4df Reason: Sending station has left the BSS 
+Apr 16 09:09:03.302: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 00c0.ca82.d45b Reason: Sending station has left the BSS 
+Apr 16 09:09:20.838: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 645a.0495.5620 Reason: Sending station has left the BSS 
+Apr 16 09:09:43.114: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 5863.568f.b4f3 Reason: Previous authentication no longer valid 
+Apr 16 09:11:12.176: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 7c7a.9119.5316 Reason: Sending station has left the BSS 
+Apr 16 09:11:49.520: %DOT11-4-MAXRETRIES: Packet to client a42b.b0bf.9b4c reached max retries, removing the client
+Apr 16 09:11:49.520: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station a42b.b0bf.9b4c Reason: Previous authentication no longer valid 
+Apr 16 09:11:49.524: %DOT11-4-MAXRETRIES: Packet to client a42b.b0bf.9b4c reached max retries, removing the client
+Apr 16 09:12:41.260: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station ac72.89a3.8e50 Reason: Sending station has left the BSS 
+Apr 16 09:15:09.130: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station 5c93.a2fd.f268 Reason: Sending station has left the BSS 
+Apr 16 09:16:33.501: %DOT11-6-DISASSOC: Interface Dot11Radio0, Deauthenticating Station c485.08a0.8ae3 Reason: Sending station has left the BSS 
+olymp-2# 
+
