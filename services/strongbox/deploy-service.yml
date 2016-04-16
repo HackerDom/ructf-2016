@@ -33,7 +33,7 @@
     - set_fact: app_sock="{{ socks_path }}/app.sock"
     - set_fact: pids_path="/home/strongbox/tmp/pids"
     - set_fact: app_pid="{{ pids_path }}/passenger.pid"
-    - name: bundle install
+    - name: bundle update
       bundler: state=latest chdir=/home/strongbox executable=/usr/local/bin/bundle
     - name: bundle install
       bundler: state=present user_install=True chdir=/home/strongbox executable=/usr/local/bin/bundle
