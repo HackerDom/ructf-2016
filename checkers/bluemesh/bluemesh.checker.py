@@ -61,7 +61,7 @@ class State:
 		socket_fd = socket.makefile('r')
 		send("list", socket)
 		line = readline(socket_fd)
-		if not hostname in line:
+		if not self.hostname in line:
 			service_down(message="Node not found in cluster")
 		else:
 			service_ok()
@@ -69,21 +69,21 @@ class State:
 	def put(self, flag_id, flag):
 		socket = self.connect_to_checker()
 		socket_fd = socket.makefile()
-		send("put " + hostname + ":" + str(PORT) + " " + flag_id + " " + flag, socket)
+		send("put " + self.hostname + ":" + str(PORT) + " " + flag_id + " " + flag, socket)
 		result = readline(socket_fd)
-		if result == "success":
+		if result == "done":
 			service_ok()
-		else
+		else:
 			ructf_error(message="Unexpected PUT response: " + result)
 
 	def get(self, flag_id, flag):
 		socket = self.connect_to_checker()
 		socket_fd = socket.makefile()
-		send("get " + hostname + ":" + str(PORT) + " " + flag_id)
+		send("get " + self.hostname + ":" + str(PORT) + " " + flag_id, socket)
 		result = readline(socket_fd)
 		if result == flag:
 			service_ok()
-		else
+		else:
 			service_corrupt(message="Unexpected GET response: " + result)
 
 def handler_info(*args):
@@ -105,7 +105,7 @@ def handler_put(args):
 	hostname, id, flag, vuln = args
 	
 	state = State(hostname)
-	state.get(id, flag)
+	state.put(id, flag)
 
 HANDLERS = {
 	'info' : handler_info,
