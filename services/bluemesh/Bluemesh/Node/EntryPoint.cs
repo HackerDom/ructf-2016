@@ -44,7 +44,6 @@ namespace Node
                 LongNames = true
             };
             var node = CreateNode(config, config, "storage");
-            //TODO cover the hole
             var consoleServer = new ConsoleServer(new IPEndPoint(IPAddress.Any, 16801), node);
             consoleServer.Start();
             node.Start();
