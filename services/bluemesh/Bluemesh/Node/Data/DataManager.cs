@@ -58,13 +58,19 @@ namespace Node.Data
         public void DispatchData(string key, byte[] data, IAddress destination)
         {
             var message = new DataMessage(DataAction.Put, key, data, routingManager.Map.OwnAddress);
-            EnqueueMessage(message, destination);
+            if (Equals(destination, routingManager.Map.OwnAddress))
+                ProcessData(message);
+            else
+                EnqueueMessage(message, destination);
         }
 
         public void RequestData(string key, IAddress destination)
         {
             var message = new DataMessage(DataAction.Get, key, new byte[0], routingManager.Map.OwnAddress);
-            EnqueueMessage(message, destination);
+            if (Equals(destination, routingManager.Map.OwnAddress))
+                ProcessData(message);
+            else
+                EnqueueMessage(message, destination);
         }
 
         public event Action<DataMessage> OnReceivedData = data => { };
@@ -143,7 +149,10 @@ namespace Node.Data
                     if (data != null)
                     {
                         var message = new DataMessage(DataAction.None, dataMessage.Key, data, routingManager.Map.OwnAddress);
-                        EnqueueMessage(message, dataMessage.Source);
+                        if (Equals(dataMessage.Source, routingManager.Map.OwnAddress))
+                            ProcessData(message);
+                        else
+                            EnqueueMessage(message, dataMessage.Source);
                     }
                     break;
                 default:
