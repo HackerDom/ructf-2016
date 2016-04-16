@@ -10,7 +10,7 @@ Rails.application.routes.draw do
   match '/strongbox/', to: 'static_pages#type', via: 'get'
 
   # User
-  resources :users
+  resources :users, only: [:new, :create, :show]
   match '/signup', to: 'users#new', via: 'get'
 
   #Auth
@@ -20,10 +20,8 @@ Rails.application.routes.draw do
 
   #Items
   resources :items, only: [:create, :destroy, :edit, :update, :show]
-  match '/items/get_all_yaml', to: 'item#get_all_yaml', via: 'get'
 
   #Checkroom
   resources :checkrooms, only: [:new, :create, :show]
   match '/checkrooms/:id', to: 'checkrooms#show', via: 'post'
-  # match '/checkrooms/login', to: 'checkrooms#set_secret', via: 'post'
 end
