@@ -139,7 +139,7 @@ namespace Tests
 
                 foreach (var connection in selectResult.ReadableConnections.Where(c => c.State == ConnectionState.Connected))
                 {
-                    while (connection.Socket.Available > 0)
+                    //while (connection.Socket.Available > 0)
                     {
                         var message = connection.Receive();
                         if (!routingManager.ProcessMessage(message, connection))
@@ -148,10 +148,6 @@ namespace Tests
                 }
                 routingManager.PushMaps(selectResult.WritableConnections.Where(c => c.State == ConnectionState.Connected));
                 dataManager.PushMessages(selectResult.WritableConnections.Where(c => c.State == ConnectionState.Connected));
-                foreach (var c in selectResult.WritableConnections.Where(c => c.State == ConnectionState.Connected))
-                {
-                    c.Push(new PullMessage(5));
-                }
 
                 routingManager.DisconnectExcessLinks();
                 routingManager.ConnectNewLinks();

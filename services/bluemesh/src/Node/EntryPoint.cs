@@ -55,7 +55,7 @@ namespace Node
             {
                 Console.WriteLine(@interface.Name);
                 var info = @interface.GetIPProperties().UnicastAddresses
-                    .Where(i => i.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                    .Where(i => i.Address.AddressFamily == AddressFamily.InterNetwork)
                     .FirstOrDefault(i => Regex.IsMatch(i.Address.ToString(), AddressRegex));
                 if (info == null)
                     continue;
@@ -161,9 +161,12 @@ namespace Node
 
                 foreach (var connection in selectResult.ReadableConnections.Where(c => c.State == ConnectionState.Connected))
                 {
-                    var message = connection.Receive();
-                    if (!routingManager.ProcessMessage(message, connection))
-                        dataManager.ProcessMessage(message, connection);
+                    for (int i = 0; i < 3 && connection.Socket.Available > 0; i++)
+                    {
+                        var message = connection.Receive();
+                        if (!routingManager.ProcessMessage(message, connection))
+                            dataManager.ProcessMessage(message, connection);
+                    }
                 }
                 routingManager.PushMaps(selectResult.WritableConnections.Where(c => c.State == ConnectionState.Connected));
                 dataManager.PushMessages(selectResult.WritableConnections.Where(c => c.State == ConnectionState.Connected));
