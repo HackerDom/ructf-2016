@@ -18,6 +18,7 @@ namespace Node.Data
             this.dataFilePath = dataFilePath;
             this.routingManager = routingManager;
             this.encryptionManager = encryptionManager;
+            random = new Random();
             pendingMessages = new List<QueueEntry>();
         }
 
@@ -92,15 +93,18 @@ namespace Node.Data
 
         private void EnqueueMessage(DataMessage message, IAddress destination)
         {
-            //TODO send by 3 paths
-            var path = routingManager.Map.Links.CreatePath(routingManager.Map.OwnAddress, destination);
-            if (path.Count == 0)
-                return;
-            var pathBody = path.GetPathBody();
-            var wrapped = WrapMessage(message, pathBody);
-            Console.WriteLine("[{0}] Added pending message : {1} {2} - {3} by path {4} to {5}", routingManager.Map.OwnAddress, message, wrapped, message.Key,
-                string.Join(", ", path), destination);
-            pendingMessages.Add(new QueueEntry(wrapped, message, path[1]));
+            for (int i = 0; i < 3; i++)
+            {
+                var path = routingManager.Map.Links.CreateRandomPath(routingManager.Map.OwnAddress, destination, 2, 20, random);
+                //var path = routingManager.Map.Links.CreatePath(routingManager.Map.OwnAddress, destination);
+                if (path == null || path.Count == 0)
+                    continue;
+                var pathBody = path.GetPathBody();
+                var wrapped = WrapMessage(message, pathBody);
+                Console.WriteLine("[{0}] Added pending message : {1} {2} - {3} by path {4} to {5}", routingManager.Map.OwnAddress, message, wrapped, message.Key,
+                    string.Join(", ", path), destination);
+                pendingMessages.Add(new QueueEntry(wrapped, message, path[1]));
+            }
         }
 
         private IMessage WrapMessage(IMessage message, List<IAddress> path)
@@ -170,6 +174,7 @@ namespace Node.Data
         private readonly IEncryptionManager encryptionManager;
 
         private readonly byte[] serializerBuffer = new byte[1024 * 1024 * 4];
+        private readonly Random random;
 
         private struct QueueEntry
         {

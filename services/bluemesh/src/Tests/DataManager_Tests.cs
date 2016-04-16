@@ -33,7 +33,7 @@ namespace Tests
             config.DisconnectCooldown.Returns(100.Milliseconds());
             config.MapUpdateCooldown.Returns(20.Milliseconds());
             var preconfiguredNodes = new List<IAddress>();
-            var nodes = Enumerable.Range(0, 15).Select(i => CreateNode(config, preconfiguredNodes, i)).ToList();
+            var nodes = Enumerable.Range(0, 5).Select(i => CreateNode(config, preconfiguredNodes, i)).ToList();
 
             ThreadPool.SetMinThreads(nodes.Count * 2, nodes.Count * 2);
 
@@ -51,6 +51,7 @@ namespace Tests
 
             Console.WriteLine("!!! Put flag");
             nodes[0].PutFlag("test1", "hujhujhuj", nodes.Last().Address);
+            Thread.Sleep(1000);
             Console.WriteLine("!!! Get flag");
             var flag = nodes[0].GetFlag("test1", nodes.Last().Address);
             Console.WriteLine("!!! Flag : " + flag);
@@ -77,7 +78,7 @@ namespace Tests
             var encryptionManager = new EncryptionManager(address.Endpoint, connectionConfig.KeySendCooldown);
             var connectionManager = new TcpConnectionManager(connectionConfig, routingConfig, encryptionManager);
             var routingManager = new RoutingManager(connectionManager, routingConfig);
-            var dataManager = new DataManager(new DataStorage(), "", routingManager, encryptionManager);
+            var dataManager = new DataManager(new DataStorage(), "local", routingManager, encryptionManager);
             return new TestNode(routingManager, connectionManager, dataManager, encryptionManager);
         }
 
