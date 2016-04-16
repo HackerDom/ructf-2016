@@ -63,7 +63,7 @@ def get_dashboards(text):
 	return set((id, name) for id, name in rdash.findall(text))
 
 def check_sensors(text, config):
-	draw = re.compile(r"<script>draw\('#sensor(\d+)', (\[[^\]]+\])\);</script>")
+	draw = re.compile(r"<script>draw\('sensor(\d+)', (\[[^\]]+\])\);</script>")
 	sensors = draw.findall(text)
 	if len(sensors) < 4:
 		service_mumble(error="can't find sensors\n{}".format(text))

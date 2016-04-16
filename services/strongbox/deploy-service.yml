@@ -10,19 +10,21 @@
   become: yes
   tasks:
     - name: install system requiremets
-      dnf: name={{item}} state=latest disable_gpg_check=yes
+      dnf: name={{item}} disable_gpg_check=yes
       with_items:
         - ruby
         - ruby-devel
         - sqlite-devel
         - libxslt-devel
         - nodejs
-    - name: gem install nokogiri
-      command: gem install nokogiri -- --use-system-libraries
+    - name: gem install nokogiri/passenger
+      gem: state=present name={{item}}
+      with_items:
+        - nokogiri
+        - passenger
+        - bundler
     - name: gem install rails
-      command: gem install rails --version 4.2.1
-    - name: instal passenger
-      command: gem install passenger
+      gem: state=present name=rails version=4.2.1
     - name: add user
       user: name=strongbox shell=/sbin/nologin
     - name: copy project
@@ -31,38 +33,27 @@
     - set_fact: app_sock="{{ socks_path }}/app.sock"
     - set_fact: pids_path="/home/strongbox/tmp/pids"
     - set_fact: app_pid="{{ pids_path }}/passenger.pid"
-    - name: bundle update
-      shell: "cd /home/strongbox/ && bundle update"
-      become: yes
-      become_user: strongbox
-      become_method: su
     - name: bundle install
-      shell: "cd /home/strongbox/ && bundle install"
+      bundler: state=present user_install=True chdir=/home/strongbox
       become: yes
       become_user: strongbox
-      become_method: su
     - name: rm tmp
-      shell: "cd /home/strongbox/ && rm -rf tmp"
+      file: state=absent path=/home/strongbox/tmp
     - name: db:precompile
-      shell: "cd /home/strongbox/ && RAILS_ENV=production bundle exec rake assets:precompile"
+      shell: "bundle exec rake assets:precompile"
+      args:
+        chdir: /home/strongbox/
+        executable: /bin/bash
+      environment:
+        RAILS_ENV: production
       become: yes
       become_user: strongbox
       become_method: su
     - name: Ensure sockets directory exists
-      file: path={{ socks_path }} state=directory
-      become: yes
-      become_user: strongbox
-      become_method: su
-    - name: Ensure pids directory exists
-      file: path={{ pids_path }} state=directory
-      become: yes
-      become_user: strongbox
-      become_method: su
-    - name: bundle install
-      command: bundle install
-      become: yes
-      become_user: strongbox
-      become_method: su
+      file: path={{item}} state=directory owner=strongbox
+      with_items:
+        - "{{ socks_path }}"
+        - "{{ pids_path }}"
     - name: db:migrate
       command: bundle exec rake db:migrate RAILS_ENV=production
       become: yes

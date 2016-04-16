@@ -1,5 +1,6 @@
 using System;
 using System.Net.Sockets;
+using System.Text;
 
 namespace Node.Connections.Tcp
 {

@@ -35,6 +35,7 @@ interface
 
 	var
 		AccountManager: TAccountManager;
+
 implementation
 
 	type
@@ -246,7 +247,7 @@ implementation
 				dt := decoded[2 * i];
 				decoded.free;
 				if sabs(dt, tsnow) > ttl then
-					exit('cookie is too old. set at ' + inttostr(dt) + ' ' + inttostr(tsnow))
+					exit('cookie is too old. set at ' + inttostr(dt))
 				else
 					exit('');
 			end;

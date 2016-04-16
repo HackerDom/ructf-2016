@@ -1,0 +1,16 @@
+[Unit]
+Description=Bluemesh
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/bluemesh
+ExecStart=/usr/bin/mono node
+User=bluemesh
+Restart=always
+CPUQuota=100%
+MemoryLimit=2048M
+TasksMax=100
+
+[Install]
+WantedBy=multi-user.target

@@ -24,7 +24,6 @@ namespace Node.Connections.Tcp
 
         public List<IAddress> GetAvailablePeers()
         {
-            // TODO do real scan
             var peers = connectionConfig.PreconfiguredNodes.Where(address => !Equals(address, Address)).ToList();
             encryptionManager.RetrievePeerKeys(peers);
             return peers;
