@@ -48,7 +48,7 @@ namespace frɪdʒ.http.handlers
 
 		public static string FormatUserMessage(User user, string sender, Food food)
 		{
-			return JsonConvert.SerializeObject(new {login = sender, title = food.Title, allergens = user == null ? null : food.Ingredients.FindAll(user.Allergens)});
+			return JsonConvert.SerializeObject(new {type = "food", login = sender, title = food.Title, allergens = user == null ? null : food.Ingredients.FindAll(user.Allergens)});
 		}
 
 		private readonly Func<string, Food, Task> callback;
