@@ -1,10 +1,10 @@
-- hosts: dev-cs
+- hosts: cs0
   roles: [main]
   vars:
     cs_user: cs
     cs_dir: /home/cs
 
-- hosts: [dev-cs2,dev-cs3]
+- hosts: [cs1,cs2,cs3]
   roles: [checkers]
   vars:
     cs_user: cs
