@@ -23,6 +23,8 @@ namespace Node.Encryption
         {
             privateKey = BluemeshEncryptor.GeneratePrivateKey(seed);
             publicKey = BluemeshEncryptor.GeneratePublicKey(privateKey);
+            lock (peerKeys)
+                peerKeys[serverEndpoint] = publicKey;
         }
 
         public void Start()

@@ -94,6 +94,35 @@ namespace Tests
             path.Should().Equal(new FakeAddress[] { 0, 2, 4 });
         }
 
+        [Test]
+        public void CreateRandomPath_should_create_correct_paths()
+        {
+            var random = new Random(16742);
+            var graph = Graph(Links(0, 1, 2, 1, 3, 1, 4, 1, 5, 0));
+
+            Console.WriteLine(graph.ToDOT());
+
+            for (int i = 0; i < 20; i++)
+            {
+                var path = graph.CreateRandomPath((FakeAddress) 0, (FakeAddress) 5, 5, 10, random);
+                Console.WriteLine(string.Join(" -> ", path));
+                path.Count.Should().BeGreaterOrEqualTo(5).And.BeLessOrEqualTo(10);
+                path.First().Should().Be((FakeAddress) 0);
+                path.Last().Should().Be((FakeAddress) 5);
+            }
+        }
+
+        [Test]
+        public void CreateRandomPath_should_return_null_when_destination_is_unreachable()
+        {
+            var random = new Random(16742);
+            var graph = Graph(Links(0, 1), Links(2, 3));
+
+            Console.WriteLine(graph.ToDOT());
+
+            graph.CreateRandomPath((FakeAddress)0, (FakeAddress)2, 5, 10, random).Should().BeNull();
+        }
+
         private static List<RoutingMapLink> Graph(params IEnumerable<RoutingMapLink>[] links)
         {
             return links.SelectMany(_ => _).Distinct().ToList();
