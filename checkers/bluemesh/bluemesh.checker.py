@@ -12,7 +12,7 @@ import time
 
 PORT = 16800
 CPORT = 16801
-CHECKER_NODE = '10.23.0.14'
+CHECKER_NODE = '10.23.0.11'
 
 def ructf_error(status=110, message=None, error=None, exception=None):
 	if message:
