@@ -86,7 +86,7 @@ implementation
 	procedure TUserModule.OnLogout(Sender: TObject; ARequest: TRequest; AResponse: TResponse; var Handled: Boolean);
 	begin
 		ClearAuthCookie(AResponse);
-		AResponse.SendRedirect('/dashboard/all/');
+		AResponse.SendRedirect('/user/login/');
 		Handled := True;
 	end;
 
