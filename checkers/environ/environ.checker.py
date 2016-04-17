@@ -167,8 +167,8 @@ def put(*args):
     try:
         B = B.get(timeout=5)
     except TimeoutError:
-            close(CORRUPT, "DH negotiation failed",
-                  "DH: not receive pub key (B)")
+            close(FAIL, "WiFi: no answer",
+                  "not receive pub key (B)")
 
     secret = 1
     try:
