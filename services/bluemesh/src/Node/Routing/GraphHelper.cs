@@ -86,6 +86,12 @@ graph {name} {{
             return BuildRandomPath(from, to, links, candidateNodes, pathNodes, minLength, maxLength, random) ? pathNodes : null;
         }
 
+        public static List<IAddress> CreateShortestPath(this ICollection<RoutingMapLink> links, IAddress from, IAddress to)
+        {
+            var pathNodes = new List<IAddress>();
+            return BuildShortestPath(from, to, links, pathNodes) ? pathNodes : null;
+        }
+
         private static string MakeSafeString(object obj, bool longNames)
         {
             if (obj is TcpAddress && !longNames)
@@ -118,16 +124,48 @@ graph {name} {{
             }
         }
 
+        private static bool BuildShortestPath(IAddress source, IAddress destination, ICollection<RoutingMapLink> links, List<IAddress> pathNodes)
+        {
+            var backtrack = new Dictionary<IAddress, IAddress>();
+            var queue = new Queue<IAddress>();
+            queue.Enqueue(source);
+            backtrack[source] = null;
+            var found = false;
+            while (queue.Count > 0)
+            {
+                var nextNode = queue.Dequeue();
+                if (Equals(nextNode, destination))
+                {
+                    found = true;
+                    break;
+                }
+                foreach (var peer in GetPeers(nextNode, links).Where(n => !backtrack.ContainsKey(n)).ToList())
+                {
+                    queue.Enqueue(peer);
+                    backtrack[peer] = nextNode;
+                }
+            }
+            if (!found)
+                return false;
+            var node = destination;
+            while (node != null)
+            {
+                pathNodes.Add(node);
+                node = backtrack[node];
+            }
+            pathNodes.Reverse();
+            return true;
+        }
+
         private static bool BuildRandomPath(IAddress source, IAddress destination, ICollection<RoutingMapLink> links, HashSet<IAddress> candidateNodes, List<IAddress> pathNodes, int minLength, int maxLength, Random random)
         {
             pathNodes.Add(source);
 
-            if (Equals(source, destination) && pathNodes.Count >= minLength)
+            if (Equals(source, destination))
                 return true;
 
             if (pathNodes.Count >= maxLength)
             {
-                pathNodes.RemoveAt(pathNodes.Count - 1);
                 return false;
             }
 

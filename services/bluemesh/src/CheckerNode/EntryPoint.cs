@@ -23,7 +23,7 @@ namespace CheckerNode
         {
             var config = new StaticConfig
             {
-                DesiredConnections = 5,
+                DesiredConnections = 22,
                 MaxConnections = 22,
                 ConnectCooldown = TimeSpan.FromMilliseconds(100),
                 DisconnectCooldown = TimeSpan.FromMilliseconds(100),

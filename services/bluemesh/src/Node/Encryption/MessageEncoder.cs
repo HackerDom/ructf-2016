@@ -15,7 +15,7 @@ namespace Node.Encryption
         {
             if (messageType != MessageType.Data && messageType != MessageType.Redirect)
                 return;
-            //Console.WriteLine("Decoded message of type {0} with key {1}", messageType, privateKey);
+            Console.WriteLine("Decoded message of type {0} with key {1}", messageType, privateKey);
             BluemeshEncryptor.EncryptBytes(buffer, offset, 
                 length % 8 == 0 ? length : length + (8 - length % 8), privateKey);
         }
@@ -25,7 +25,7 @@ namespace Node.Encryption
             if (messageType != MessageType.Data && messageType != MessageType.Redirect)
                 return;
             var publicKey = publicKeyProvider();
-            //Console.WriteLine("Encoded message of type {0} with key {1}", messageType, publicKey);
+            Console.WriteLine("Encoded message of type {0} with key {1}", messageType, publicKey);
             BluemeshEncryptor.EncryptBytes(buffer, offset,
                 length % 8 == 0 ? length : length + (8 - length % 8), publicKey);
         }
