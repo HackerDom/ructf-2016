@@ -78,7 +78,7 @@ namespace frɪdʒ.ws
 
 		private async Task TryRegister(WebSocket ws, CancellationToken token)
 		{
-			await Task.Delay(100, token); //NOTE: ws4py issue workaround =\
+			await Task.Delay(250, token); //NOTE: ws4py issue workaround =\
 			try
 			{
 				await ws.WriteStringAsync(HelloMessage, token).ConfigureAwait(false);
