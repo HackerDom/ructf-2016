@@ -3,22 +3,24 @@ class StaticPagesController < ApplicationController
   end
 
   def type
+    @ren = true
     if !params[:type].nil?
-      params[:type].gsub!(/[\/]/, '')
-      params[:type].gsub!('..', '.')
       if params[:type] == 'private'
         if signed_in?
           @items = Item.where(user_id: current_user.id).all
           @item_new = Item.new
-          render params[:type]
         else
           store_location
-          redirect_to signin_url, notice: "Please sign in."
+          @ren = false
         end
       elsif params[:type] == 'public'
         @items = Checkroom.all
         @item_new = Checkroom.new
+      end
+      if @ren
         render params[:type]
+      else
+        redirect_to signin_url, notice: "Please sign in."
       end
     else
       redirect_to root_path
