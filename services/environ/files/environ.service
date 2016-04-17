@@ -9,6 +9,7 @@ ExecStartPre=/bin/bash -c '/usr/bin/systemctl set-environment WIFICARD=$(/usr/sb
 ExecStart=/usr/bin/python3.5 /home/environ/server.py
 User=environ
 Restart=always
+RestartSec=5
 WorkingDirectory=/home/environ
 
 [Install]

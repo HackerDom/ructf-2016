@@ -8,6 +8,7 @@ WorkingDirectory=/home/bluemesh
 ExecStart=/usr/bin/mono node
 User=bluemesh
 Restart=always
+RestartSec=5
 CPUQuota=100%
 MemoryLimit=2048M
 TasksMax=100

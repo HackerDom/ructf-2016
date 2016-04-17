@@ -522,7 +522,7 @@ class Checker(HttpCheckerBase):
 		self.debug(user)
 
 		ws = DummyClient('ws://{}:{}/'.format(addr, WSPORT), headers=[
-			#('Origin', 'http://{}:{}'.format(addr, PORT)),
+			('Origin', 'http://{}:{}'.format(addr, PORT)),
 			('User-Agent', self.randua())])
 		try:
 			ws.daemon = True
@@ -539,8 +539,6 @@ class Checker(HttpCheckerBase):
 				print('await hello failed')
 				return EXITCODE_MUMBLE
 
-			time.sleep(3 + random.randrange(1, 4) + random.random())
-
 			result = self.spost(s, addr, '/signup', [
 				('csrf-token', csrf_token),
 				('login', user['login']),
@@ -556,6 +554,8 @@ class Checker(HttpCheckerBase):
 
 			title = self.randingredients(1, 4, " ")
 			msg = [('title', title), ('ingredients', flag + ', ' + self.randingredients()), ('csrf-token', csrf_token)]
+
+			time.sleep(3 + random.randrange(1, 4) + random.random())
 
 			result = self.spost(s, addr, '/put', msg)
 			if not result:
@@ -635,7 +635,7 @@ class Checker(HttpCheckerBase):
 		msg = [('title', title), ('ingredients', flag + ', ' + self.randingredients()), ('csrf-token', csrf_token)]
 
 		ws = DummyClient('ws://{}:{}/'.format(addr, WSPORT), headers=[
-			#('Origin', 'http://{}:{}'.format(addr, PORT)),
+			('Origin', 'http://{}:{}'.format(addr, PORT)),
 			('User-Agent', s2.headers['User-Agent']),
 			('Cookie', cookies_string)])
 		try:

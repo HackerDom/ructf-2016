@@ -7,6 +7,7 @@ import string
 import random
 import re
 import json
+import time
 
 PORT = 6725
 
@@ -90,6 +91,8 @@ def check_sensors(text, config):
 	config = config.encode()
 	inital = vv[:4]
 	vv = vv[4:]
+	if 4 * len(vv) != len(config):
+		service_mumble(error="inconsistens count of sensors and config")
 	for i in range(0, len(config), 4):
 		for j in range(300):
 			if abs(config[i] * inital[0][j] + config[i + 1] * inital[1][j] + config[i + 2] * inital[2][j] + config[i + 3] * inital[3][j] - vv[i // 4][j]) > 1e-6:
@@ -103,19 +106,23 @@ class State:
 	def get(self, url):
 		url = self.base_addr + url
 		response = None
+#		start = time.time()
 		try:
 			response = self.session.get(url)
 		except Exception as ex:
 			service_down(error=url, exception=ex)
+#		print(url, time.time() - start)
 		check_status(response)
 		return response
 	def post(self, url, d):
 		url = self.base_addr + url
 		response = None
+#		start = time.time();
 		try:
 			response = self.session.post(url, data=d)
 		except Exception as ex:
 			service_down(error='{}\n{}'.format(url, d), exception=ex)
+#		print(url, time.time() - start)
 		check_status(response)
 		check_cookie(self.session.cookies)
 		return response
