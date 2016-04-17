@@ -82,6 +82,7 @@ namespace Node
             var selectResult = ConnectionManager.Select();
 
             RoutingManager.UpdateConnections();
+            EncryptionManager.RetrievePeerKeys(ConnectionManager.EstablishedConnections.Select(c => c.RemoteAddress));
 
             foreach (var connection in selectResult.ReadableConnections.Where(c => c.State == ConnectionState.Connected))
             {
