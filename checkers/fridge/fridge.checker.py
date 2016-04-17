@@ -539,8 +539,6 @@ class Checker(HttpCheckerBase):
 				print('await hello failed')
 				return EXITCODE_MUMBLE
 
-			time.sleep(3 + random.randrange(1, 4) + random.random())
-
 			result = self.spost(s, addr, '/signup', [
 				('csrf-token', csrf_token),
 				('login', user['login']),
@@ -556,6 +554,8 @@ class Checker(HttpCheckerBase):
 
 			title = self.randingredients(1, 4, " ")
 			msg = [('title', title), ('ingredients', flag + ', ' + self.randingredients()), ('csrf-token', csrf_token)]
+
+			time.sleep(3 + random.randrange(1, 4) + random.random())
 
 			result = self.spost(s, addr, '/put', msg)
 			if not result:
