@@ -30,15 +30,15 @@ namespace Node
                 ConnectCooldown = TimeSpan.FromMilliseconds(100),
                 DisconnectCooldown = TimeSpan.FromMilliseconds(100),
                 MapUpdateCooldown = TimeSpan.FromMilliseconds(50),
-                KeySendCooldown = TimeSpan.FromSeconds(10),
+                KeySendCooldown = TimeSpan.FromSeconds(5),
                 ConnectingSocketMaxTTL = TimeSpan.FromMilliseconds(50),
                 ConnectingSocketsToConnectionsMultiplier = 5,
-                PreconfiguredNodes = Enumerable.Range(1, 30).Select(i => new TcpAddress(new IPEndPoint(IPAddress.Parse(string.Format(AddressFormat, i)), 16800)) as IAddress).ToList(),
-                LocalAddress = GetLocalAddress(16800),
+                PreconfiguredNodes = Enumerable.Range(1, 30).Select(i => new TcpAddress(new IPEndPoint(IPAddress.Parse(string.Format(AddressFormat, i)), 16900)) as IAddress).ToList(),
+                LocalAddress = GetLocalAddress(16900),
                 LongNames = true
             };
             var node = CreateNode(config, config, "storage");
-            var consoleServer = new ConsoleServer(new IPEndPoint(IPAddress.Any, 16801), node);
+            var consoleServer = new ConsoleServer(new IPEndPoint(IPAddress.Any, 16901), node);
             consoleServer.Start();
             node.Start();
         }

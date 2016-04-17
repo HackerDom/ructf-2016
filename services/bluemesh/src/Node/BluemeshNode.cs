@@ -25,7 +25,7 @@ namespace Node
 
         public virtual void Start()
         {
-            EncryptionManager.GenerateKeyPair(BitConverter.GetBytes(new Random().Next()));
+            EncryptionManager.GenerateKeyPair(BitConverter.GetBytes(ConnectionManager.Address.GetHashCode()));
             EncryptionManager.Start();
             while (true)
             {
@@ -86,7 +86,7 @@ namespace Node
 
             foreach (var connection in selectResult.ReadableConnections.Where(c => c.State == ConnectionState.Connected))
             {
-                for (int i = 0; i < 3 && connection.Socket.Available > 0; i++)
+                for (int i = 0; i < 2 && connection.Socket.Available > 0; i++)
                 {
                     var message = connection.Receive();
                     if (!RoutingManager.ProcessMessage(message, connection))
@@ -112,8 +112,8 @@ namespace Node
 
             if (DoLogMap)
                 Console.WriteLine("[{0}] v: {2} {1}", RoutingManager.Map.OwnAddress, RoutingManager.Map, RoutingManager.Map.Version);
-            //if (dataManager.DataStorage.ToString().Length > 0)
-            //    Console.WriteLine("[{0}] !! my flags : {1}", routingManager.Map.OwnAddress, dataManager.DataStorage);
+            //if (DataManager.DataStorage.ToString().Length > 0)
+            //    Console.WriteLine("[{0}] !! my flags : {1}", RoutingManager.Map.OwnAddress, DataManager.DataStorage);
             Map = RoutingManager.Map.Links.ToList();
         }
 

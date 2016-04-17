@@ -123,6 +123,30 @@ namespace Tests
             graph.CreateRandomPath((FakeAddress)0, (FakeAddress)2, 5, 10, random).Should().BeNull();
         }
 
+        [Test]
+        public void CreateShortestPath_should_create_correct_paths()
+        {
+            var graph = Graph(Links(0, 1, 2, 1, 3, 1, 4, 1, 5, 0));
+
+            Console.WriteLine(graph.ToDOT());
+            
+            for (int i = 0; i < 20; i++)
+            {
+                var path = graph.CreateShortestPath((FakeAddress)0, (FakeAddress)5);
+                Console.WriteLine(string.Join(" -> ", path));
+            }
+        }
+
+        [Test]
+        public void CreateShortestPath_should_return_null_when_destination_is_unreachable()
+        {
+            var graph = Graph(Links(0, 1), Links(2, 3));
+
+            Console.WriteLine(graph.ToDOT());
+
+            graph.CreateShortestPath((FakeAddress)0, (FakeAddress)2).Should().BeNull();
+        }
+
         private static List<RoutingMapLink> Graph(params IEnumerable<RoutingMapLink>[] links)
         {
             return links.SelectMany(_ => _).Distinct().ToList();
