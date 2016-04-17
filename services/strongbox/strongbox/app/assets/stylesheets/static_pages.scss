@@ -1,3 +1,62 @@
 // Place all the styles related to the StaticPages controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+.image-list__item--block {
+  text-align: center;
+  height: 180px;
+}
+
+.image-list__item--block:before {
+  content: '';
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+  margin-right: -0.25em;
+}
+
+.image-list__item-img {
+  display: inline-block;
+  vertical-align: middle;
+  transition: border-color 0.2s ease;
+  max-width: 100%;
+  height: auto;
+}
+
+.image-list {
+  list-style-type: none;
+  font-style: normal;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-left: 0;
+  border: 1px solid #e6e6e6;
+  border-width: 0 0 0 1px;
+}
+
+.image-list:after,
+.image-list:before {
+  content: ' ';
+  display: table;
+}
+
+.image-list:after {
+  clear: both;
+}
+
+.image-list__item {
+  display: list-item;
+  list-style-type: none;
+  font-style: normal;
+  float: left;
+  padding: 1.3em;
+  width: 200px;
+  height: 220px;
+  text-align: center;
+  margin-top: -1px;
+  border: 1px solid #e6e6e6;
+  border-width: 1px 1px 1px 0;
+}
+
+.image-list__item-title {
+  margin: 0;
+  font-size: 1em;
+}

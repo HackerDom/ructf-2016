@@ -1,0 +1,30 @@
+# Ansible >2 deploy playbook
+# use: ansible-playbook -i 192.168.0.1, deploy-service.yml
+# LOOK AT COMMA, IT IS IMPORTANT     ^^^
+# or as usual: ansible-playbook -i hosts.list deploy-service.yml
+
+---
+- hosts: all
+  remote_user: root
+  become_user: root
+  become: yes
+  tasks:
+    - name: install system requiremets
+      dnf: name={{item}} state=latest disable_gpg_check=yes
+      with_items:
+        - Xserver
+        - freeglut
+        - libGLU
+        - xorg-x11-drv-evdev
+        - xorg-x11-drv-synaptics
+    - name: add user
+      user: name=discoball shell=/sbin/nologin
+    - name: set permissions
+      file: path=/home/discoball owner=discoball group=discoball mode=0700
+    - name: copy files 
+      copy: src={{item}} dest=/home/discoball force=yes owner=discoball
+      with_items:
+        - run.sh
+        - readme.txt
+        - DiscoBall
+        - libs

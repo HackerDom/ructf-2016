@@ -1,0 +1,16 @@
+<% provide(:title, @item.title) %>
+<div class="row">
+  <div class="col-md-12">
+
+    <%= form_for(@item) do |f| %>
+        <%= render 'shared/error_messages', object: f.object %>
+        <div class="form-group">
+          <%= f.text_field :title, placeholder: "Title", class: "form-control", name: 'item[][title]' %>
+        </div>
+        <div class="form-group">
+          <%= f.text_area :content, placeholder: "Description", class: "form-control", name: 'item[][content]' %>
+        </div>
+        <%= f.submit "Save", class: "btn btn-large btn-primary" %>
+    <% end %>
+  </div>
+</div>

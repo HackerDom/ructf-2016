@@ -33,7 +33,7 @@ namespace frɪdʒ.http.handlers
 
 		public static void SetAuthCookies(this HttpListenerContext context, string login)
 		{
-			context.SetCookie(LoginCookieName, login);
+			context.SetCookie(LoginCookieName, WebUtility.UrlEncode(login));
 			context.SetCookie(AuthCookieName, Hmac(login), true);
 		}
 

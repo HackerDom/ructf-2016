@@ -1,6 +1,6 @@
 class CreateThings < ActiveRecord::Migration
   def change
-    create_table :things do |t|
+    create_table :items do |t|
       t.string :title
       t.string :content
       t.integer :user_id

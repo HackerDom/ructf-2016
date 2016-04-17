@@ -1,0 +1,21 @@
+<div class="row">
+  <div class="col-md-12">
+    <div>
+      <% unless @items.nil? %>
+          <h1>Public strongbox:</h1>
+          <ul class="image-list">
+            <% @items.each do |item| %>
+                <li class="image-list__item">
+                  <a class="fancyimage" rel="group">
+                    <div class="image-list__item--block">
+                      <%= image_tag "locker-luggage.jpg", class: "image-list__item-img", style: "height: 150px;"%>
+                    </div>
+                  </a>
+                  <%= link_to item.name, checkroom_path(item) %>
+                </li>
+            <% end %>
+          </ul>
+      <% end %></div>
+    <%= link_to "Add checkroom", new_checkroom_path %>
+  </div>
+</div>

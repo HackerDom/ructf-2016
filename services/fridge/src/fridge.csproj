@@ -91,10 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="static\css\styles.css" />
-    <Content Include="static\js\jquery-2.2.3.min.js" />
-    <Content Include="static\js\js-cookie-2.1.0.min.js" />
     <Content Include="static\js\scripts.js" />
-    <Content Include="static\js\websocket-1.0.1.min.js" />
     <Content Include="static\index.html" />
     <Content Include="static\robots.txt" />
   </ItemGroup>

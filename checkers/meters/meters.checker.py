@@ -46,7 +46,7 @@ def get_rand_string(l):
 
 def check_status(response):
 	if response.status_code != 200:
-		service_mumble(error='status code is {}. Content: {}\n'.format(response.status_code, response.text))
+		service_mumble(error='status code is {}. Url: {}. Content:\n{}'.format(response.status_code, response.url, response.text))
 		
 def check_cookie(cookies):
 	if cookies is None:
@@ -63,7 +63,7 @@ def get_dashboards(text):
 	return set((id, name) for id, name in rdash.findall(text))
 
 def check_sensors(text, config):
-	draw = re.compile(r"<script>draw\('#sensor(\d+)', (\[[^\]]+\])\);</script>")
+	draw = re.compile(r"<script>draw\('sensor(\d+)', (\[[^\]]+\])\);</script>")
 	sensors = draw.findall(text)
 	if len(sensors) < 4:
 		service_mumble(error="can't find sensors\n{}".format(text))
@@ -147,7 +147,7 @@ class State:
 		if m is None:
 			service_mumble(error="can't found dashboard name")
 		name = m.groups(1)
-		rdescription = re.compile('<p>([^<]*)</p>')
+		rdescription = re.compile("<p class='description'>([^<]*)</p>")
 		m = rdescription.search(response.text)
 		if m is None:
 			service_mumble(error="can't found dashboard description")
