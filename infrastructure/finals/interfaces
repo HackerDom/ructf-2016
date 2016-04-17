@@ -1,0 +1,123 @@
+source /etc/network/interfaces.d/*
+
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet static
+    address 10.90.90.1
+    netmask 255.255.255.0
+
+auto eth1			# UPLINK
+iface eth1 inet dhcp
+
+auto eth0.100           	# JURY
+iface eth0.100 inet static
+    address 10.23.0.1
+    netmask 255.255.255.0
+
+auto eth0.201
+iface eth0.201 inet static
+    address 10.23.1.1
+    netmask 255.255.255.0
+
+auto eth0.202
+iface eth0.202 inet static
+    address 10.23.2.1
+    netmask 255.255.255.0
+
+auto eth0.204
+iface eth0.204 inet static
+    address 10.23.4.1
+    netmask 255.255.255.0
+
+auto eth0.205
+iface eth0.205 inet static
+    address 10.23.5.1
+    netmask 255.255.255.0
+
+auto eth0.206
+iface eth0.206 inet static
+    address 10.23.6.1
+    netmask 255.255.255.0
+
+auto eth0.207
+iface eth0.207 inet static
+    address 10.23.7.1
+    netmask 255.255.255.0
+
+auto eth0.208
+iface eth0.208 inet static
+    address 10.23.8.1
+    netmask 255.255.255.0
+
+auto eth0.209
+iface eth0.209 inet static
+    address 10.23.9.1
+    netmask 255.255.255.0
+
+auto eth0.210
+iface eth0.210 inet static
+    address 10.23.10.1
+    netmask 255.255.255.0
+
+auto eth0.211
+iface eth0.211 inet static
+    address 10.23.11.1
+    netmask 255.255.255.0
+
+auto eth0.212
+iface eth0.212 inet static
+    address 10.23.12.1
+    netmask 255.255.255.0
+
+auto eth0.213
+iface eth0.213 inet static
+    address 10.23.13.1
+    netmask 255.255.255.0
+
+auto eth0.214
+iface eth0.214 inet static
+    address 10.23.14.1
+    netmask 255.255.255.0
+
+auto eth0.215
+iface eth0.215 inet static
+    address 10.23.15.1
+    netmask 255.255.255.0
+
+auto eth0.216
+iface eth0.216 inet static
+    address 10.23.16.1
+    netmask 255.255.255.0
+
+auto eth0.217
+iface eth0.217 inet static
+    address 10.23.17.1
+    netmask 255.255.255.0
+
+auto eth0.218
+iface eth0.218 inet static
+    address 10.23.18.1
+    netmask 255.255.255.0
+
+auto eth0.219
+iface eth0.219 inet static
+    address 10.23.19.1
+    netmask 255.255.255.0
+
+auto eth0.220
+iface eth0.220 inet static
+    address 10.23.20.1
+    netmask 255.255.255.0
+
+auto eth0.221
+iface eth0.221 inet static
+    address 10.23.21.1
+    netmask 255.255.255.0
+
+auto eth0.222
+iface eth0.222 inet static
+    address 10.23.22.1
+    netmask 255.255.255.0
+
