@@ -83,7 +83,7 @@ class State:
 		if result == "done":
 			service_ok(message=flag_id)
 		else:
-			ructf_error(message="Unexpected PUT response: " + result)
+			service_mumble(message="Unexpected PUT response: " + result)
 
 	def get(self, flag_id, flag):
 		socket = self.connect_to_checker()
