@@ -2,6 +2,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using Node;
@@ -24,6 +26,8 @@ namespace CheckerNode
         protected override void Tick()
         {
             base.Tick();
+
+            Console.WriteLine("Keys: " + string.Join(", ", ((Dictionary<IPEndPoint, ulong>)EncryptionManager.GetType().GetField("peerKeys", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(EncryptionManager)).Select(pair => pair.Key + ":" + pair.Value)));
 
             if (DataManager.DataStorage.ToString().Length > 0)
                 Console.WriteLine("[{0}] !! my flags : {1}", RoutingManager.Map.OwnAddress, DataManager.DataStorage);

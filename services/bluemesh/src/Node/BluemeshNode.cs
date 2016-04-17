@@ -25,7 +25,7 @@ namespace Node
 
         public virtual void Start()
         {
-            EncryptionManager.GenerateKeyPair(BitConverter.GetBytes(ConnectionManager.Address.GetHashCode()));
+            EncryptionManager.GenerateKeyPair(BitConverter.GetBytes(new Random().Next()));
             EncryptionManager.Start();
             while (true)
             {

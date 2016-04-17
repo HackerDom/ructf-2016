@@ -16,10 +16,10 @@ namespace Node
 {
     internal class EntryPoint
     {
-        //private const string AddressFormat = "10.23.{0}.3";
-        //private const string AddressRegex = @"^10\.23\.\d+\.3$";
-        private const string AddressFormat = "172.16.16.1{0:00}";
-        private const string AddressRegex = @"^172\.16\.16\.1\d+$";
+        private const string AddressFormat = "10.23.{0}.3";
+        private const string AddressRegex = @"^10\.23\.\d+\.3$";
+        //private const string AddressFormat = "172.16.16.1{0:00}";
+        //private const string AddressRegex = @"^172\.16\.16\.1\d+$";
 
         private static void Main(string[] args)
         {

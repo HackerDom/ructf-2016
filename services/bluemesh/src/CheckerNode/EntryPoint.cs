@@ -17,11 +17,8 @@ namespace CheckerNode
 {
     internal class EntryPoint
     {
-        //private const string AddressFormat = "10.23.{0}.3";
-        //private const string AddressRegex = @"^10\.23\.\d+\.3$";
-        private const string AddressFormat = "172.16.16.1{0:00}";
-        private const string AddressRegex = @"^172\.16\.16\.1\d+$";
-
+        private const string AddressFormat = "10.23.{0}.3";
+        
         private static void Main(string[] args)
         {
             var config = new StaticConfig
@@ -49,17 +46,7 @@ namespace CheckerNode
 
         private static TcpAddress GetLocalAddress(int port)
         {
-            foreach (var @interface in NetworkInterface.GetAllNetworkInterfaces())
-            {
-                //Console.WriteLine(@interface.Name);
-                var info = @interface.GetIPProperties().UnicastAddresses
-                    .Where(i => i.Address.AddressFamily == AddressFamily.InterNetwork)
-                    .FirstOrDefault(i => Regex.IsMatch(i.Address.ToString(), AddressRegex));
-                if (info == null)
-                    continue;
-                return new TcpAddress(new IPEndPoint(info.Address, port));
-            }
-            throw new Exception("Could not find interface to listen on!");
+            return (TcpAddress)new TcpUtility().ParseAddress("10.23.0.14:" + port);
         }
 
         private static CheckerNode CreateNode(IConnectionConfig connectionConfig, IRoutingConfig routingConfig, string storagePath)

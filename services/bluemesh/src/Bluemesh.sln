@@ -11,8 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheckerNode", "CheckerNode\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HackerNode", "HackerNode\HackerNode.csproj", "{69586C1D-1D88-4B66-AEF2-B3A872C18146}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchedNode", "PatchedNode\PatchedNode.csproj", "{2AA7CBEB-EB9C-4B73-86AB-B39141D3BFF6}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,10 +33,6 @@ Global
 		{69586C1D-1D88-4B66-AEF2-B3A872C18146}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69586C1D-1D88-4B66-AEF2-B3A872C18146}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69586C1D-1D88-4B66-AEF2-B3A872C18146}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2AA7CBEB-EB9C-4B73-86AB-B39141D3BFF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2AA7CBEB-EB9C-4B73-86AB-B39141D3BFF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2AA7CBEB-EB9C-4B73-86AB-B39141D3BFF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2AA7CBEB-EB9C-4B73-86AB-B39141D3BFF6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
