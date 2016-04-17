@@ -60,7 +60,7 @@ def check_response(response):
 	check_cookie(response)
 
 def get_dashboards(text):
-	rdash = re.compile(r"<a [^>]*href='/dashboard/view/\?dashboardId=(\d+)'>([^<]+)</a>", re.IGNORECASE)
+	rdash = re.compile(r"href='/dashboard/view/\?dashboardId=(\d+)'>([^<]+)<")
 	return set((id, name) for id, name in rdash.findall(text))
 
 def check_sensors(text, config):
