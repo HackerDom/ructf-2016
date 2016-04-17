@@ -94,9 +94,19 @@ def handler_info(*args):
 def handler_check(args, *other):
     _, _, hostname = args
     request = "http://{0}:{1}/".format(hostname, PORT)
-    r = requests.get(request)
-    r.raise_for_status()
-    service_ok()
+    reply = None
+    try:
+        r = requests.get(request)
+        r.raise_for_status()
+        reply = r.text
+        return service_ok()
+    except requests.exceptions.ConnectionError as e:
+        return service_down(message="Cant connect to server", exception=e, request=request, reply=reply)
+    except requests.exceptions.HTTPError as e:
+        return service_mumble(message="Server error: {}".format(e), exception=e, request=request, reply=reply)
+    except OSError as e:
+        return service_down(message="Cant connect to server", exception=e, request=request, reply=reply)
+
 
 def make_request(things):
     things_list = things.split()
@@ -123,6 +133,9 @@ def handler_get(args, things):
         return service_down(message="Cant connect to server", exception=e, request=request, reply=reply)
     except requests.exceptions.HTTPError as e:
         return service_mumble(message="Server error: {}".format(e), exception=e, request=request, reply=reply)
+    except OSError as e:
+        return service_down(message="Cant connect to server", exception=e, request=request, reply=reply)
+
 
     for r in reply.split("\n"):
         if flag in r:
@@ -145,6 +158,8 @@ def handler_put(args, things):
         return service_down(message="Cant connect to server", exception=e, request=request, reply=reply, body=thing)
     except requests.exceptions.HTTPError as e:
         return service_mumble(message="Server error: {}".format(e), exception=e, request=request, reply=reply, body=thing)
+    except OSError as e:
+        return service_down(message="Cant connect to server", exception=e, request=request, reply=reply)
 
 
     return service_ok(message=base64.b64encode(id_big.encode("utf-8")).decode("utf-8"), request=request, reply=reply, body=thing)
