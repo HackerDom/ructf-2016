@@ -10,8 +10,8 @@ import socket
 import collections
 import time
 
-PORT = 16800
-CPORT = 16801
+PORT = 16900
+CPORT = 16901
 CHECKER_NODES = ['10.23.' + str(i) + '.3' for i in range(1, 23)]
 
 def ructf_error(status=110, message=None, error=None, exception=None):
