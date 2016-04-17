@@ -98,8 +98,8 @@ namespace Node.Data
         {
             for (int i = 0; i < 3; i++)
             {
-                var path = routingManager.Map.Links.CreateRandomPath(routingManager.Map.OwnAddress, destination, 2, 20, random);
-                //var path = routingManager.Map.Links.CreatePath(routingManager.Map.OwnAddress, destination);
+                //var path = routingManager.Map.Links.CreateRandomPath(routingManager.Map.OwnAddress, destination, 2, 20, random);
+                var path = routingManager.Map.Links.CreatePath(routingManager.Map.OwnAddress, destination);
                 if (path == null || path.Count == 0)
                     continue;
                 var pathBody = path.GetPathBody();
