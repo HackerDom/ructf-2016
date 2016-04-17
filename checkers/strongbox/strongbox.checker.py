@@ -8,7 +8,7 @@ from randomizer import *
 
 GET = 'GET'
 POST = 'POST'
-PORT = 3001
+PORT = 3000
 
 
 class StrongboxChecker(HttpCheckerBase, Randomizer):
@@ -70,7 +70,7 @@ class StrongboxChecker(HttpCheckerBase, Randomizer):
         try:
             item_content = result["page"].find('p',
                                                {'class': 'item__contetn'})
-            if item_content.text.strip() == flag:
+            if item_content.text.strip() == flag.strip():
                 return False
             return True
         except (AttributeError, TypeError):
@@ -81,19 +81,18 @@ class StrongboxChecker(HttpCheckerBase, Randomizer):
             item_content = result["page"].find('h1',
                                                {'class': 'users__name'})
 
-            if item_content.text.strip() == flag:
+            if item_content.text.strip() == flag.strip():
                 return False
             return True
         except (AttributeError, TypeError):
             return True
-
 
     def checkCheckroom(self, result, flag):
         try:
             item_content = result["page"].find('p',
                                                {'class': 'checkroom__content'})
 
-            if item_content.text.strip() == flag:
+            if item_content.text.strip() == flag.strip():
                 return False
             return True
         except (AttributeError, TypeError):
@@ -199,6 +198,35 @@ class StrongboxChecker(HttpCheckerBase, Randomizer):
         return EXITCODE_OK
 
     def check(self, addr):
+        session = self.session(addr)
+        user = self.randUser()
+        item = self.randItem()
+        checkrooms_id = 0
+        checkroom = self.randCheckroom()
+        result = self.spost(
+            session, addr, 'checkrooms/new', 'checkrooms', checkroom
+        )
+        pars_url = urlparse(result['url'])
+        checkrooms_path = pars_url.path
+
+        try:
+            checkrooms_id = int(checkrooms_path.split('/')[-1])
+        except ValueError:
+            print('add checkrooms  failed 1')
+            return EXITCODE_MUMBLE
+        result = self.spost(
+            session, addr,
+            'checkrooms/' + str(checkrooms_id),
+            'checkrooms/' + str(checkrooms_id),
+            {'secret': checkroom['checkroom[secret]']}
+        )
+        if self.checkCheckroom(result, checkroom['checkroom[content]']):
+            print('add checkrooms  failed 2')
+            return EXITCODE_MUMBLE
+        result = self.sget(session, addr,'strongbox?type=public')
+        if not result['page'].findAll(text=checkroom['checkroom[name]']):
+            print('not faund ')
+            return EXITCODE_MUMBLE
         return EXITCODE_OK
 
 
