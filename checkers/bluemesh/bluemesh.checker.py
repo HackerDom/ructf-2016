@@ -12,7 +12,7 @@ import time
 
 PORT = 16800
 CPORT = 16801
-CHECKER_NODE = '10.23.0.11'
+CHECKER_NODES = ['10.23.' + str(i) + '.3' for i in range(1, 23)]
 
 def ructf_error(status=110, message=None, error=None, exception=None):
 	if message:
@@ -54,7 +54,13 @@ class State:
 		self.hostname = hostname
 
 	def connect_to_checker(self):
-		return socket.create_connection((CHECKER_NODE, CPORT))
+		while True:
+			try:
+				s = socket.create_connection((random.choice(CHECKER_NODES), CPORT), 0.1)
+				s.settimeout(10)
+				return s
+			except:
+				time.sleep(0.1)
 
 	def check(self):
 		socket = self.connect_to_checker()

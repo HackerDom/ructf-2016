@@ -89,9 +89,9 @@ namespace Node.Encryption
                 if (listenerSocket.ReceiveFrom(keyBuffer, ref endpoint) == 8)
                 {
                     var key = BitConverter.ToUInt64(keyBuffer, 0);
+                    Console.WriteLine("KeyManager: {0} has {1}", endpoint, key);
                     lock (peerKeys)
                         peerKeys[(IPEndPoint) endpoint] = key;
-                    //Console.WriteLine("KeyManager: {0} has {1}", endpoint, key);
                 }
             }
             listenerSocket.Close();
