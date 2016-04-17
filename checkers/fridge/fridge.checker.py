@@ -516,7 +516,7 @@ class Checker(HttpCheckerBase):
 		csrf_token = s.cookies.get('csrf-token')
 		#cookies_string = "; ".join([str(key) + "=" + str(val) for key, val in s.cookies.items()])
 
-		time.sleep(random.random() * 2)
+		time.sleep(random.random())
 
 		user = self.semiranduser(flag, 8)
 		self.debug(user)
@@ -535,11 +535,11 @@ class Checker(HttpCheckerBase):
 			return EXITCODE_MUMBLE
 
 		else:
-			if not OPEN.wait(5):
+			if not OPEN.wait(3):
 				print('await hello failed')
 				return EXITCODE_MUMBLE
 
-			time.sleep(4 + random.randrange(1,5) + random.random())
+			time.sleep(3 + random.randrange(1, 4) + random.random())
 
 			result = self.spost(s, addr, '/signup', [
 				('csrf-token', csrf_token),
@@ -550,7 +550,7 @@ class Checker(HttpCheckerBase):
 			#	print('registration failed')
 			#	return EXITCODE_MUMBLE
 
-			if not DONE.wait(5):
+			if not DONE.wait(3):
 				print('await message failed')
 				return EXITCODE_MUMBLE
 
@@ -609,7 +609,7 @@ class Checker(HttpCheckerBase):
 
 		cookies_string = "; ".join([str(key) + "=" + str(val) for key, val in s2.cookies.items()])
 
-		time.sleep(random.random() * 2)
+		time.sleep(random.random())
 
 		s = self.session(addr)
 
@@ -629,7 +629,7 @@ class Checker(HttpCheckerBase):
 		#	print('register user failed')
 		#	return EXITCODE_MUMBLE
 
-		time.sleep(random.random() * 2)
+		time.sleep(random.random())
 
 		title = self.randingredients(1, 4, " ")
 		msg = [('title', title), ('ingredients', flag + ', ' + self.randingredients()), ('csrf-token', csrf_token)]
@@ -649,13 +649,13 @@ class Checker(HttpCheckerBase):
 			return EXITCODE_MUMBLE
 
 		else:
-			if not OPEN.wait(5):
+			if not OPEN.wait(3):
 				print('await hello failed')
 				return EXITCODE_MUMBLE
 
 			self.debug(msg)
 
-			time.sleep(4 + random.randrange(1, 5) + random.random())
+			time.sleep(3 + random.randrange(1, 4) + random.random())
 
 			result = self.spost(s, addr, '/put', msg)
 			if not result:
@@ -664,7 +664,7 @@ class Checker(HttpCheckerBase):
 
 			id = result
 
-			if not DONE.wait(5):
+			if not DONE.wait(3):
 				print('await message failed')
 				return EXITCODE_MUMBLE
 
