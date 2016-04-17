@@ -3,9 +3,14 @@
     <div>
       <% unless @items.nil? %>
           <h1>Public strongbox:</h1>
-          <ul style="list-style: none; margin: 0; padding: 0;border: 1px solid #BBB;">
+          <ul class="image-list">
             <% @items.each do |item| %>
-                <li style="border: 1px solid #BBBBBB; border-left:0;padding: 20px; width: 140px; height: 140px; text-align: center;display: list-item; float: left;">
+                <li class="image-list__item">
+                  <a class="fancyimage" rel="group">
+                    <div class="image-list__item--block">
+                      <%= image_tag "locker-luggage.jpg", class: "image-list__item-img", style: "height: 150px;"%>
+                    </div>
+                  </a>
                   <%= link_to item.name, checkroom_path(item) %>
                 </li>
             <% end %>

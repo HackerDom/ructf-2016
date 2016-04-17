@@ -82,11 +82,12 @@ if __name__ == '__main__':
     IFACE = environ.get('WIFICARD', 'wlan0')
     logger.warning(IFACE)
 
-    TEAM_ID = [snic.address for _, v in net_if_addrs().items() for snic in v if '172.16' in snic.address[:6]]  # TODO: actual netmask
+    TEAM_ID = [snic.address for _, v in net_if_addrs().items() for snic in v if '10.23' in snic.address[:5]] 
     if len(TEAM_ID):
-        TEAM_ID = int(TEAM_ID[0].split(".")[-1]) # TODO: change to 2 offset
+        TEAM_ID = int(TEAM_ID[0].split(".")[2])
     else:
         logger.error("Your TEAM_ID not found")
+        exit(1)
 
     logger.warning(TEAM_ID)
     manager = Manager()

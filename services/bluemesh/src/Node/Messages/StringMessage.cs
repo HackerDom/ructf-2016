@@ -1,4 +1,3 @@
-using System.Text;
 using Node.Serialization;
 
 namespace Node.Messages

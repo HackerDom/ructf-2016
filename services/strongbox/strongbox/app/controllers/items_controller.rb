@@ -46,9 +46,12 @@ class ItemsController < ApplicationController
   end
 
   def item_params
-    params.require(:item).map do |u|
-      ActionController::Parameters.new(u.to_hash).permit!
+    if params.require(:item).kind_of?(Array)
+      params.require(:item).map do |u|
+        ActionController::Parameters.new(u.to_hash).permit!
+      end
+    else
+      params.require(:item).permit!
     end
   end
-
 end

@@ -11,7 +11,9 @@
 
 - command: cpanm -n --installdeps {{cs_dir}}/app
 
-# - command: /bin/sh -c 'cp {{cs_dir}}/app/etc/systemd/* /etc/systemd/system/'
+- file: path=/var/nginx
+
+- synchronize: src=../logos/ dest=/var/nginx/logos
 
 - template: src=systemd/flags.service dest=/etc/systemd/system/flags.service
 

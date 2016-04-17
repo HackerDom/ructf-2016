@@ -1,4 +1,4 @@
-{ pg => {uri => 'postgresql://cs:{{cs_db_pass}}@a.b.c.d/cs_prod'},
+{ pg => {uri => 'postgresql://cs:{{cs_db_pass}}@10.23.0.10/cs_prod'},
   hypnotoad => {listen => ['http://127.0.0.1:8080'], workers => 16},
   cs => {
     base_url => 'http://monitor.ructf.org/',

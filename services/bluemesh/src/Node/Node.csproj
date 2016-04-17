@@ -33,6 +33,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -44,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BluemeshNode.cs" />
     <Compile Include="Connections\ConnectionState.cs" />
     <Compile Include="Connections\IAddress.cs" />
     <Compile Include="Connections\IConnectionConfig.cs" />
@@ -55,10 +57,9 @@
     <Compile Include="Connections\Tcp\NonblockingSocketStream.cs" />
     <Compile Include="Connections\Tcp\SelectResult.cs" />
     <Compile Include="Connections\Tcp\SocketExtensions.cs" />
-    <Compile Include="ConsoleClient.cs" />
-    <Compile Include="BluemeshNode.cs" />
     <Compile Include="Connections\IConnection.cs" />
     <Compile Include="Connections\IConnectionManager.cs" />
+    <Compile Include="ConsoleServer.cs" />
     <Compile Include="Data\DataManager.cs" />
     <Compile Include="Data\DataStorage.cs" />
     <Compile Include="Encryption\BluemeshEncryptor.cs" />
@@ -73,6 +74,7 @@
     <Compile Include="Messages\MessageHelper.cs" />
     <Compile Include="Messages\MessageContainer.cs" />
     <Compile Include="Messages\MessageType.cs" />
+    <Compile Include="Messages\PullMessage.cs" />
     <Compile Include="Messages\RedirectMessage.cs" />
     <Compile Include="Routing\GraphHelper.cs" />
     <Compile Include="Data\IDataManager.cs" />
@@ -103,6 +105,9 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>$(SolutionDir)\ConfuserEx_bin\Confuser.CLI.exe $(ProjectDir)\Node.crproj -n</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

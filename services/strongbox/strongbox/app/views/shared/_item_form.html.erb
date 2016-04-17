@@ -1,7 +1,7 @@
 <%= form_for(@item_new) do |f| %>
     <%= render 'shared/error_messages', object: f.object %>
     <div class="form-group">
-      <%= f.text_field :title, placeholder: "Title" , class: "form-control"%>
+      <%= f.text_field :title, placeholder: "Title", class: "form-control" %>
     </div>
     <div class="form-group">
       <%= f.text_area :content, placeholder: "Description", class: "form-control" %>

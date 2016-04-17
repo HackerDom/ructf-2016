@@ -12,7 +12,7 @@ import time
 
 PORT = 16800
 CPORT = 16801
-CHECKER_NODE = '172.16.16.109'
+CHECKER_NODE = '10.23.0.11'
 
 def ructf_error(status=110, message=None, error=None, exception=None):
 	if message:
@@ -71,6 +71,9 @@ class State:
 		socket_fd = socket.makefile()
 		send("put " + self.hostname + ":" + str(PORT) + " " + flag_id + " " + flag, socket)
 		result = readline(socket_fd)
+		
+		time.sleep(2)
+		
 		if result == "done":
 			service_ok(message=flag_id)
 		else:
