@@ -228,6 +228,35 @@ class StrongboxChecker(HttpCheckerBase, Randomizer):
             print('not found strongbox public')
             return EXITCODE_MUMBLE
 
+        result = self.spost(session, addr, 'signup', 'users', user)
+        check_user1 = self.checkSignup(result)
+        pars_url = urlparse(result['url'])
+        not_users = not str(pars_url.path).startswith('/users/')
+        if not result or check_user1 or not_users:
+            print('registration failed')
+            return EXITCODE_MUMBLE
+        try:
+            user_id = int(pars_url.path.split('/')[-1])
+        except ValueError:
+            print('registration failed')
+            return EXITCODE_MUMBLE
+        result = self.spost(session, addr, '/strongbox?type=private', 'items',
+                            item)
+        pars_url = urlparse(result['url'])
+        not_items = not str(pars_url.path).startswith('/items/')
+        if not result or not_items:
+            print('put items failed')
+            return EXITCODE_MUMBLE
+        try:
+            item_id = int(pars_url.path.split('/')[-1])
+        except ValueError:
+            print('put items failed')
+            return EXITCODE_MUMBLE
+        result = self.sget(session, addr,'strongbox?type=private')
+        if not result['page'].findAll(text=item['item[title]']):
+            print('not found strongbox public')
+            return EXITCODE_MUMBLE
+
         return EXITCODE_OK
 
 
