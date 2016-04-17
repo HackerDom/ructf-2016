@@ -91,6 +91,8 @@ def check_sensors(text, config):
 	config = config.encode()
 	inital = vv[:4]
 	vv = vv[4:]
+	if 4 * len(vv) != len(config):
+		service_mumble(error="inconsistens count of sensors and config")
 	for i in range(0, len(config), 4):
 		for j in range(300):
 			if abs(config[i] * inital[0][j] + config[i + 1] * inital[1][j] + config[i + 2] * inital[2][j] + config[i + 3] * inital[3][j] - vv[i // 4][j]) > 1e-6:
