@@ -225,8 +225,9 @@ class StrongboxChecker(HttpCheckerBase, Randomizer):
             return EXITCODE_MUMBLE
         result = self.sget(session, addr,'strongbox?type=public')
         if not result['page'].findAll(text=checkroom['checkroom[name]']):
-            print('not faund ')
+            print('not found strongbox public')
             return EXITCODE_MUMBLE
+
         return EXITCODE_OK
 
 
