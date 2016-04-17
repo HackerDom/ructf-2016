@@ -21,7 +21,7 @@ class Randomizer(object):
         }
 
     def randCheckroom(self):
-        secret_len = random.randrange(4, 6)
+        secret_len = random.randrange(1, 7)
         secret = uuid.uuid4().hex[:secret_len]
         return {
             'checkroom[title]': self.randTitle(),
