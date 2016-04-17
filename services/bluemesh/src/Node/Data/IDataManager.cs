@@ -15,7 +15,7 @@ namespace Node.Data
         void RequestData(string key, IAddress destination);
         event Action<DataMessage> OnReceivedData;
 
-        void PullPendingMessage(IConnection connection);
+        bool PullPendingMessage(IConnection connection);
 
         IDataStorage DataStorage { get; }
     }

@@ -37,3 +37,6 @@ using System.Runtime.InteropServices;
 
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
 [assembly: InternalsVisibleTo("Tests")]
+[assembly: InternalsVisibleTo("CheckerNode")]
+[assembly: InternalsVisibleTo("HackerNode")]
+[assembly: InternalsVisibleTo("PatchedNode")]

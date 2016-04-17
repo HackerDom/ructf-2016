@@ -65,8 +65,7 @@ graph {name} {{
 
             return myLinks.All(myLink => otherLinks.Any(otherLink => Equals(myLink, otherLink) && myLink.Connected == otherLink.Connected));
         }
-
-        //TODO make random path
+        
         public static List<IAddress> CreatePath(this ICollection<RoutingMapLink> links, IAddress from, IAddress to)
         {
             return CreatePath(to, from, links, new HashSet<IAddress>()).Reverse().ToList();

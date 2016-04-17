@@ -34,6 +34,11 @@ namespace Node.Messages
                 var deserializer = new StreamDeserializer(stream);
                 deserializer.ReadInt();
                 var messageType = (MessageType)deserializer.ReadInt();
+                if (!Enum.IsDefined(typeof (MessageType), messageType))
+                {
+                    //Console.WriteLine("Invalid message type!");
+                    return null;
+                }
                 //Console.WriteLine(" !! MessageType = " + messageType);
                 return new MessageContainer(MessageHelper.GetDeserializeMethod(messageType, utility)(deserializer));
             }
@@ -52,7 +57,6 @@ namespace Node.Messages
 
         public static int GetNeededLength(byte[] buffer, int offset)
         {
-            //TODO check all these values, add check label
             using (var stream = new MemoryStream(buffer, offset, buffer.Length - offset, false))
             {
                 var deserializer = new StreamDeserializer(stream);
