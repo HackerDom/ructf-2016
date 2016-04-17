@@ -102,9 +102,6 @@ GEM
     multi_json (1.11.2)
     nokogiri (1.6.7.2)
       mini_portile2 (~> 2.0.0.rc2)
-    passenger (5.0.27)
-      rack
-      rake (>= 0.8.1)
     rack (1.6.4)
     rack-test (0.6.3)
       rack (>= 1.0)
@@ -215,7 +212,6 @@ DEPENDENCIES
   font-awesome-rails
   jbuilder (~> 2.0)
   jquery-rails
-  passenger (>= 5.0.25)
   rails (= 4.2.1)
   rails_12factor
   rspec-its (= 1.2.0)

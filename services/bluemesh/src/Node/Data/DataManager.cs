@@ -18,6 +18,7 @@ namespace Node.Data
             this.dataFilePath = dataFilePath;
             this.routingManager = routingManager;
             this.encryptionManager = encryptionManager;
+            random = new Random();
             pendingMessages = new List<QueueEntry>();
         }
 
@@ -27,7 +28,8 @@ namespace Node.Data
                 return true;
             return
                 ProcessData(message as DataMessage) ||
-                ProcessRedirect(message as RedirectMessage);
+                ProcessRedirect(message as RedirectMessage) ||
+                ProcessPull(message as PullMessage, connection);
         }
 
         public void PushMessages(IEnumerable<IConnection> readyConnections)
@@ -38,12 +40,12 @@ namespace Node.Data
                 if (pending.Destination == null)
                     continue;
 
-                Console.WriteLine("[{0}] Pending :  {1} {2}", routingManager.Map.OwnAddress, pending.Message, pending.RawData);
+                //Console.WriteLine("[{0}] Pending :  {1} {2}", routingManager.Map.OwnAddress, pending.Message, pending.RawData);
                 
                 var result = pending.Message != null ? connection.Push(pending.Message) : connection.Push(pending.RawData);
                 if (result == SendResult.Success)
                 {
-                    Console.WriteLine("[{0}] Pushed a pending message to {1}", routingManager.Map.OwnAddress, connection.RemoteAddress);
+                    //Console.WriteLine("[{0}] Pushed a pending message to {1}", routingManager.Map.OwnAddress, connection.RemoteAddress);
                     pendingMessages.Remove(pending);
                 }
             }
@@ -75,32 +77,37 @@ namespace Node.Data
 
         public event Action<DataMessage> OnReceivedData = data => { };
 
-        public void PullPendingMessage(IConnection connection)
+        public bool PullPendingMessage(IConnection connection)
         {
             var message = pendingMessages
                 .FirstOrDefault(m => Equals(m.Destination, connection.RemoteAddress) && m.UnwrappedMessage != null);
             if (message.UnwrappedMessage == null)
-                return;
+                return false;
             var result = connection.Push(message.UnwrappedMessage);
             if (result == SendResult.Success)
             {
                 pendingMessages.Remove(message);
+                return true;
             }
+            return false;
         }
 
         public IDataStorage DataStorage => dataStorage;
 
         private void EnqueueMessage(DataMessage message, IAddress destination)
         {
-            //TODO send by 3 paths
-            var path = routingManager.Map.Links.CreatePath(routingManager.Map.OwnAddress, destination);
-            if (path.Count == 0)
-                return;
-            var pathBody = path.GetPathBody();
-            var wrapped = WrapMessage(message, pathBody);
-            Console.WriteLine("[{0}] Added pending message : {1} {2} - {3} by path {4} to {5}", routingManager.Map.OwnAddress, message, wrapped, message.Key,
-                string.Join(", ", path), destination);
-            pendingMessages.Add(new QueueEntry(wrapped, message, path[1]));
+            for (int i = 0; i < 3; i++)
+            {
+                var path = routingManager.Map.Links.CreateRandomPath(routingManager.Map.OwnAddress, destination, 2, 20, random);
+                //var path = routingManager.Map.Links.CreatePath(routingManager.Map.OwnAddress, destination);
+                if (path == null || path.Count == 0)
+                    continue;
+                var pathBody = path.GetPathBody();
+                var wrapped = WrapMessage(message, pathBody);
+                //Console.WriteLine("[{0}] Added pending message : {1} {2} - {3} by path {4} to {5}", routingManager.Map.OwnAddress, message, wrapped, message.Key,
+                //    string.Join(", ", path), destination);
+                pendingMessages.Add(new QueueEntry(wrapped, message, path[1]));
+            }
         }
 
         private IMessage WrapMessage(IMessage message, List<IAddress> path)
@@ -109,7 +116,6 @@ namespace Node.Data
             {
                 var length = new MessageContainer(message).WriteToBuffer(serializerBuffer, 0);
                 encryptionManager.EncryptData(serializerBuffer, MessageContainer.HeaderSize, length - MessageContainer.HeaderSize, path.Last());
-                //TODO optimize
                 var wrapped = new RedirectMessage(path.Last(), serializerBuffer.Take(length).ToArray());
                 message = wrapped;
                 path = path.Take(path.Count - 1).ToList();
@@ -122,7 +128,7 @@ namespace Node.Data
             if (redirectMessage == null)
                 return false;
 
-            Console.WriteLine("[{0}] Process redirect : {1}", routingManager.Map.OwnAddress, redirectMessage.Destination);
+            //Console.WriteLine("[{0}] Process redirect : {1}", routingManager.Map.OwnAddress, redirectMessage.Destination);
 
             pendingMessages.Add(new QueueEntry(redirectMessage.Data, redirectMessage.Destination));
             return true;
@@ -133,7 +139,7 @@ namespace Node.Data
             if (dataMessage == null)
                 return false;
 
-            Console.WriteLine("[{0}] Process data : {1} ({2})", routingManager.Map.OwnAddress, dataMessage.Key, dataMessage.Action);
+            //Console.WriteLine("[{0}] Process data : {1} ({2})", routingManager.Map.OwnAddress, dataMessage.Key, dataMessage.Action);
 
             switch (dataMessage.Action)
             {
@@ -141,12 +147,13 @@ namespace Node.Data
                     OnReceivedData(dataMessage);
                     break;
                 case DataAction.Put:
+                    Console.WriteLine("[{0}] Put by key {1}", routingManager.Map.OwnAddress, dataMessage.Key);
                     if (dataStorage.PutData(dataMessage.Key, dataMessage.Data))
                         FlushData();
                     break;
                 case DataAction.Get:
                     var data = dataStorage.GetData(dataMessage.Key);
-                    Console.WriteLine("[{0}] Get by key {1} : {2}", routingManager.Map.OwnAddress, dataMessage.Key, data);
+                    Console.WriteLine("[{0}] Get by key {1}", routingManager.Map.OwnAddress, dataMessage.Key);
                     if (data != null)
                     {
                         var message = new DataMessage(DataAction.None, dataMessage.Key, data, routingManager.Map.OwnAddress);
@@ -162,6 +169,20 @@ namespace Node.Data
             return true;
         }
 
+        private bool ProcessPull(PullMessage pullMessage, IConnection connection)
+        {
+            if (pullMessage == null)
+                return false;
+            //Console.WriteLine("[{0}] Processing pull message ({1}) from {2}", routingManager.Map.OwnAddress, pullMessage.Limit, connection.RemoteAddress);
+            for (int i = 0; i < pullMessage.Limit; i++)
+            {
+                if (!PullPendingMessage(connection))
+                    break;
+                //Console.WriteLine("[{0}] Fast-forwarded a message to {1}", routingManager.Map.OwnAddress, connection.RemoteAddress);
+            }
+            return true;
+        }
+
         private readonly List<QueueEntry> pendingMessages;
 
         private readonly IDataStorage dataStorage;
@@ -170,6 +191,7 @@ namespace Node.Data
         private readonly IEncryptionManager encryptionManager;
 
         private readonly byte[] serializerBuffer = new byte[1024 * 1024 * 4];
+        private readonly Random random;
 
         private struct QueueEntry
         {

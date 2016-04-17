@@ -4,8 +4,12 @@
 
     <%= form_for(@item) do |f| %>
         <%= render 'shared/error_messages', object: f.object %>
-        <%= number_field_tag "item[][user_id]" %>
-        <%= number_field_tag "item[][user_id]" %>
+        <div class="form-group">
+          <%= f.text_field :title, placeholder: "Title", class: "form-control", name: 'item[][title]' %>
+        </div>
+        <div class="form-group">
+          <%= f.text_area :content, placeholder: "Description", class: "form-control", name: 'item[][content]' %>
+        </div>
         <%= f.submit "Save", class: "btn btn-large btn-primary" %>
     <% end %>
   </div>

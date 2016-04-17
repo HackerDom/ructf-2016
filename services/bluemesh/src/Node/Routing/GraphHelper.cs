@@ -65,8 +65,7 @@ graph {name} {{
 
             return myLinks.All(myLink => otherLinks.Any(otherLink => Equals(myLink, otherLink) && myLink.Connected == otherLink.Connected));
         }
-
-        //TODO make random path
+        
         public static List<IAddress> CreatePath(this ICollection<RoutingMapLink> links, IAddress from, IAddress to)
         {
             return CreatePath(to, from, links, new HashSet<IAddress>()).Reverse().ToList();
@@ -75,7 +74,17 @@ graph {name} {{
         public static List<IAddress> GetPathBody(this IList<IAddress> path)
         {
             return path.Skip(2).Take(path.Count - 2).ToList();
-        }  
+        }
+
+        public static List<IAddress> CreateRandomPath(this ICollection<RoutingMapLink> links, IAddress from, IAddress to, int minLength, int maxLength, Random random)
+        {
+            var candidateNodes = new HashSet<IAddress>();
+            if (!FindPathCandidateNodes(from, to, links, new HashSet<IAddress>(), candidateNodes))
+                return null;
+
+            var pathNodes = new List<IAddress>();
+            return BuildRandomPath(from, to, links, candidateNodes, pathNodes, minLength, maxLength, random) ? pathNodes : null;
+        }
 
         private static string MakeSafeString(object obj, bool longNames)
         {
@@ -108,6 +117,47 @@ graph {name} {{
                 }
             }
         }
+
+        private static bool BuildRandomPath(IAddress source, IAddress destination, ICollection<RoutingMapLink> links, HashSet<IAddress> candidateNodes, List<IAddress> pathNodes, int minLength, int maxLength, Random random)
+        {
+            pathNodes.Add(source);
+
+            if (Equals(source, destination) && pathNodes.Count >= minLength)
+                return true;
+
+            if (pathNodes.Count >= maxLength)
+            {
+                pathNodes.RemoveAt(pathNodes.Count - 1);
+                return false;
+            }
+
+            var peers = GetPeers(source, links).Where(candidateNodes.Contains).ToList();
+            while (true)
+            {
+                var peer = peers[random.Next(peers.Count)];
+                if (BuildRandomPath(peer, destination, links, candidateNodes, pathNodes, minLength, maxLength, random))
+                    return true;
+            }
+        }
+
+        private static bool FindPathCandidateNodes(IAddress source, IAddress destination, ICollection<RoutingMapLink> links, HashSet<IAddress> visitedNodes, HashSet<IAddress> candidateNodes)
+        {
+            visitedNodes.Add(source);
+            if (Equals(source, destination))
+            {
+                candidateNodes.Add(source);
+                return true;
+            }
+            var found = false;
+            foreach (var peer in GetPeers(source, links).Where(p => !visitedNodes.Contains(p)))
+            {
+                if (FindPathCandidateNodes(peer, destination, links, visitedNodes, candidateNodes))
+                    found = true;
+            }
+            if (found)
+                candidateNodes.Add(source);
+            return found;
+        } 
 
         private static bool IsReachable(IAddress destination, IAddress source, ICollection<RoutingMapLink> links, HashSet<IAddress> visitedNodes)
         {

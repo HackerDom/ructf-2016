@@ -41,6 +41,8 @@
       copy: src=environ dest=/home/ force=yes owner=environ
     - name: set permissions
       file: path=/home/environ owner=environ group=environ mode=0700
+    - name: clear sensors dir
+      file: path=/home/environ/sensors state=absent
     - name: add sensors dir
       file: path=/home/environ/sensors state=directory mode=0755 owner=environ
     - name: copy environ-wifi-setup.service

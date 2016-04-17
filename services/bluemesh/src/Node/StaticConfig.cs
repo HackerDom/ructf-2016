@@ -18,5 +18,6 @@ namespace Node
         public TimeSpan DisconnectCooldown { get; set; }
         public TimeSpan MapUpdateCooldown { get; set; }
         public bool LongNames { get; set; }
+        public bool DoLogMap { get; set; }
     }
 }

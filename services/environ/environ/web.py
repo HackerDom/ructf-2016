@@ -27,4 +27,4 @@ def show_raw(sensor):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=27000, debug=True)
+    app.run(host="0.0.0.0", port=27000)

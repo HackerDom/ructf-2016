@@ -54,7 +54,7 @@ class HttpCheckerBase(object):
 
         try:
             if command == 'info':
-                print('vulns: 1:1')
+                print('vulns: 1:1:1')
                 exit(EXITCODE_OK)
 
             if len(sys.argv) < 3:
