@@ -522,7 +522,7 @@ class Checker(HttpCheckerBase):
 		self.debug(user)
 
 		ws = DummyClient('ws://{}:{}/'.format(addr, WSPORT), headers=[
-			#('Origin', 'http://{}:{}'.format(addr, PORT)),
+			('Origin', 'http://{}:{}'.format(addr, PORT)),
 			('User-Agent', self.randua())])
 		try:
 			ws.daemon = True
@@ -635,7 +635,7 @@ class Checker(HttpCheckerBase):
 		msg = [('title', title), ('ingredients', flag + ', ' + self.randingredients()), ('csrf-token', csrf_token)]
 
 		ws = DummyClient('ws://{}:{}/'.format(addr, WSPORT), headers=[
-			#('Origin', 'http://{}:{}'.format(addr, PORT)),
+			('Origin', 'http://{}:{}'.format(addr, PORT)),
 			('User-Agent', s2.headers['User-Agent']),
 			('Cookie', cookies_string)])
 		try:
