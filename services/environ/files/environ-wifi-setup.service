@@ -9,7 +9,7 @@ ExecStartPre=/bin/bash -c 'modprobe rt3290sta && rmmod rt3290sta; modprobe rt280
 ExecStartPre=/bin/bash -c '/usr/bin/systemctl set-environment WIFICARD=$(/usr/sbin/iwconfig 2> /dev/null | grep IEEE | cut -d \" \" -f 1)'
 ExecStartPre=/bin/bash -c '/usr/sbin/ifconfig $WIFICARD down'
 ExecStartPre=/bin/bash -c '/usr/sbin/iwconfig $WIFICARD mode monitor'
-ExecStartPre=-/bin/bash -c '/usr/sbin/iwconfig $WIFICARD channel 1'
+ExecStartPre=-/bin/bash -c '/usr/sbin/iwconfig $WIFICARD channel 7'
 ExecStartPre=/bin/bash -c '/usr/sbin/ifconfig $WIFICARD up'
 
 ExecStart=/bin/true
