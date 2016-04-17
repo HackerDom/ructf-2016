@@ -110,12 +110,18 @@ def handler_check(args, *other):
 
 def make_request(things):
     things_list = things.split()
+    if len(things_list) < 3:
+        return things
+
     things_out = []
     for _ in range(3):
         t = random.choice(things_list)
         things_list.remove(t)
         things_out.append(t)
-    return " ".join(things_out)
+    things_new = " ".join(things_out)
+    if things_new:
+        return things_new
+    return things
 
 
 def handler_get(args, things):
@@ -176,7 +182,7 @@ class Things:
     def __init__(self, filename):
         self.filename = filename
         with open(filename) as fn:
-            self.things = list(map(lambda x: x.strip(), fn.readlines()))
+            self.things = list(filter(None, map(lambda x: x.strip(), fn.readlines())))
 
     def random(self):
         return random.choice(self.things)

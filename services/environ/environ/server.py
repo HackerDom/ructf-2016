@@ -87,6 +87,7 @@ if __name__ == '__main__':
         TEAM_ID = int(TEAM_ID[0].split(".")[2])
     else:
         logger.error("Your TEAM_ID not found")
+        exit(1)
 
     logger.warning(TEAM_ID)
     manager = Manager()

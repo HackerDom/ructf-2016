@@ -46,7 +46,7 @@ namespace CheckerNode
 
         private static TcpAddress GetLocalAddress(int port)
         {
-            return (TcpAddress)new TcpUtility().ParseAddress("10.23.0.14:" + port);
+            return (TcpAddress)new TcpUtility().ParseAddress("10.23.0.11:" + port);
         }
 
         private static CheckerNode CreateNode(IConnectionConfig connectionConfig, IRoutingConfig routingConfig, string storagePath)
