@@ -118,7 +118,10 @@ def make_request(things):
         t = random.choice(things_list)
         things_list.remove(t)
         things_out.append(t)
-    return " ".join(things_out)
+    things_new = " ".join(things_out)
+    if things_new:
+        return things_new
+    return things
 
 
 def handler_get(args, things):
