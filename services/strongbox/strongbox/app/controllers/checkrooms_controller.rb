@@ -11,7 +11,7 @@ class CheckroomsController < ApplicationController
     @checkroom = Checkroom.new(checkroom_params)
     if @checkroom.save
       flash[:success] = "Checkroom create!"
-      redirect_to '/strongbox?type=public'
+      redirect_to checkroom_path(@checkroom)
     else
       render 'new'
     end

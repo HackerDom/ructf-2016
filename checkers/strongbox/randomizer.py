@@ -14,10 +14,20 @@ class Randomizer(object):
             'user[email]': self.randEmail()
         }
 
-    def randThing(self):
+    def randItem(self):
         return {
-            'thing[title]': self.randTitle(),
-            'thing[content]': self.randphrase()
+            'item[title]': self.randTitle(),
+            'item[content]': self.randphrase()
+        }
+
+    def randCheckroom(self):
+        secret_len = random.randrange(4, 6)
+        secret = uuid.uuid4().hex[:secret_len]
+        return {
+            'checkroom[title]': self.randTitle(),
+            'checkroom[name]': self.randTitle(),
+            'checkroom[content]': self.randphrase(),
+            'checkroom[secret]': secret,
         }
 
     def randword(self):
