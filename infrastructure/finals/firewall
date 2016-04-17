@@ -1,0 +1,84 @@
+##################################################################################################
+*nat                                                                                           ###
+##################################################################################################
+
+:PREROUTING ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+
+# To UPLINK
+-A POSTROUTING -o eth1    -j MASQUERADE
+
+# To DLink Switch
+-A POSTROUTING -o eth0    -j MASQUERADE
+
+# To teams
+-A POSTROUTING -o eth0.2+ -p udp --dport 16800 -j ACCEPT
+-A POSTROUTING -o eth0.2+ -j MASQUERADE
+
+COMMIT
+
+##################################################################################################
+*filter                                                                                        ###
+##################################################################################################
+
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT ACCEPT [0:0]
+
+# INPUT
+
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+-A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT
+
+# Allow all from jury
+-A INPUT -i eth0.100 -j ACCEPT
+
+# Allow DHCP
+-A INPUT -p udp --dport 67 -j ACCEPT
+
+# *** RAZLIVALKA
+# TFTP
+-A INPUT -p udp --dport 69 -j ACCEPT
+# NFS
+-A INPUT -p tcp --dport 2049 -j ACCEPT
+-A INPUT -p udp --dport 2049 -j ACCEPT
+
+-A INPUT -j LOG --log-prefix="[blocked] "
+
+# FORWARD
+
+-A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+#-A FORWARD -j LOG --log-prefix="[iptables] "
+
+## BLOCK THE NETWORK
+#-A FORWARD -i eth0.2+ -o eth0.2+ -j LOG --log-prefix="[team2team] "
+#-A FORWARD -i eth0.2+ -o eth0.2+ -j DROP
+
+## ALLOW THE NETWORK
+-A FORWARD -i eth0.2+ -o eth0.2+ -j ACCEPT
+
+# Allow jury go everywhere
+-A FORWARD -i eth0.100 -j ACCEPT
+
+# Service bluemesh - to jury
+-A FORWARD -i eth0.2+ -o eth0.100 -d 10.23.0.14 -p udp --dport 16800 -j ACCEPT
+-A FORWARD -i eth0.2+ -o eth0.100 -d 10.23.0.14 -p tcp --dport 16800 -j ACCEPT
+
+# Allow vpn to jury
+-A FORWARD -i tun0 -j ACCEPT
+
+# Allow teams to inet
+-A FORWARD -i eth0.2+ -o eth1 -j ACCEPT
+
+# Allow teams to flags and scoreboard
+-A FORWARD -i eth0.2+ -d 10.23.0.10 -p tcp --dport 31337 -j ACCEPT
+-A FORWARD -i eth0.2+ -d 10.23.0.10 -p tcp --dport 80    -j ACCEPT
+
+-A FORWARD -j LOG --log-prefix="[blocked] "
+-A FORWARD -j REJECT
+
+COMMIT
+
