@@ -71,6 +71,9 @@ class State:
 		socket_fd = socket.makefile()
 		send("put " + self.hostname + ":" + str(PORT) + " " + flag_id + " " + flag, socket)
 		result = readline(socket_fd)
+		
+		time.sleep(2)
+		
 		if result == "done":
 			service_ok(message=flag_id)
 		else:
