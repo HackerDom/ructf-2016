@@ -61,7 +61,7 @@ class DummyClient(WebSocketClient):
 class Checker(HttpCheckerBase):
 	def session(self, addr):
 		s = r.Session()
-		s.headers['User-Agent'] = 'Robot/0.1 (non-compatible)'
+		s.headers['User-Agent'] = self.randua()
 		return s
 
 	def url(self, addr, suffix):
@@ -119,6 +119,46 @@ class Checker(HttpCheckerBase):
 		for i in range(rnd):
 			phrase += ' ' + self.randword();
 		return phrase.lstrip()
+
+	def randua(self):
+		return random.choice([
+			'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.124 Safari/537.36',
+			'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36',
+			'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.0 Safari/537.36',
+			'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36',
+			'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.110 Safari/537.36',
+
+			'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 YaBrowser/14.8.1985.11875 Safari/537.36',
+			'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 YaBrowser/14.8.1985.12017 Safari/537.36',
+			'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 YaBrowser/14.8.1985.12018 Safari/537.36',
+			'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 YaBrowser/14.8.1985.12084 Safari/537.36',
+			'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 YaBrowser/14.8.1985.12084 Safari/537.36',
+
+			'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/33.0.1750.152 Chrome/33.0.1750.152 Safari/537.36',
+			'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/34.0.1847.116 Chrome/34.0.1847.116 Safari/537.36',
+			'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/36.0.1985.125 Chrome/36.0.1985.125 Safari/537.36',
+			'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/38.0.2125.111 Chrome/38.0.2125.111 Safari/537.36',
+			'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/38.0.2125.111 Chrome/38.0.2125.111 Safari/537.36',
+
+			'Mozilla/5.0 (X11; Linux i586; rv:31.0) Gecko/20100101 Firefox/31.0',
+			'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:31.0) Gecko/20130401 Firefox/31.0',
+			'Mozilla/5.0 (X11; OpenBSD amd64; rv:28.0) Gecko/20100101 Firefox/28.0',
+			'Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0',
+			'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:36.0) Gecko/20100101 Firefox/36.0',
+			'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:41.0) Gecko/20100101 Firefox/41.0',
+
+			'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)',
+			'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)',
+			'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; WOW64; Trident/6.0)',
+			'Mozilla/5.0 (compatible, MSIE 11, Windows NT 6.1; Trident/7.0; rv:11.0) like Gecko',
+			'Mozilla/5.0 (compatible, MSIE 11, Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko',
+
+			'Opera/9.80 (Windows NT 6.1; U; es-ES) Presto/2.9.181 Version/12.00',
+			'Opera/9.80 (Windows NT 6.0) Presto/2.12.388 Version/12.14',
+			'Opera/9.80 (X11; Linux i686; Ubuntu/14.10) Presto/2.12.388 Version/12.16',
+			'Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.16',
+			'Opera/9.80 (Windows NT 6.1; Win64; x64) Presto/2.12.388 Version/12.17'
+		])
 
 	def randfreqengword(self):
 		return random.choice([
@@ -265,14 +305,130 @@ class Checker(HttpCheckerBase):
 			'exp_icat','suboma','incused'
 		])
 
+	def randproduct(self):
+		return random.choice([
+			'jelly','capsicum','valencia','whitefish','bay','candied','runny','bells','worcestershire','hibiscus','jus','herdez',
+			'italian','well','grand','fideos','flavoring','sharp','mint','kewra','kasha','fines','romano','pace','bird','boiled',
+			'ridged','despelette','coleslaw','saki','heirloom','avocado','furikake','lentil','kasuri','buffalo','stilton','arrowroot',
+			'juniper','no-salt-added','bun','pollock','tomato','lard','moulard','pancetta','fennel','capers','aged','jimmies','cotechino',
+			'pan','paper','brains','muscadine','baked','coloring','deli','bisquick','curly','gem','smoke','cooking','cookies','herbsaint',
+			'brioche','pistachios','flaked','cal','the','mulato','capellini','crumb','color','organic','fat','crystallized','dreamfields',
+			'tostada','almond','squirrel','biscotti','pecans','rotisserie','cool','fingers','aminos','lager','rosa','hellmanns','flower',
+			'shoulder','peach','fine','caps','marshmallow','scallions','spinach','chiffonade','boiling','rock','pack','oats','chicory','chia',
+			'hamburger','bars','pod','uncle','brats','hemp','alaskan','banana','beaters','strong','thai','english','meatballs','ziti',
+			'hungarian','bar','kraft','mussels','bottled','less','pastrami','m&ms','tomatoes','snaps','skins','cumin','basil','spear',
+			'compressed','creamed','pears','bbq','deviled','sprigs','shell','bushi','bitter','mary','cannellini','campari','grated','porter',
+			'satsuma','fillet','ale','onions','drink','mushrooms','rounds','french','beansprouts','speck','superfine','tangelos','shoots','thyme',
+			'fritos','almonds','tawny','masoor','jell-o','shortcrust','pillsbury','lychees','chambord','gravy','pockets','porterhouse','blade',
+			'cashew','persimmons','smoked','canton','campanelle','sambhar','uncooked','tip','lasagne','olives','slices','violets','cubes','fresca',
+			'brewed','risotto','madeira','chayotes','free-range','chipotl','swanson','slice','oysters','parmigiana-reggiano','recaito','saltines',
+			'turkei','refried','center-cut','hellmanns','gallo','tonic','northern','hatch','romaine','reduced','baking','sweeten','bibb','orecchiette',
+			'broiler-fryers','mullet','chile','chilegarlic','iceberg','kong-style','tradit','kikkoman','oil-cured','hoagie','bicarbonate','salami',
+			'flatbread','pecorino','european','maida','boneless','agar','vegetarian','king','fishcake','distilled','dinner','part','goji','chopped',
+			'gelatin','roast','microgreens','hushpuppy','methi','juice','rack','beaten','chipotles','champagne','tangzhong','treacle','turkish',
+			'paccheri','cornbread','taco','blossoms','ramps','vermouth','nopales','noir','piece','ro-tel','lentils','mirin','curry','bunches','with',
+			'free','yuca','lemon-lime','meat','cabernet','tapioca','medium','steel-cut','dry','cornish','eye','extract','quinoa','caramel','knockwurst',
+			'chicken-apple','ham','tomatillo','sorghum','hershey','corned','texas','fig','orange','shiso','scrub','fondant','harissa','grouper','silk',
+			'tarragon','poha','striped','tortilla','panko','fermented','daniels','frozen','herbed','chablis','monterey','forest','brazil','sandwiches',
+			'spare','oil','sucanat','feet','basmati','jumbo','beef','dasti','remoulade','cranberries','hard','licorice','ciabatta','chicken-flavored',
+			'callaloo','five','assorted','pot','andouille','dashi','hazelnuts','clams','arugula','drained','duncan','san','chenpi','syd','hens','browning',
+			'linguisa','wild','wholemeal','boston','yolks','unsmoked','blanco','liquid','barbecue','pesto','paprika','grapefruit','pasteurized','con',
+			'santo','halloumi','rye','gomashio','beaujolais','crumbs','soymilk','stick','bowls','fresh','collards','couscous','flaxseed','pie','seasoned',
+			'split','chimichurri','mrs.','saltine','rum','jam','oatmeal','yucca','nut','shiitake','calcium','endive','artichoke','bresaola','spiced',
+			'gizzards','taro','wish-bone','steamed','cantaloupe','sugar','string','seltzer','albacore','head','rendered','del','tenderloins','prego',
+			'sum','instant','polenta','katsuo','quickcooking','crookneck','peperoncini','emmenthal','perilla','ackee','stir','marjoram','goya','sago',
+			'dasheen','single','asafoetida','nero','meal','anjou','grappa','wafer','cranberry','part-skim','confit','warm','ears','clove','traditional',
+			'cortland','mixture','tuna','purГ©e','collard','veget','ketchup','moscato','cookie','laughing','apricots','macadamias','tonkatsu','rapeseed',
+			'short','cottage','habanero','wheat','peasant','portobello','garland','farms','kosher','non-fat','idaho','leaves','peppers','gruyere','framboise',
+			'salted','shelled','groundnut','crumble','masa','hines','wrappers','cannoli','gammon','fleur','hock','quick','rose','butt','maple','bitters',
+			'brisket','dolce','rabbit','baileys','fried','pico','bow-tie','marinara','phyllo','cloves','bee','manzanilla','cornmeal','burgundi','seedless',
+			'batter','linguica','base','lowfat','shanghai','marcona','nutella','red','gelato','hot','edible','grilled','frisee','chops','fish','artichokes',
+			'rub','extra','kaffir','matzos','ronzoni','grass','small','parmigiano-reggiano','crispy','mexican','lily','salmon','loin','crema','dogs','puree',
+			'paste','roots','olive','orang','coarse','chard','lasagna','into','peaches','swordfish','burger','fats','club','malted','oranges','florets','relish',
+			'browns','cuisine','cupcakes','flowers','schnapps','pink','slivered','bloody','prepar','four','trout','whipped','chee','substitute','giantв„ў',
+			'blanched','caciotta','decorating','glass','min','gold','rotelle','jerk','mild','center','hass','filling','bits','soft-boiled','hearts','leaf',
+			'chГЁvre','jerusalem','promis','leafy','fromage','canned','veal','ginger','america','strawberry','original','pickles','fatfree','caviar','tenderloin',
+			'queso','varnish','cooked','cholula','brussels','sanding','sourdough','hollandaise','picholine','guava','fusilli','pots','ripened','ulek','persian',
+			'ragu','splenda','bechamel','medal','precooked','nori','indian','philadelphia','mix','skin','parsley','disco','sprouts','seafood','snapper','parts',
+			'rolls','calabaza','minicub','prawn','farmer','bones','bamboo','kirsch','cornflour','oxtails','slab','chianti','turkey','confectioners','raw',
+			'flounder','lite','dogfish','stout','leftover','hen','bawang','plus','fashioned','anardana','korean','links','ouzo','nu-salt','shichimi','seville',
+			'penne','ranch','daal','brand','breadcrumbs','pate','aka','for','white','roll','beets','zinfandel','rutabaga','cayenne','extra-lean','channa','chili',
+			'laurel','croissants','dark','drumstick','chapatti','gras','kahlГєa','tartlet','prebaked','sel','halves','naan','sage','marrow','preserves','azuki',
+			'chapati','masala','erythritol','brine-cured','shredded','shank','moong','picante','biscuit','tahini','ritz','shaved','curing','cured','mellow','low',
+			'butter','fajita','stuffing','pastis','kinchay','bananas','refrigerated','chestnut','spelt','provence','merguez','canola','non','lop','daisy','paddles',
+			'cardamom','fen','hocks','domaine','sun','verts','mitsuba','sazon','boiler','knudsen','packed','kataifi','croutons','kale','mezcal','sun-dried','mission',
+			'grill','brown','pear','buckwheat','shavings','hog','annatto','fries','crГЁme','sausages','pasilla','ditalini','chips','tomato-and-basil','pepperidge',
+			'beans','bacon','sherry','pudding','palm','yum','round','fraise','chive','medallions','heads','fudge','elbow','zesty','sesame','popsicle','rib-eye',
+			'soften','dal','greens','gluten','mochi','gherkins','smith','granny','premium','almondmilk','calamata','homestyl','dende','alfredostyle','regular',
+			'pinipig','asafetida','molasses','shellfish','plain','mandarin','cow','equal','anejo','nugget','lapsang','simply','merluza','montreal','tri-tip','eggs',
+			'maggi','negro','vienna','fryer','imo','granular','turtle','leche','doubanjiang','maitake','bran','broad','soursop','cherrystone','rome','mentaiko',
+			'avocados','armagnac','potatoes','island','duxelles','posole','oyster','chillies','blossom','pasoв„ў','vodka','plums','lacinato','marnier','raising',
+			'silken','safflower','blueberry','style','bramley','grey','tilapia','teas','dubliner','roux','crumbled','arthur','citron','irish','pimento','piecrusts',
+			'escarole','jambalaya','winter','gouda','taglierini','sunflower','menthe','bulk','mascarpone','lamb','mortadella','barilla','gremolata','semi','cassia',
+			'sec','mahi','escargot','skate','kidnei','converted','liquor','mexicana','olivada','shrimp','salt','success','day','chex','piloncillo','blend','chutney',
+			'konbu','japanese','vietnamese','chana','limeade','harina','slaw','anchovies','carnitas','crab','toppings','dates','canela','thick-cut','uncook','suet',
+			'fleshed','pinto','sato','dress','borlotti','nilla','kitchen','broth','chow','vanilla','turmeric','recipe','reduc','corkscrew','stickers','lemon','range',
+			'padron','lemongrass','serrano','soybean','kernel','figs','cream','pickle','puff','giblet','mazola','york','classic','prawns','stone-ground','capicola',
+			'dillweed','clarified','napa','nigella','sorrel','peanut','lambs','mexico','all','diced','wax','tamarind','jackfruit','sundae','vegetable','sea','pollen',
+			'salsa','asparagus','mahimahi','balls','tandoori','grain','aleppo','cola-flavored','gumdrops','balm','pecan','tostadas','leg','soba','nutritional','cannelloni',
+			'dri','country-style','dzem','passion','yams','dipping','manioc','stems','lovage','taleggio','pompeian','miniature','watercress','nutmeg','lean','cane','kim',
+			'lan','pepitas','straw','jarlsberg','bean','germ','garam','green','tails','savory','double-dark','pineapple','panela','burgundy','nuoc','muffin','semolina',
+			'peanuts','semi-sweet','saba','jalapeno','low-fat','carcass','padano','syrup','galangal','ducklings','chees','prosciutto','pimenton','skinless','foster',
+			'multipurpose','flowerets','medium-grain','surimi','egg','horseradish','dream','table','flanken','herbes','nen','nutmegs','loaf','thousand','madras','navy',
+			'okra','button','macaroni','wakame','choi','flax','crabmeat','parmesan','miracle','shirataki','ghee','colorado','frosting','konnyaku','praline','peppercorns',
+			'doenzang','mixed','fry','glaze','loaves','sandwich','starchy','starch','mango','seca','crust','peas','malbec','hominy','shuck','alfalfa','mountain','mackerel',
+			'yardlong','anchovy','apricot','wildflower','best','liqueur','herbal','calorie','gorgonzola','rosemary','acid','sprite','crumbles','root','lobster','bengal',
+			'dog','cepe','jicama','walnut','young','pancit','pea','yuba','usukuchi','tortillas','pandanus','sumac','cuts','pressed','cook','sundried','perfect','sardines',
+			'chop','treviso','hazelnut','coriander','husks','cava','krachai','unsulphured','yellowtail','raspberries','gran','eggplant','szu','field','peppered','morel',
+			'amaretto','choy','garlic','cutlets','boil','kielbasa','cavatappi','chickpea','havarti','massaman','sultana','pumpernickel','honeydew','plantains','kiwi',
+			'wheels','corn-on-the-cob','enokitake','asadero','sambal','hothouse','doughs','key','cassis','cider','yakisoba','pГўte','fava','pound','crescent','chinkiang',
+			'old-fashioned','segments','bens','kettle','yuzu','bulgur','devils','urad','buttercream','shortening','dash','bragg','calvados','hong','edam','hand','monkfish',
+			'pepe','firm','hint','franks','cavolo','sevruga','beet','chilli','imitation','butter-flavored','quail','jack','nama','glace','cherries','acai','rins','kelp',
+			'papaya','adzuki','brandy','empanada','pumpkin','fronds','breast','large','sweetened','flavor','rhubarb','adobo','skin-on','soi','baton','house','truffles',
+			'golden','vidalia','rotel','sour','taiwanese','sansho','plum','moisture','jeera','season','whipping','black-eyed','oregano','flake','whip','genoise','linguine'
+		])
+
 	def randendpunct(self):
 		return random.choice(['.','!','?','!!!','?!'])
 
-	def randuser(self, randlen):
+	def randallergen(self):
+		select = random.randrange(0, 10)
+		if select < 2:
+			return self.randword()
+		return self.randproduct()
+
+	def randingredients(self, minsize=3, maxsize=10, delim=", "):
+		result = self.randproduct()
+		rnd = random.randrange(minsize, maxsize)
+		for i in range(rnd):
+			result += delim
+			result += self.randproduct()
+		return result
+
+	def randuser(self, flag, randlen):
 		login = uuid.uuid4().hex[:randlen]
 		passlen = random.randrange(6,10)
 		password = uuid.uuid4().hex[:passlen]
-		return {'login':self.randlogin() + login, 'pass':password}
+		select = random.randrange(0, 10)
+		if select < 4:
+			allergens = [flag]
+		elif select < 8:
+			allergens = [self.randallergen(), flag]
+		else:
+			allergens = [flag, self.randallergen(), self.randallergen()]
+		return {'login':self.randlogin() + login, 'pass':password, 'allergens':allergens}
+
+	def semiranduser(self, flag, randlen):
+		login = uuid.uuid4().hex[:randlen]
+		passlen = random.randrange(6,10)
+		password = uuid.uuid4().hex[:passlen]
+		allergens = [flag]
+		select = random.randrange(0, 10)
+		if select < 4:
+			allergens = [flag, self.randallergen()]
+		elif select < 8:
+			allergens = [self.randallergen(), flag]
+		return {'login':'FoodBot 0x' + login, 'pass':password, 'allergens': allergens}
 
 	#################
 	#     CHECK     #
@@ -319,7 +475,7 @@ class Checker(HttpCheckerBase):
 			('pass', user['pass']),
 			('csrf-token', csrf_token)])
 		if not result or result.find(flag) < 0:
-			print('flag not found in allergens')
+			print('flag not found')
 			return EXITCODE_CORRUPT
 
 		return EXITCODE_OK
@@ -332,7 +488,7 @@ class Checker(HttpCheckerBase):
 
 		result = self.sget(s, addr, '/get?id=' + flag_id)
 		if result.find(flag) < 0:
-			print('flag not found in ingredients')
+			print('flag not found')
 			return EXITCODE_CORRUPT
 
 		return EXITCODE_OK
@@ -358,16 +514,16 @@ class Checker(HttpCheckerBase):
 			return EXITCODE_MUMBLE
 
 		csrf_token = s.cookies.get('csrf-token')
-		cookies_string = "; ".join([str(key) + "=" + str(val) for key, val in s.cookies.items()])
+		#cookies_string = "; ".join([str(key) + "=" + str(val) for key, val in s.cookies.items()])
 
-		user = self.randuser(8)
-		user['allergens'] = [flag]
+		time.sleep(random.random())
+
+		user = self.semiranduser(flag, 8)
 		self.debug(user)
 
 		ws = DummyClient('ws://{}:{}/'.format(addr, WSPORT), headers=[
 			#('Origin', 'http://{}:{}'.format(addr, PORT)),
-			('User-Agent', 'qqqqqqq'),
-			('Cookie', cookies_string)])
+			('User-Agent', self.randua())])
 		try:
 			ws.daemon = True
 			ws.setargs(None, user['login'])
@@ -379,11 +535,11 @@ class Checker(HttpCheckerBase):
 			return EXITCODE_MUMBLE
 
 		else:
-			if not OPEN.wait(5):
+			if not OPEN.wait(3):
 				print('await hello failed')
 				return EXITCODE_MUMBLE
 
-			time.sleep(5 + random.randrange(1,5))
+			time.sleep(3 + random.randrange(1, 4) + random.random())
 
 			result = self.spost(s, addr, '/signup', [
 				('csrf-token', csrf_token),
@@ -394,8 +550,16 @@ class Checker(HttpCheckerBase):
 			#	print('registration failed')
 			#	return EXITCODE_MUMBLE
 
-			if not DONE.wait(5):
+			if not DONE.wait(3):
 				print('await message failed')
+				return EXITCODE_MUMBLE
+
+			title = self.randingredients(1, 4, " ")
+			msg = [('title', title), ('ingredients', flag + ', ' + self.randingredients()), ('csrf-token', csrf_token)]
+
+			result = self.spost(s, addr, '/put', msg)
+			if not result:
+				print('send msg failed')
 				return EXITCODE_MUMBLE
 
 			print('{}:{}'.format(user['login'], user['pass']))
@@ -407,10 +571,46 @@ class Checker(HttpCheckerBase):
 			except:
 				self.debug('WebSocket close failed')
 
+	#######################################
+	def reguser(self, s, addr, csrf_token, flag):
+		user = self.randuser(flag, 2)
+		for i in range(0, 3):
+			try:
+				result = self.spost(s, addr, '/signup', [
+					('login', user['login']),
+					('pass', user['pass']),
+					('allergen', ", ".join(user['allergens'])),
+					('csrf-token', csrf_token)])
+				break
+
+			except HttpWebException as e:
+				self.debug('Auth: ' + str(e.value))
+				if e.value == 409 and i < 2:
+					user = self.randuser(flag, i * 5)
+				else:
+					raise
+		return user
+
 	###################
 	#      PUT 2      #
 	###################
 	def put2(self, addr, flag_id, flag):
+		s2 = self.session(addr)
+
+		result = self.sget(s2, addr, '/')
+		if not result or len(result) == 0:
+			print('get / failed')
+			return EXITCODE_MUMBLE
+
+		csrf_token2 = s2.cookies.get("csrf-token")
+
+		user2 = self.reguser(s2, addr, csrf_token2, flag)
+		self.debug('User (ws): ' + str(user2))
+
+		cookies_string = "; ".join([str(key) + "=" + str(val) for key, val in s2.cookies.items()])
+
+		time.sleep(random.random())
+
 		s = self.session(addr)
 
 		result = self.sget(s, addr, '/')
@@ -419,7 +619,9 @@ class Checker(HttpCheckerBase):
 			return EXITCODE_MUMBLE
 
 		csrf_token = s.cookies.get("csrf-token")
-		cookies_string = "; ".join([str(key) + "=" + str(val) for key, val in s.cookies.items()])
+
+		user = self.reguser(s, addr, csrf_token, self.randallergen())
+		self.debug('User (put): ' + str(user))
 
 		#user = self.randuser(4)
 		#result = self.spost(s, addr, '/auth', [('csrf-token', csrf_token), ('login', user['login']), ('pass', user['pass'])])
@@ -427,18 +629,18 @@ class Checker(HttpCheckerBase):
 		#	print('register user failed')
 		#	return EXITCODE_MUMBLE
 
-		time.sleep(0.2)
+		time.sleep(random.random())
 
-		title = self.randphrase()
-		msg = [('title', title), ('ingredients', self.randphrase() + ', ' + flag), ('csrf-token', csrf_token)]
+		title = self.randingredients(1, 4, " ")
+		msg = [('title', title), ('ingredients', flag + ', ' + self.randingredients()), ('csrf-token', csrf_token)]
 
 		ws = DummyClient('ws://{}:{}/'.format(addr, WSPORT), headers=[
 			#('Origin', 'http://{}:{}'.format(addr, PORT)),
-			('User-Agent', 'qweqweqwe'),
+			('User-Agent', s2.headers['User-Agent']),
 			('Cookie', cookies_string)])
 		try:
 			ws.daemon = True
-			ws.setargs(title, None)
+			ws.setargs(title, flag)
 			ws.connect()
 
 		except WebSocketException:
@@ -447,11 +649,13 @@ class Checker(HttpCheckerBase):
 			return EXITCODE_MUMBLE
 
 		else:
-			if not OPEN.wait(5):
+			if not OPEN.wait(3):
 				print('await hello failed')
 				return EXITCODE_MUMBLE
 
 			self.debug(msg)
+
+			time.sleep(3 + random.randrange(1, 4) + random.random())
 
 			result = self.spost(s, addr, '/put', msg)
 			if not result:
@@ -460,7 +664,7 @@ class Checker(HttpCheckerBase):
 
 			id = result
 
-			if not DONE.wait(5):
+			if not DONE.wait(3):
 				print('await message failed')
 				return EXITCODE_MUMBLE
 
