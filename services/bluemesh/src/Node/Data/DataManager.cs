@@ -96,9 +96,9 @@ namespace Node.Data
 
         private void EnqueueMessage(DataMessage message, IAddress destination)
         {
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 1; i++)
             {
-                //var path = routingManager.Map.Links.CreateRandomPath(routingManager.Map.OwnAddress, destination, 2, 20, random);
+                //var path = routingManager.Map.Links.CreateRandomPath(routingManager.Map.OwnAddress, destination, 2, 5, random);
                 var path = routingManager.Map.Links.CreatePath(routingManager.Map.OwnAddress, destination);
                 if (path == null || path.Count == 0)
                     continue;
