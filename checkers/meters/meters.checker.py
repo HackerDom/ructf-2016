@@ -193,7 +193,7 @@ def handler_check(*args):
 	state.logout()
 	state.login(username, password)
 	dashboards = []
-	for i in range(random.randint(2, 10)):
+	for i in range(random.randint(1, 2)):
 		dashboards.append(state.create_dashboard())
 		state.get_dashboard(dashboards[-1][0])
 	state.check_dashboards(dashboards)
@@ -229,10 +229,10 @@ def handler_get(args):
 
 def handler_put_1(state, flag):
 	username, password = state.register()
-	for i in range(random.randint(0, 5)):
+	for i in range(random.randint(0, 2)):
 		state.create_dashboard()
 	dashboard, name = state.create_dashboard(flag, None, '')
-	for i in range(random.randint(0, 5)):
+	for i in range(random.randint(0, 2)):
 		state.create_dashboard()
 	service_ok(message="{}\n{}\n{}\n{}".format(username, password, dashboard, name))
 
