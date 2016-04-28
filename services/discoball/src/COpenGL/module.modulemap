@@ -1,0 +1,5 @@
+module COpenGL [system] {
+    header "/usr/include/GL/gl.h"
+    link "GL"
+    export *
+}
