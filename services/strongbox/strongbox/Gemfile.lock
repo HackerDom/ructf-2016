@@ -76,7 +76,7 @@ GEM
     factory_girl_rails (4.6.0)
       factory_girl (~> 4.5.0)
       railties (>= 3.0.0)
-    ffi (1.9.10)
+    ffi (1.11.2)
     font-awesome-rails (4.6.1.0)
       railties (>= 3.2, < 5.1)
     globalid (0.3.6)
